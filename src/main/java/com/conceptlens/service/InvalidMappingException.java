@@ -1,0 +1,15 @@
+package com.conceptlens.service;
+
+/**
+ * Thrown when a proposed mapping would not be a valid claim.
+ *
+ * <p>The message names the specific rule that was broken, because every one of them is something
+ * the caller can correct: an unresolvable fact, two facts from the same concept, an unsupported
+ * type or status, or a mapping that already exists.
+ */
+public class InvalidMappingException extends RuntimeException {
+
+    public InvalidMappingException(String message) {
+        super(message);
+    }
+}
