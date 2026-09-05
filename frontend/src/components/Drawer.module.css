@@ -1,0 +1,43 @@
+.shade {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.2);
+  z-index: 50;
+}
+
+.drawer {
+  position: fixed;
+  right: 0;
+  top: 0;
+  width: 430px;
+  max-width: 94vw;
+  height: 100vh;
+  background: #fff;
+  z-index: 51;
+  padding: 28px;
+  box-shadow: -18px 0 45px rgba(0, 0, 0, 0.16);
+  overflow: auto;
+}
+
+.close {
+  float: right;
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 50%;
+  background: #f0f0eb;
+  cursor: pointer;
+}
+
+.title {
+  font-size: 26px;
+  letter-spacing: -0.6px;
+  margin: 24px 0 8px;
+}
+
+.lead {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.5;
+  margin-bottom: 16px;
+}

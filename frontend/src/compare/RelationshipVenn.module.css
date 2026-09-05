@@ -1,0 +1,94 @@
+.frame {
+  border: 1px solid #e1e1db;
+  border-radius: 14px;
+  background: #fbfbf8;
+  padding: 18px 12px 14px;
+  overflow-x: auto;
+}
+
+.frameLabel {
+  text-align: center;
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  font-weight: 900;
+  color: var(--muted);
+  margin-bottom: 8px;
+}
+
+/* Fixed canvas: every circle below is positioned against these exact dimensions. */
+.venn {
+  position: relative;
+  width: 700px;
+  height: 370px;
+  margin: 0 auto;
+}
+
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  border: 4px solid;
+  display: block;
+}
+
+.circle.variantA {
+  border-color: var(--accent);
+  background: rgba(49, 95, 80, 0.13);
+}
+
+.circle.variantB {
+  border-color: var(--accent2);
+  background: rgba(125, 143, 134, 0.13);
+}
+
+.circleTitle {
+  position: absolute;
+  font-size: 19px;
+  font-weight: 850;
+  white-space: nowrap;
+}
+
+.only {
+  position: absolute;
+  text-align: center;
+  font-size: 13px;
+  line-height: 1.45;
+  overflow-wrap: anywhere;
+  box-sizing: border-box;
+}
+
+.overlap {
+  position: absolute;
+  z-index: 10;
+  text-align: center;
+  background: white;
+  border: 2px solid var(--accent);
+  border-radius: 12px;
+  padding: 12px 8px;
+  box-shadow: 0 4px 15px rgba(0, 0, 0, 0.08);
+}
+
+.overlap b {
+  display: block;
+  color: var(--accent);
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  margin-bottom: 6px;
+}
+
+.overlap strong {
+  font-size: 14px;
+}
+
+.regionLabel {
+  font-size: 10px;
+  letter-spacing: 0.08em;
+  font-weight: 900;
+  color: var(--muted);
+  margin-bottom: 5px;
+}
+
+.regionValue {
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--ink);
+}

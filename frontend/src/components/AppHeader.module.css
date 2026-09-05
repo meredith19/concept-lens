@@ -1,0 +1,39 @@
+.header {
+  height: 62px;
+  border-bottom: 1px solid var(--line);
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 32px;
+  background: #fafaf7;
+  position: sticky;
+  top: 0;
+  z-index: 10;
+}
+
+.brand {
+  font-weight: 850;
+}
+
+.nav {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.navLink {
+  border: 0;
+  background: transparent;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 7px 9px;
+  border-radius: 8px;
+  cursor: pointer;
+  text-decoration: none;
+}
+
+.navLinkActive {
+  background: #ecece6;
+  color: var(--ink);
+}

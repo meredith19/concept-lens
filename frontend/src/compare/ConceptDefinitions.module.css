@@ -1,0 +1,37 @@
+.defs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin: 20px 0;
+}
+
+.def {
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  padding: 14px;
+}
+
+.owner {
+  font-size: 10px;
+  letter-spacing: 0.1em;
+  font-weight: 850;
+  color: var(--muted);
+}
+
+.name {
+  font-size: 20px;
+  font-weight: 850;
+  margin: 4px 0;
+}
+
+.meaning {
+  font-size: 13px;
+  color: #666;
+  line-height: 1.45;
+}
+
+@media (max-width: 760px) {
+  .defs {
+    grid-template-columns: 1fr;
+  }
+}

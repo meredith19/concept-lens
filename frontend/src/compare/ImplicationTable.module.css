@@ -1,0 +1,61 @@
+.table {
+  display: grid;
+  grid-template-columns: 1.5fr 0.7fr 0.7fr;
+  max-width: 760px;
+  margin: 22px auto 0;
+  border: 1px solid var(--line);
+  border-radius: 12px;
+  overflow: hidden;
+  font-size: 12px;
+}
+
+.row {
+  display: contents;
+}
+
+.row > * {
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e5df;
+}
+
+.row:last-child > * {
+  border-bottom: 0;
+}
+
+.header > * {
+  background: var(--soft);
+  font-size: 10px;
+  font-weight: 850;
+  letter-spacing: 0.06em;
+}
+
+.center {
+  text-align: center;
+}
+
+.pill {
+  display: inline-block;
+  padding: 5px 8px;
+  border-radius: 999px;
+  background: #edf2ef;
+  font-size: 10px;
+  font-weight: 850;
+  color: #58635d;
+}
+
+.pill.unknown {
+  background: #f2f1ec;
+  color: #77736a;
+}
+
+.factName {
+  font-weight: 750;
+}
+
+.factNative {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #858585;
+}

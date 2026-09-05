@@ -1,19 +1,13 @@
-import { NavLink, Navigate, Route, Routes } from 'react-router'
+import { Navigate, Route, Routes } from 'react-router'
 
-import ComparePage from './routes/ComparePage.tsx'
-import MappingsPage from './routes/MappingsPage.tsx'
+import AppHeader from './components/AppHeader.tsx'
+import ComparePage from './compare/ComparePage.tsx'
+import MappingsPage from './mappings/MappingsPage.tsx'
 
 export default function App() {
   return (
     <>
-      <header>
-        <div>Concept Lens</div>
-        <nav>
-          <NavLink to="/compare">Compare</NavLink>
-          <NavLink to="/mappings">Mappings</NavLink>
-        </nav>
-      </header>
-
+      <AppHeader />
       <Routes>
         <Route path="/" element={<Navigate to="/compare" replace />} />
         <Route path="/compare" element={<ComparePage />} />

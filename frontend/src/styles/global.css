@@ -1,5 +1,10 @@
 @import './tokens.css';
 
+/*
+ * Primitives shared across pages, ported from the UX mock's stylesheet.
+ * Anything used by a single component lives in that component's CSS module instead.
+ */
+
 * {
   box-sizing: border-box;
 }
@@ -16,4 +21,95 @@ select,
 input,
 textarea {
   font: inherit;
+}
+
+main {
+  max-width: 1120px;
+  margin: auto;
+  padding: 30px;
+}
+
+.eyebrow {
+  font-size: 11px;
+  color: var(--muted);
+  font-weight: 850;
+  letter-spacing: 0.1em;
+}
+
+.card {
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 24px;
+}
+
+.selector-card {
+  background: #fff;
+  border: 1px solid var(--line);
+  border-radius: 16px;
+  padding: 20px;
+  margin: 22px 0 18px;
+}
+
+.selector-title {
+  font-weight: 850;
+  font-size: 15px;
+  margin-bottom: 12px;
+}
+
+.section-title {
+  font-size: 14px;
+  font-weight: 850;
+  margin: 26px 0 6px;
+}
+
+.section-sub {
+  font-size: 12px;
+  color: #777;
+  margin-bottom: 14px;
+  line-height: 1.45;
+}
+
+/*
+ * The mock marks these !important so they win over the generic button rules inside
+ * mapping rows and drawers. Kept as-is to avoid changing the rendered result.
+ */
+.primary {
+  border: 1px solid var(--accent) !important;
+  background: var(--accent) !important;
+  color: #fff !important;
+  padding: 10px 13px !important;
+  border-radius: 10px !important;
+  font-weight: 850 !important;
+  cursor: pointer;
+}
+
+.secondary {
+  border: 1px solid #d7d7d0;
+  background: #fff;
+  padding: 9px 11px;
+  border-radius: 9px;
+  font-weight: 800;
+}
+
+.tags {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.tag {
+  font-size: 10px;
+  border: 1px solid #d7d7d0;
+  border-radius: 999px;
+  padding: 5px 7px;
+  background: #fafaf7;
+  color: #5f5f5b;
+  font-weight: 750;
+}
+
+@media (max-width: 760px) {
+  main {
+    padding: 18px;
+  }
 }

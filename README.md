@@ -55,8 +55,10 @@ src/main/java/com/conceptlens/
 src/main/resources/         Backend configuration
 src/test/java/              Backend tests
 frontend/                   Vite + React + TypeScript app
-  src/routes/               Page-level components, one per route
-  src/components/           Shared UI components
+  src/compare/              Compare page and its sections
+  src/mappings/             Mappings page, mapping rows and drawers
+  src/domain/               Concept model, relationship logic, demo fixtures
+  src/components/           Shared UI: header, hero, drawer, toast
   src/api/                  HTTP client for the backend API
   src/styles/               Design tokens and global styles
 ui-mock/                    UX mock — the source of truth for the UI. Do not edit.
@@ -85,5 +87,6 @@ Run from `frontend/`:
 
 ## Status
 
-This is a scaffold. The UX defined in `ui-mock/concept_lens_mock_ui.html` has not been migrated
-yet, and no application functionality is implemented.
+The UI from `ui-mock/concept_lens_mock_ui.html` has been migrated to React and behaves as the
+mock does, but it still runs entirely on the demo fixtures in `frontend/src/domain/`. No backend
+API exists yet, so nothing is persisted and no new functionality has been added.
