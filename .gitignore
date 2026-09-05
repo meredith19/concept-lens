@@ -1,0 +1,17 @@
+# Maven
+target/
+!.mvn/wrapper/maven-wrapper.properties
+
+# Node (downloaded by frontend-maven-plugin, and local installs)
+node_modules/
+frontend/node/
+frontend/dist/
+npm-debug.log*
+
+# IDE
+.idea/
+*.iml
+.vscode/
+
+# OS
+.DS_Store
