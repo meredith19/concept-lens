@@ -1,0 +1,137 @@
+[
+  {
+    "id": "returns.returnable",
+    "name": "Returnable",
+    "sourceSystem": "Returns",
+    "definition": "Whether an item can currently be returned.",
+    "version": 1,
+    "publishedAt": "2026-01-14T09:12:00Z",
+    "facts": [
+      {
+        "id": "returns.returnable.valid_return_path",
+        "label": "Has a valid return path",
+        "description": "A valid path exists for returning the item."
+      },
+      {
+        "id": "returns.returnable.within_return_window",
+        "label": "Is within the return window",
+        "description": "The order is still inside the period during which returns are accepted."
+      },
+      {
+        "id": "returns.returnable.not_final_sale",
+        "label": "Is not final sale",
+        "description": "The item was not sold under final-sale terms that exclude returns."
+      }
+    ]
+  },
+  {
+    "id": "payments.refundable",
+    "name": "Refundable",
+    "sourceSystem": "Payments",
+    "definition": "Whether money can currently be refunded.",
+    "version": 1,
+    "publishedAt": "2026-01-22T16:40:00Z",
+    "facts": [
+      {
+        "id": "payments.refundable.refund_path_available",
+        "label": "Refund path available",
+        "description": "A valid path exists for refunding the purchase."
+      },
+      {
+        "id": "payments.refundable.return_approved",
+        "label": "Return has been approved",
+        "description": "The corresponding return has been approved by the returns process."
+      },
+      {
+        "id": "payments.refundable.payment_captured",
+        "label": "Payment was captured",
+        "description": "Funds were captured for this order and are therefore available to refund."
+      }
+    ]
+  },
+  {
+    "id": "fulfillment.shipped",
+    "name": "Shipped",
+    "sourceSystem": "Fulfillment",
+    "definition": "The package has left the fulfillment center.",
+    "version": 1,
+    "publishedAt": "2026-02-03T11:05:00Z",
+    "facts": [
+      {
+        "id": "fulfillment.shipped.left_fulfillment_center",
+        "label": "Left the fulfillment center",
+        "description": "The package has physically left the fulfillment center that dispatched it."
+      }
+    ]
+  },
+  {
+    "id": "delivery.delivered",
+    "name": "Delivered",
+    "sourceSystem": "Delivery",
+    "definition": "The package has reached its destination.",
+    "version": 1,
+    "publishedAt": "2026-02-05T08:30:00Z",
+    "facts": [
+      {
+        "id": "delivery.delivered.left_fulfillment_center",
+        "label": "Package left fulfillment",
+        "description": "The package has left the fulfillment center that dispatched it."
+      },
+      {
+        "id": "delivery.delivered.reached_destination",
+        "label": "Reached the destination",
+        "description": "The package arrived at the destination address."
+      }
+    ]
+  },
+  {
+    "id": "orders.buyercountry",
+    "name": "BuyerCountry",
+    "sourceSystem": "Orders",
+    "definition": "Country associated with the payment instrument used for this order.",
+    "version": 1,
+    "publishedAt": "2026-01-09T13:55:00Z",
+    "facts": [
+      {
+        "id": "orders.buyercountry.payment_instrument_country",
+        "label": "Uses the payment instrument country",
+        "description": "The country is taken from the payment instrument used for the order."
+      },
+      {
+        "id": "orders.buyercountry.country_normalization",
+        "label": "Uses the same normalization rule",
+        "description": "The country code is normalized to ISO 3166-1 alpha-2."
+      },
+      {
+        "id": "orders.buyercountry.missing_country_behavior",
+        "label": "Has the same null behavior",
+        "description": "A missing country is recorded as null rather than defaulted."
+      }
+    ]
+  },
+  {
+    "id": "payments.billingcountry",
+    "name": "BillingCountry",
+    "sourceSystem": "Payments",
+    "definition": "Country associated with the payment instrument used for this order.",
+    "version": 1,
+    "publishedAt": "2026-01-22T16:40:00Z",
+    "facts": [
+      {
+        "id": "payments.billingcountry.billing_country",
+        "label": "Billing country",
+        "description": "The country associated with the payment instrument used for the order."
+      },
+      {
+        "id": "payments.billingcountry.country_normalization",
+        "label": "Country normalization",
+        "description": "The country code is normalized to ISO 3166-1 alpha-2."
+      },
+      {
+        "id": "payments.billingcountry.missing_country_behavior",
+        "label": "Missing-country behavior",
+        "description": "A missing country is recorded as null rather than defaulted."
+      }
+    ]
+  }
+]

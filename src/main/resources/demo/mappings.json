@@ -1,0 +1,47 @@
+[
+  {
+    "id": "rel_018",
+    "leftFactId": "returns.returnable.valid_return_path",
+    "rightFactId": "payments.refundable.refund_path_available",
+    "type": "SAME_MEANING",
+    "status": "CONFIRMED",
+    "rationale": "Both facts mean that a valid path exists to reverse the purchase in their respective domains.",
+    "reviewedBy": "Domain reviewer"
+  },
+  {
+    "id": "rel_024",
+    "leftFactId": "fulfillment.shipped.left_fulfillment_center",
+    "rightFactId": "delivery.delivered.left_fulfillment_center",
+    "type": "SAME_MEANING",
+    "status": "CONFIRMED",
+    "rationale": "Both facts record the same physical event. Fulfillment observes it as dispatch, Delivery as the start of the delivery leg.",
+    "reviewedBy": "Domain reviewer"
+  },
+  {
+    "id": "rel_031",
+    "leftFactId": "orders.buyercountry.payment_instrument_country",
+    "rightFactId": "payments.billingcountry.billing_country",
+    "type": "SAME_MEANING",
+    "status": "CONFIRMED",
+    "rationale": "Orders derives the buyer country from the payment instrument, which is the same value Payments records as the billing country.",
+    "reviewedBy": "Domain reviewer"
+  },
+  {
+    "id": "rel_032",
+    "leftFactId": "orders.buyercountry.country_normalization",
+    "rightFactId": "payments.billingcountry.country_normalization",
+    "type": "SAME_MEANING",
+    "status": "CONFIRMED",
+    "rationale": "Both systems normalize country codes to ISO 3166-1 alpha-2 using the same rule.",
+    "reviewedBy": "Domain reviewer"
+  },
+  {
+    "id": "rel_033",
+    "leftFactId": "orders.buyercountry.missing_country_behavior",
+    "rightFactId": "payments.billingcountry.missing_country_behavior",
+    "type": "SAME_MEANING",
+    "status": "CONFIRMED",
+    "rationale": "Both systems record a missing country as null rather than substituting a default.",
+    "reviewedBy": "Domain reviewer"
+  }
+]
