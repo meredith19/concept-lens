@@ -112,8 +112,15 @@ public class MappingService {
         }
     }
 
+    /**
+     * Refuses a proposed mapping.
+     *
+     * <p>Logged at debug because a rejection is the service working correctly: the caller supplied
+     * something invalid, the exception tells them so, and nothing here needs an operator's
+     * attention.
+     */
     private void reject(String reason) {
-        log.warn("Rejected mapping: {}", reason);
+        log.debug("Rejected mapping: {}", reason);
         throw new InvalidMappingException(reason);
     }
 
