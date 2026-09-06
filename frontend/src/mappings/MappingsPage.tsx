@@ -1,45 +1,92 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
+import { api } from '../api/client.ts'
+import type { Concept, Fact, MappingDraft, SemanticMapping } from '../api/types.ts'
+import { useAsync } from '../api/useAsync.ts'
 import Hero from '../components/Hero.tsx'
+import StatusMessage from '../components/StatusMessage.tsx'
 import Toast from '../components/Toast.tsx'
 import { useToast } from '../components/useToast.ts'
-import { DEMO_MAPPINGS, MAPPING_WITH_DETAIL } from '../domain/mappings.ts'
 import AddMappingDrawer from './AddMappingDrawer.tsx'
 import MappingDetailDrawer from './MappingDetailDrawer.tsx'
 import MappingRow from './MappingRow.tsx'
 import styles from './MappingsPage.module.css'
 
-const DETAIL_ONLY_IN_MOCK = 'Mapping detail is represented by the first example in this mock.'
+interface Located {
+  concept: Concept
+  fact: Fact
+}
 
-export default function MappingsPage() {
-  const [mappings, setMappings] = useState(DEMO_MAPPINGS)
-  const [filter, setFilter] = useState('')
-  const [detailOpen, setDetailOpen] = useState(false)
-  const [addOpen, setAddOpen] = useState(false)
-  const { message, showToast } = useToast()
-
-  const query = filter.trim().toLowerCase()
-  const visible = query ? mappings.filter((mapping) => mapping.search.includes(query)) : mappings
-
-  const handleView = (id: string) => {
-    if (id === MAPPING_WITH_DETAIL) {
-      setDetailOpen(true)
-    } else {
-      showToast(DETAIL_ONLY_IN_MOCK)
+/** Index of every published fact by id, so a mapping can be shown with labels and owners. */
+function indexFacts(concepts: Concept[]): Map<string, Located> {
+  const index = new Map<string, Located>()
+  for (const concept of concepts) {
+    for (const fact of concept.facts) {
+      index.set(fact.id, { concept, fact })
     }
   }
+  return index
+}
 
-  const handleRemove = (id: string) => {
+function haystack(mapping: SemanticMapping, facts: Map<string, Located>): string {
+  const label = (factId: string) => facts.get(factId)?.fact.label ?? ''
+  return [
+    mapping.id,
+    mapping.leftFactId,
+    mapping.rightFactId,
+    mapping.type,
+    mapping.status,
+    mapping.reviewedBy,
+    mapping.rationale,
+    label(mapping.leftFactId),
+    label(mapping.rightFactId),
+  ]
+    .join(' ')
+    .toLowerCase()
+}
+
+export default function MappingsPage() {
+  const loadMappings = useCallback(() => api.mappings(), [])
+  const loadConcepts = useCallback(() => api.concepts(), [])
+  const mappings = useAsync(loadMappings)
+  const concepts = useAsync(loadConcepts)
+
+  const [filter, setFilter] = useState('')
+  const [inspected, setInspected] = useState<SemanticMapping>()
+  const [adding, setAdding] = useState(false)
+  const { message, showToast } = useToast()
+
+  const facts = indexFacts(concepts.data ?? [])
+  const query = filter.trim().toLowerCase()
+  const visible = (mappings.data ?? []).filter(
+    (mapping) => !query || haystack(mapping, facts).includes(query),
+  )
+
+  const remove = async (mapping: SemanticMapping) => {
     if (!window.confirm('Remove this mapping? Comparisons will no longer use it.')) {
       return
     }
-    setMappings((current) => current.filter((mapping) => mapping.id !== id))
-    showToast('Mapping removed')
+    try {
+      await api.deleteMapping(mapping.id)
+      mappings.reload()
+      showToast('Mapping removed')
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : 'Could not remove the mapping')
+    }
   }
 
-  const handleSave = () => {
-    setAddOpen(false)
-    showToast('Mapping saved as Confirmed · Domain reviewer')
+  const add = async (draft: MappingDraft) => {
+    const created = await api.createMapping(draft)
+    setAdding(false)
+    mappings.reload()
+    showToast(`Mapping ${created.id} saved as Confirmed · ${created.reviewedBy}`)
+  }
+
+  const inspectedMatch = inspected && {
+    leftFact: facts.get(inspected.leftFactId)?.fact,
+    rightFact: facts.get(inspected.rightFactId)?.fact,
+    leftConcept: facts.get(inspected.leftFactId)?.concept,
+    rightConcept: facts.get(inspected.rightFactId)?.concept,
   }
 
   return (
@@ -59,29 +106,57 @@ export default function MappingsPage() {
             value={filter}
             onChange={(event) => setFilter(event.target.value)}
           />
-          <button className="primary" onClick={() => setAddOpen(true)}>
+          <button className="primary" onClick={() => setAdding(true)}>
             + Add mapping
           </button>
         </div>
+
+        {mappings.error && (
+          <StatusMessage tone="error">{`Could not load mappings. ${mappings.error}`}</StatusMessage>
+        )}
+        {!mappings.data && !mappings.error && <StatusMessage>Loading mappings…</StatusMessage>}
 
         <div className={styles.list}>
           {visible.map((mapping) => (
             <MappingRow
               key={mapping.id}
               mapping={mapping}
-              onView={() => handleView(mapping.id)}
-              onRemove={() => handleRemove(mapping.id)}
+              leftFact={facts.get(mapping.leftFactId)?.fact}
+              rightFact={facts.get(mapping.rightFactId)?.fact}
+              onView={() => setInspected(mapping)}
+              onRemove={() => void remove(mapping)}
             />
           ))}
         </div>
       </section>
 
-      <MappingDetailDrawer open={detailOpen} onClose={() => setDetailOpen(false)} />
-      <AddMappingDrawer
-        open={addOpen}
-        onClose={() => setAddOpen(false)}
-        onSave={handleSave}
-      />
+      {inspected &&
+        inspectedMatch?.leftFact &&
+        inspectedMatch.rightFact &&
+        inspectedMatch.leftConcept &&
+        inspectedMatch.rightConcept && (
+          <MappingDetailDrawer
+            open
+            onClose={() => setInspected(undefined)}
+            match={{
+              leftFact: inspectedMatch.leftFact,
+              rightFact: inspectedMatch.rightFact,
+              mapping: inspected,
+            }}
+            leftConcept={inspectedMatch.leftConcept}
+            rightConcept={inspectedMatch.rightConcept}
+          />
+        )}
+
+      {adding && concepts.data && (
+        <AddMappingDrawer
+          open
+          concepts={concepts.data}
+          onClose={() => setAdding(false)}
+          onSave={add}
+        />
+      )}
+
       <Toast message={message} />
     </main>
   )

@@ -1,6 +1,7 @@
 import { Fragment, type CSSProperties } from 'react'
 
-import type { Comparison, Concept } from '../domain/types.ts'
+import type { ComparisonResult } from '../api/types.ts'
+import { type VennShape, vennShape } from './comparisonPresentation.ts'
 import styles from './RelationshipVenn.module.css'
 
 interface Region {
@@ -32,11 +33,16 @@ interface Layout {
  * Geometry for each relationship shape, in pixels against the fixed 700x370 canvas.
  * The values are taken from the UX mock; changing them changes the drawing.
  */
-function layoutFor(comparison: Comparison, a: Concept, b: Concept): Layout {
-  const { shared, onlyA, onlyB } = comparison
-
-  switch (comparison.relationship) {
-    case 'PARTIAL_OVERLAP':
+function layoutFor(
+  shape: VennShape,
+  a: { name: string },
+  b: { name: string },
+  shared: string[],
+  onlyA: string[],
+  onlyB: string[],
+): Layout {
+  switch (shape) {
+    case 'OVERLAP':
       return {
         circles: [
           {
@@ -65,8 +71,8 @@ function layoutFor(comparison: Comparison, a: Concept, b: Concept): Layout {
         overlap: { label: 'SHARED', lines: shared, style: { left: 280, top: 118, width: 140 } },
       }
 
-    case 'B_SUBSET_A':
-      // B's implications sit entirely inside A's, so the inner circle is all shared.
+    case 'RIGHT_INSIDE_LEFT':
+      // B's facts sit entirely inside A's, so the inner circle is all shared.
       return {
         circles: [
           {
@@ -95,7 +101,7 @@ function layoutFor(comparison: Comparison, a: Concept, b: Concept): Layout {
         },
       }
 
-    case 'A_SUBSET_B':
+    case 'LEFT_INSIDE_RIGHT':
       return {
         circles: [
           {
@@ -199,17 +205,18 @@ function Lines({ values }: { values: string[] }) {
 }
 
 interface RelationshipVennProps {
-  comparison: Comparison
-  conceptA: Concept
-  conceptB: Concept
+  result: ComparisonResult
 }
 
-export default function RelationshipVenn({
-  comparison,
-  conceptA,
-  conceptB,
-}: RelationshipVennProps) {
-  const { circles, overlap } = layoutFor(comparison, conceptA, conceptB)
+export default function RelationshipVenn({ result }: RelationshipVennProps) {
+  const { circles, overlap } = layoutFor(
+    vennShape(result),
+    result.leftConcept,
+    result.rightConcept,
+    result.matchedFacts.map((match) => match.leftFact.label),
+    result.unmatchedLeftFacts.map((fact) => fact.label),
+    result.unmatchedRightFacts.map((fact) => fact.label),
+  )
 
   return (
     <div className={styles.frame}>

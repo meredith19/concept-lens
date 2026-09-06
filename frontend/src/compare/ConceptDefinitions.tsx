@@ -1,4 +1,4 @@
-import type { Concept } from '../domain/types.ts'
+import type { Concept } from '../api/types.ts'
 import styles from './ConceptDefinitions.module.css'
 
 interface ConceptDefinitionsProps {
@@ -11,7 +11,7 @@ export default function ConceptDefinitions({ conceptA, conceptB }: ConceptDefini
     <div className={styles.defs}>
       {[conceptA, conceptB].map((concept, index) => (
         <div key={index} className={styles.def}>
-          <div className={styles.owner}>{concept.system.toUpperCase()}</div>
+          <div className={styles.owner}>{concept.sourceSystem.toUpperCase()}</div>
           <div className={styles.name}>{concept.name}</div>
           <div className={styles.meaning}>{concept.definition}</div>
         </div>

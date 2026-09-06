@@ -1,4 +1,4 @@
-import type { Takeaway as TakeawayContent } from '../domain/types.ts'
+import type { Takeaway as TakeawayContent } from './comparisonPresentation.ts'
 import styles from './Takeaway.module.css'
 
 interface TakeawayProps {

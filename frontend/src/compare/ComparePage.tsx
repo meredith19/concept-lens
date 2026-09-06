@@ -1,13 +1,9 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 
+import { api } from '../api/client.ts'
+import { useAsync } from '../api/useAsync.ts'
 import Hero from '../components/Hero.tsx'
-import { CONCEPTS, DEFAULT_PAIR } from '../domain/concepts.ts'
-import {
-  implicationRows,
-  mappingEvidence,
-  takeaway as takeawayFor,
-} from '../domain/comparisonNarrative.ts'
-import { classify, summarize } from '../domain/relationship.ts'
+import StatusMessage from '../components/StatusMessage.tsx'
 import MappingDetailDrawer from '../mappings/MappingDetailDrawer.tsx'
 import ConceptDefinitions from './ConceptDefinitions.tsx'
 import ConceptPicker from './ConceptPicker.tsx'
@@ -15,71 +11,109 @@ import ImplicationTable from './ImplicationTable.tsx'
 import MappingEvidence from './MappingEvidence.tsx'
 import RelationshipVenn from './RelationshipVenn.tsx'
 import Takeaway from './Takeaway.tsx'
+import { evidence, headline, implicationRows, takeaway } from './comparisonPresentation.ts'
 import styles from './ComparePage.module.css'
 
+const HERO = {
+  eyebrow: 'EXPLORE MEANING ACROSS SYSTEMS',
+  title: 'Compare any two concepts.',
+  lead: 'Choose concepts defined by different systems and see what they mean, what they imply, and where they differ.',
+}
+
 export default function ComparePage() {
-  const [pair, setPair] = useState<{ a: string; b: string }>({ ...DEFAULT_PAIR })
-  const [detailOpen, setDetailOpen] = useState(false)
+  const [pair, setPair] = useState<{ left: string; right: string }>()
+  const [inspecting, setInspecting] = useState(false)
 
-  const conceptA = CONCEPTS[pair.a]
-  const conceptB = CONCEPTS[pair.b]
+  const loadConcepts = useCallback(() => api.concepts(), [])
+  const concepts = useAsync(loadConcepts)
 
-  const comparison = classify(conceptA, conceptB)
-  const { badge, summary } = summarize(comparison.relationship, conceptA, conceptB)
+  // Until a concept is picked, compare the first two published, which is what the page opens on.
+  const available = concepts.data ?? []
+  const left = pair?.left ?? available[0]?.id
+  const right = pair?.right ?? available[1]?.id
+
+  const loadComparison = useCallback(
+    () => (left && right ? api.compare(left, right) : Promise.resolve(undefined)),
+    [left, right],
+  )
+  const comparison = useAsync(loadComparison)
+
+  if (concepts.error) {
+    return (
+      <main>
+        <Hero {...HERO} />
+        <StatusMessage tone="error">{`Could not load concepts. ${concepts.error}`}</StatusMessage>
+      </main>
+    )
+  }
+
+  const result = comparison.data
 
   return (
     <main>
-      <Hero
-        eyebrow="EXPLORE MEANING ACROSS SYSTEMS"
-        title="Compare any two concepts."
-        lead="Choose concepts defined by different systems and see what they mean, what they imply, and where they differ."
-      />
+      <Hero {...HERO} />
 
-      <ConceptPicker
-        conceptAId={pair.a}
-        conceptBId={pair.b}
-        onChange={(a, b) => setPair({ a, b })}
-      />
+      {available.length > 0 && left && right && (
+        <ConceptPicker
+          concepts={available}
+          leftConceptId={left}
+          rightConceptId={right}
+          onChange={(nextLeft, nextRight) => setPair({ left: nextLeft, right: nextRight })}
+        />
+      )}
 
-      <section className="card">
-        <div className={styles.top}>
-          <div>
-            <div className="eyebrow">CONCEPT COMPARISON</div>
-            <div className={styles.title}>
-              {conceptA.name} vs {conceptB.name}
+      {comparison.error && (
+        <StatusMessage tone="error">{`Could not compare these concepts. ${comparison.error}`}</StatusMessage>
+      )}
+
+      {!result && !comparison.error && <StatusMessage>Loading comparison…</StatusMessage>}
+
+      {result && (
+        <section className="card">
+          <div className={styles.top}>
+            <div>
+              <div className="eyebrow">CONCEPT COMPARISON</div>
+              <div className={styles.title}>
+                {result.leftConcept.name} vs {result.rightConcept.name}
+              </div>
             </div>
+            <div className={styles.badge}>{headline(result).badge}</div>
           </div>
-          <div className={styles.badge}>{badge}</div>
-        </div>
 
-        <ConceptDefinitions conceptA={conceptA} conceptB={conceptB} />
+          <ConceptDefinitions conceptA={result.leftConcept} conceptB={result.rightConcept} />
 
-        <Takeaway takeaway={takeawayFor(conceptA.id, conceptB.id)} />
+          <Takeaway takeaway={takeaway(result)} />
 
-        <div className="section-title">How are these concepts related?</div>
-        <div className="section-sub">{summary}</div>
+          <div className="section-title">How are these concepts related?</div>
+          <div className="section-sub">{headline(result).summary}</div>
 
-        <RelationshipVenn comparison={comparison} conceptA={conceptA} conceptB={conceptB} />
+          <RelationshipVenn result={result} />
 
-        <div className="section-title">How does the right concept relate to the left?</div>
-        <div className="section-sub">
-          Use the left concept as the anchor. See which of its meanings match something in the
-          right concept, and what the right concept adds.
-        </div>
+          <div className="section-title">How does the right concept relate to the left?</div>
+          <div className="section-sub">
+            Use the left concept as the anchor. See which of its meanings match something in the
+            right concept, and what the right concept adds.
+          </div>
 
-        <ImplicationTable
-          conceptA={conceptA}
-          conceptB={conceptB}
-          rows={implicationRows(conceptA.id, conceptB.id)}
-        />
+          <ImplicationTable
+            leftConcept={result.leftConcept}
+            rightConcept={result.rightConcept}
+            rows={implicationRows(result)}
+          />
 
-        <MappingEvidence
-          evidence={mappingEvidence(conceptA.id, conceptB.id)}
-          onInspect={() => setDetailOpen(true)}
-        />
-      </section>
+          <MappingEvidence evidence={evidence(result)} onInspect={() => setInspecting(true)} />
 
-      <MappingDetailDrawer open={detailOpen} onClose={() => setDetailOpen(false)} />
+          {result.matchedFacts[0] && (
+            <MappingDetailDrawer
+              open={inspecting}
+              onClose={() => setInspecting(false)}
+              match={result.matchedFacts[0]}
+              leftConcept={result.leftConcept}
+              rightConcept={result.rightConcept}
+            />
+          )}
+        </section>
+      )}
     </main>
   )
 }

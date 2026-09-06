@@ -1,18 +1,45 @@
-import { CONCEPT_LIST, SUGGESTED_COMPARISONS, conceptOptionLabel } from '../domain/concepts.ts'
+import type { Concept } from '../api/types.ts'
 import styles from './ConceptPicker.module.css'
 
-interface ConceptPickerProps {
-  conceptAId: string
-  conceptBId: string
-  onChange: (aId: string, bId: string) => void
+/**
+ * Shortcuts to the comparisons worth seeing first. They are presentation, not domain data, so
+ * they live here; any pair naming a concept the backend has not published is dropped.
+ */
+const SUGGESTED = [
+  { left: 'returns.returnable', right: 'payments.refundable' },
+  { left: 'fulfillment.shipped', right: 'delivery.delivered' },
+  { left: 'orders.buyercountry', right: 'payments.billingcountry' },
+]
+
+function optionLabel(concept: Concept): string {
+  return `${concept.name} · ${concept.sourceSystem}`
 }
 
-export default function ConceptPicker({ conceptAId, conceptBId, onChange }: ConceptPickerProps) {
-  const options = CONCEPT_LIST.map((concept) => (
+interface ConceptPickerProps {
+  concepts: Concept[]
+  leftConceptId: string
+  rightConceptId: string
+  onChange: (leftConceptId: string, rightConceptId: string) => void
+}
+
+export default function ConceptPicker({
+  concepts,
+  leftConceptId,
+  rightConceptId,
+  onChange,
+}: ConceptPickerProps) {
+  const byId = new Map(concepts.map((concept) => [concept.id, concept]))
+  const options = concepts.map((concept) => (
     <option key={concept.id} value={concept.id}>
-      {conceptOptionLabel(concept)}
+      {optionLabel(concept)}
     </option>
   ))
+
+  const suggestions = SUGGESTED.flatMap((pair) => {
+    const left = byId.get(pair.left)
+    const right = byId.get(pair.right)
+    return left && right ? [{ ...pair, label: `${left.name} ↔ ${right.name}` }] : []
+  })
 
   return (
     <section className="selector-card">
@@ -22,14 +49,18 @@ export default function ConceptPicker({ conceptAId, conceptBId, onChange }: Conc
           <label htmlFor="conceptA">CONCEPT A</label>
           <select
             id="conceptA"
-            value={conceptAId}
-            onChange={(event) => onChange(event.target.value, conceptBId)}
+            value={leftConceptId}
+            onChange={(event) => onChange(event.target.value, rightConceptId)}
           >
             {options}
           </select>
         </div>
 
-        <button className={styles.swap} onClick={() => onChange(conceptBId, conceptAId)}>
+        <button
+          className={styles.swap}
+          onClick={() => onChange(rightConceptId, leftConceptId)}
+          aria-label="Swap concepts"
+        >
           ⇄
         </button>
 
@@ -37,25 +68,29 @@ export default function ConceptPicker({ conceptAId, conceptBId, onChange }: Conc
           <label htmlFor="conceptB">CONCEPT B</label>
           <select
             id="conceptB"
-            value={conceptBId}
-            onChange={(event) => onChange(conceptAId, event.target.value)}
+            value={rightConceptId}
+            onChange={(event) => onChange(leftConceptId, event.target.value)}
           >
             {options}
           </select>
         </div>
       </div>
 
-      <div className={styles.suggestedLabel}>SUGGESTED COMPARISONS</div>
-      <div className={styles.suggested}>
-        {SUGGESTED_COMPARISONS.map((suggestion) => (
-          <button
-            key={suggestion.label}
-            onClick={() => onChange(suggestion.a, suggestion.b)}
-          >
-            {suggestion.label}
-          </button>
-        ))}
-      </div>
+      {suggestions.length > 0 && (
+        <>
+          <div className={styles.suggestedLabel}>SUGGESTED COMPARISONS</div>
+          <div className={styles.suggested}>
+            {suggestions.map((suggestion) => (
+              <button
+                key={suggestion.label}
+                onClick={() => onChange(suggestion.left, suggestion.right)}
+              >
+                {suggestion.label}
+              </button>
+            ))}
+          </div>
+        </>
+      )}
     </section>
   )
 }

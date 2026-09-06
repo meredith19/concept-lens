@@ -31,10 +31,15 @@ public class MappingService {
 
     private final MappingRepository mappingRepository;
     private final ConceptRepository conceptRepository;
+    private final MappingIdGenerator mappingIdGenerator;
 
-    public MappingService(MappingRepository mappingRepository, ConceptRepository conceptRepository) {
+    public MappingService(
+            MappingRepository mappingRepository,
+            ConceptRepository conceptRepository,
+            MappingIdGenerator mappingIdGenerator) {
         this.mappingRepository = mappingRepository;
         this.conceptRepository = conceptRepository;
+        this.mappingIdGenerator = mappingIdGenerator;
     }
 
     /** Every mapping currently held, seeded ones first and runtime additions appended. */
@@ -57,11 +62,29 @@ public class MappingService {
     }
 
     /**
-     * Records a new mapping after checking it is a claim Concept Lens can stand behind.
+     * Records a new mapping, giving it an id, after checking it is a claim Concept Lens can stand
+     * behind.
      *
      * @throws InvalidMappingException if any validation rule is broken
      */
-    public SemanticMapping addMapping(SemanticMapping mapping) {
+    public SemanticMapping addMapping(MappingDraft draft) {
+        return addMapping(new SemanticMapping(
+                mappingIdGenerator.next(),
+                draft.leftFactId(),
+                draft.rightFactId(),
+                draft.type(),
+                draft.status(),
+                draft.rationale(),
+                draft.reviewedBy()));
+    }
+
+    /**
+     * Validates and stores a mapping that already has an id.
+     *
+     * <p>Package-private: ids are assigned by {@link MappingIdGenerator}, so callers outside the
+     * service supply a {@link MappingDraft} and never choose an id themselves.
+     */
+    SemanticMapping addMapping(SemanticMapping mapping) {
         validate(mapping);
 
         SemanticMapping created = mappingRepository.create(mapping);

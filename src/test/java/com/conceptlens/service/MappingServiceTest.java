@@ -32,7 +32,7 @@ class MappingServiceTest {
         mappings = new InMemoryMappingRepository();
         mappings.create(mapping("rel_018", RETURN_PATH, REFUND_PATH));
 
-        mappingService = new MappingService(mappings, concepts);
+        mappingService = new MappingService(mappings, concepts, new MappingIdGenerator(mappings));
     }
 
     // --- lookups ---------------------------------------------------------------------------
@@ -60,6 +60,38 @@ class MappingServiceTest {
     }
 
     // --- creation --------------------------------------------------------------------------
+
+    @Test
+    void addMappingGeneratesTheNextIdInSequence() {
+        SemanticMapping created = mappingService.addMapping(
+                new MappingDraft(
+                        RETURN_WINDOW,
+                        RETURN_APPROVED,
+                        MappingType.SAME_MEANING,
+                        MappingStatus.CONFIRMED,
+                        "Same approval step.",
+                        "Domain reviewer"));
+
+        assertThat(created.id()).isEqualTo("rel_019");
+        assertThat(created.leftFactId()).isEqualTo(RETURN_WINDOW);
+        assertThat(mappingService.getMapping("rel_019")).isEqualTo(created);
+    }
+
+    @Test
+    void addMappingValidatesADraftJustAsStrictly() {
+        MappingDraft sameConcept = new MappingDraft(
+                RETURN_PATH,
+                RETURN_WINDOW,
+                MappingType.SAME_MEANING,
+                MappingStatus.CONFIRMED,
+                "Reason.",
+                "Domain reviewer");
+
+        assertThatExceptionOfType(InvalidMappingException.class)
+                .isThrownBy(() -> mappingService.addMapping(sameConcept))
+                .withMessageContaining("two different concepts");
+        assertThat(mappings.findAll()).hasSize(1);
+    }
 
     @Test
     void addMappingStoresAValidMapping() {

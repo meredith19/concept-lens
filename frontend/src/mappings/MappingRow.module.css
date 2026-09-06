@@ -39,3 +39,10 @@
   font-weight: 800;
   cursor: pointer;
 }
+
+.labels {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.45;
+  margin-bottom: 7px;
+}

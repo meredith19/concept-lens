@@ -1,30 +1,40 @@
-import type { Mapping } from '../domain/types.ts'
+import type { Fact, SemanticMapping } from '../api/types.ts'
 import styles from './MappingRow.module.css'
 
 interface MappingRowProps {
-  mapping: Mapping
+  mapping: SemanticMapping
+  /** Resolved facts, when the owning concepts are known, so the row can show labels. */
+  leftFact: Fact | undefined
+  rightFact: Fact | undefined
   onView: () => void
   onRemove: () => void
 }
 
-export default function MappingRow({ mapping, onView, onRemove }: MappingRowProps) {
+export default function MappingRow({
+  mapping,
+  leftFact,
+  rightFact,
+  onView,
+  onRemove,
+}: MappingRowProps) {
   return (
     <div className={styles.row}>
       <div>
         <div className={styles.nodes}>
-          {mapping.source}
-          <br />
-          {mapping.connector}
-          <br />
-          {mapping.target}
+          {mapping.leftFactId}
+          <br />↕<br />
+          {mapping.rightFactId}
         </div>
-        <div className={styles.relation}>{mapping.relation}</div>
+        <div className={styles.relation}>{mapping.type.replace('_', ' ')}</div>
+        {leftFact && rightFact && (
+          <div className={styles.labels}>
+            {leftFact.label} ↔ {rightFact.label}
+          </div>
+        )}
         <div className="tags">
-          {mapping.tags.map((tag) => (
-            <span key={tag} className="tag">
-              {tag}
-            </span>
-          ))}
+          <span className="tag">{mapping.status === 'CONFIRMED' ? 'Confirmed' : mapping.status}</span>
+          <span className="tag">{mapping.reviewedBy}</span>
+          <span className="tag">{mapping.id}</span>
         </div>
       </div>
       <div className={styles.actions}>

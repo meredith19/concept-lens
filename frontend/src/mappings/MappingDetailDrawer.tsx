@@ -1,32 +1,35 @@
 import Drawer from '../components/Drawer.tsx'
+import type { Concept, FactMatch } from '../api/types.ts'
 import styles from './MappingDetailDrawer.module.css'
-
-const SOURCE_FACT = {
-  owner: 'RETURNS · RETURNABLE',
-  native: 'valid_return_path',
-  description: 'A valid path exists for returning the item.',
-}
-
-const TARGET_FACT = {
-  owner: 'PAYMENTS · REFUNDABLE',
-  native: 'refund_path_available',
-  description: 'A valid path exists for refunding the purchase.',
-}
-
-const DETAILS = [
-  { label: 'RELATIONSHIP', value: 'Same meaning' },
-  { label: 'STATUS', value: 'Confirmed' },
-  { label: 'REVIEWED BY', value: 'Domain reviewer' },
-  { label: 'RELATION ID', value: 'rel_018' },
-]
 
 interface MappingDetailDrawerProps {
   open: boolean
   onClose: () => void
+  match: FactMatch
+  leftConcept: Concept
+  rightConcept: Concept
 }
 
-/** Shows the mock's single worked example; the backend will supply real mappings later. */
-export default function MappingDetailDrawer({ open, onClose }: MappingDetailDrawerProps) {
+/** Shows the two related facts and the provenance Concept Lens holds for the claim. */
+export default function MappingDetailDrawer({
+  open,
+  onClose,
+  match,
+  leftConcept,
+  rightConcept,
+}: MappingDetailDrawerProps) {
+  const sides = [
+    { concept: leftConcept, fact: match.leftFact },
+    { concept: rightConcept, fact: match.rightFact },
+  ]
+
+  const details = [
+    { label: 'RELATIONSHIP', value: 'Same meaning' },
+    { label: 'STATUS', value: match.mapping.status === 'CONFIRMED' ? 'Confirmed' : match.mapping.status },
+    { label: 'REVIEWED BY', value: match.mapping.reviewedBy },
+    { label: 'RELATION ID', value: match.mapping.id },
+  ]
+
   return (
     <Drawer
       open={open}
@@ -35,22 +38,27 @@ export default function MappingDetailDrawer({ open, onClose }: MappingDetailDraw
       title="Why is this shared?"
       lead="The source systems keep their own concepts and vocabulary. Concept Lens stores a separate, provenance-bearing relationship between their facts."
     >
-      {[SOURCE_FACT, null, TARGET_FACT].map((fact, index) =>
-        fact ? (
-          <div key={fact.native} className={styles.factCard}>
-            <div className={styles.owner}>{fact.owner}</div>
-            <div className={styles.native}>{fact.native}</div>
-            <div className={styles.description}>{fact.description}</div>
+      {sides.map((side, index) => (
+        <div key={side.fact.id}>
+          {index > 0 && <div className={styles.equals}>≡</div>}
+          <div className={styles.factCard}>
+            <div className={styles.owner}>
+              {side.concept.sourceSystem.toUpperCase()} · {side.concept.name.toUpperCase()}
+            </div>
+            <div className={styles.native}>{side.fact.id}</div>
+            <div className={styles.description}>{side.fact.description}</div>
           </div>
-        ) : (
-          <div key={index} className={styles.equals}>
-            ≡
-          </div>
-        ),
+        </div>
+      ))}
+
+      {match.mapping.rationale && (
+        <div className={styles.description} style={{ marginTop: 14 }}>
+          {match.mapping.rationale}
+        </div>
       )}
 
       <div className={styles.details}>
-        {DETAILS.map((detail) => (
+        {details.map((detail) => (
           <div key={detail.label}>
             <small>{detail.label}</small>
             <b>{detail.value}</b>

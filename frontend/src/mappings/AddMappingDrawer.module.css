@@ -32,3 +32,13 @@
   gap: 8px;
   margin-top: 20px;
 }
+
+.problem {
+  margin-top: 14px;
+  padding: 11px 13px;
+  border-radius: 9px;
+  background: #f6ece9;
+  color: #7a4a3d;
+  font-size: 12px;
+  line-height: 1.45;
+}

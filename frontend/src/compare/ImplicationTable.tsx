@@ -1,5 +1,5 @@
-import { NO_MATCH } from '../domain/comparisonNarrative.ts'
-import type { Concept, Fact, ImplicationRow } from '../domain/types.ts'
+import type { Concept, Fact } from '../api/types.ts'
+import { NO_MATCH, type ImplicationRow } from './comparisonPresentation.ts'
 import styles from './ImplicationTable.module.css'
 
 function FactCell({ fact }: { fact: Fact | null }) {
@@ -9,25 +9,29 @@ function FactCell({ fact }: { fact: Fact | null }) {
 
   return (
     <div>
-      <span className={styles.factName}>{fact.name}</span>
-      {fact.native && <span className={styles.factNative}>{fact.native}</span>}
+      <span className={styles.factName}>{fact.label}</span>
+      <span className={styles.factNative}>{fact.id}</span>
     </div>
   )
 }
 
 interface ImplicationTableProps {
-  conceptA: Concept
-  conceptB: Concept
+  leftConcept: Concept
+  rightConcept: Concept
   rows: ImplicationRow[]
 }
 
-export default function ImplicationTable({ conceptA, conceptB, rows }: ImplicationTableProps) {
+export default function ImplicationTable({
+  leftConcept,
+  rightConcept,
+  rows,
+}: ImplicationTableProps) {
   return (
     <div className={styles.table}>
       <div className={`${styles.row} ${styles.header}`}>
-        <div>{conceptA.name} means…</div>
+        <div>{leftConcept.name} means…</div>
         <div className={styles.center}>Relationship</div>
-        <div>{conceptB.name} means…</div>
+        <div>{rightConcept.name} means…</div>
       </div>
 
       {rows.map((row, index) => (

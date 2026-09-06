@@ -1,4 +1,4 @@
-import type { MappingEvidence as Evidence } from '../domain/types.ts'
+import type { Evidence } from './comparisonPresentation.ts'
 import styles from './MappingEvidence.module.css'
 
 interface MappingEvidenceProps {
@@ -15,7 +15,7 @@ export default function MappingEvidence({ evidence, onInspect }: MappingEvidence
           <div className={styles.path}>{evidence.path}</div>
           <div className={styles.meta}>{evidence.meta}</div>
         </div>
-        <button onClick={onInspect}>Inspect mapping</button>
+        {evidence.mappingId && <button onClick={onInspect}>Inspect mapping</button>}
       </div>
 
       <div className={styles.note}>{evidence.note}</div>

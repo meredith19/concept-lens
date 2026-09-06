@@ -1,55 +1,73 @@
-import { render, screen, within } from '@testing-library/react'
+import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
-import { describe, expect, it } from 'vitest'
+import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import { installApiStub } from '../test/apiStub.ts'
 import ComparePage from './ComparePage.tsx'
 
+afterEach(() => {
+  vi.unstubAllGlobals()
+})
+
 describe('ComparePage', () => {
-  it('opens on the Returnable / Refundable comparison', () => {
+  it('compares the first two published concepts on load', async () => {
+    const stub = installApiStub()
     render(<ComparePage />)
 
-    expect(screen.getByText('Returnable vs Refundable')).toBeInTheDocument()
-    expect(screen.getByText('PARTIAL OVERLAP')).toBeInTheDocument()
-    expect(screen.getByText('Related, but not interchangeable.')).toBeInTheDocument()
+    expect(await screen.findByText('Returnable vs Refundable')).toBeInTheDocument()
+    expect(screen.getByText('PARTIAL SHARED MEANING')).toBeInTheDocument()
+    expect(stub.calls.map((call) => call.url)).toContain(
+      '/api/compare?left=returns.returnable&right=payments.refundable',
+    )
   })
 
-  it('swaps the two concepts', async () => {
-    const user = userEvent.setup()
+  it('renders the matched and unmatched facts from the comparison', async () => {
+    installApiStub()
     render(<ComparePage />)
 
-    await user.click(screen.getByRole('button', { name: '⇄' }))
+    await screen.findByText('Returnable vs Refundable')
 
-    expect(screen.getByText('Refundable vs Returnable')).toBeInTheDocument()
+    expect(screen.getAllByText('Same meaning')).not.toHaveLength(0)
+    expect(screen.getAllByText('No confirmed match')).toHaveLength(2)
+    expect(screen.getByText('returns.returnable.valid_return_path')).toBeInTheDocument()
   })
 
-  it('applies a suggested comparison and redraws the relationship', async () => {
+  it('requests a new comparison when the concepts are swapped', async () => {
     const user = userEvent.setup()
+    const stub = installApiStub()
     render(<ComparePage />)
 
-    await user.click(screen.getByRole('button', { name: 'Shipped ↔ Delivered' }))
+    await screen.findByText('Returnable vs Refundable')
+    await user.click(screen.getByRole('button', { name: 'Swap concepts' }))
 
-    expect(screen.getByText('Shipped vs Delivered')).toBeInTheDocument()
-    expect(screen.getByText('CONTAINMENT')).toBeInTheDocument()
-    expect(screen.getByText('Delivered is more specific.')).toBeInTheDocument()
+    await waitFor(() =>
+      expect(stub.calls.map((call) => call.url)).toContain(
+        '/api/compare?left=payments.refundable&right=returns.returnable',
+      ),
+    )
   })
 
-  it('falls back to the unknown wording for an unmapped pair', async () => {
+  it('opens the mapping drawer with the real evidence', async () => {
     const user = userEvent.setup()
+    installApiStub()
     render(<ComparePage />)
 
-    await user.selectOptions(screen.getByLabelText('CONCEPT B'), 'delivered')
-
-    expect(screen.getByText('Relationship unknown.')).toBeInTheDocument()
-    expect(screen.getByText('No confirmed mapping for this demo pair')).toBeInTheDocument()
-  })
-
-  it('opens the mapping detail drawer from the evidence panel', async () => {
-    const user = userEvent.setup()
-    render(<ComparePage />)
-
+    await screen.findByText('Returnable vs Refundable')
     await user.click(screen.getByRole('button', { name: 'Inspect mapping' }))
 
     const drawer = screen.getByRole('complementary')
-    expect(within(drawer).getByRole('heading', { name: 'Why is this shared?' })).toBeInTheDocument()
+    expect(within(drawer).getByText('rel_018')).toBeInTheDocument()
+    expect(within(drawer).getByText('Domain reviewer')).toBeInTheDocument()
+  })
+
+  it('reports a failure to load concepts', async () => {
+    installApiStub({
+      failures: {
+        'GET /api/concepts': { status: 500, code: 'INTERNAL_ERROR', message: 'Unexpected error' },
+      },
+    })
+    render(<ComparePage />)
+
+    expect(await screen.findByRole('alert')).toHaveTextContent('Could not load concepts')
   })
 })
