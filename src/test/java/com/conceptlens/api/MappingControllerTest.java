@@ -138,6 +138,46 @@ class MappingControllerTest extends ApiTestSupport {
     }
 
     @Test
+    void rejectsASecondMappingOfTheSameFactWithinAConceptPair() {
+        Response oneToMany = post(
+                "/api/mappings",
+                draft(
+                        "returns.returnable.valid_return_path",
+                        "payments.refundable.return_approved"));
+        Response manyToOne = post(
+                "/api/mappings",
+                draft(
+                        "returns.returnable.within_return_window",
+                        "payments.refundable.refund_path_available"));
+
+        assertThat(oneToMany.status()).isEqualTo(400);
+        assertThat(oneToMany.body().get("code").asString()).isEqualTo("INVALID_MAPPING");
+        assertThat(oneToMany.body().get("message").asString())
+                .contains("already mapped within this concept pair");
+        assertThat(manyToOne.status()).isEqualTo(400);
+        assertThat(manyToOne.body().get("message").asString())
+                .contains("already mapped within this concept pair");
+        assertThat(get("/api/mappings").body()).hasSize(6);
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void allowsTheSameFactToMapToADifferentConcept() {
+        Response response = post(
+                "/api/mappings",
+                draft(
+                        "returns.returnable.valid_return_path",
+                        "fulfillment.shipped.left_fulfillment_center"));
+
+        assertThat(response.status()).isEqualTo(201);
+        assertThat(response.body().get("leftFactId").asString())
+                .isEqualTo("returns.returnable.valid_return_path");
+        assertThat(response.body().get("rightFactId").asString())
+                .isEqualTo("fulfillment.shipped.left_fulfillment_center");
+        assertThat(get("/api/mappings").body()).hasSize(7);
+    }
+
+    @Test
     void rejectsAMalformedBody() {
         Response response = postRaw("/api/mappings", "{ not json");
 

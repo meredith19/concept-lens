@@ -16,6 +16,7 @@ final class ServiceTestData {
     static final String RETURN_WINDOW = "returns.returnable.within_return_window";
     static final String REFUND_PATH = "payments.refundable.refund_path_available";
     static final String RETURN_APPROVED = "payments.refundable.return_approved";
+    static final String REACHED_DESTINATION = "delivery.delivered.reached_destination";
 
     private ServiceTestData() {}
 
@@ -43,6 +44,18 @@ final class ServiceTestData {
                 List.of(
                         new Fact(REFUND_PATH, "Refund path available", "A refund path exists."),
                         new Fact(RETURN_APPROVED, "Return has been approved", "Approved.")));
+    }
+
+    static Concept delivered() {
+        return new Concept(
+                "delivery.delivered",
+                "Delivered",
+                "Delivery",
+                "The package has reached its destination.",
+                1,
+                Instant.parse("2026-02-05T08:30:00Z"),
+                List.of(new Fact(
+                        REACHED_DESTINATION, "Reached the destination", "Arrived at the destination.")));
     }
 
     static SemanticMapping mapping(String id, String leftFactId, String rightFactId) {

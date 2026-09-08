@@ -5,7 +5,8 @@ package com.conceptlens.service;
  *
  * <p>The message names the specific rule that was broken, because every one of them is something
  * the caller can correct: an unresolvable fact, two facts from the same concept, a blank
- * rationale, an unsupported type or status, or a mapping that already exists.
+ * rationale, an unsupported type or status, a mapping that already exists, or a fact that is
+ * already mapped within the same concept pair.
  */
 public class InvalidMappingException extends RuntimeException {
 

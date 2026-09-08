@@ -1,5 +1,6 @@
 package com.conceptlens.service;
 
+import static com.conceptlens.service.ServiceTestData.REACHED_DESTINATION;
 import static com.conceptlens.service.ServiceTestData.REFUND_PATH;
 import static com.conceptlens.service.ServiceTestData.RETURN_APPROVED;
 import static com.conceptlens.service.ServiceTestData.RETURN_PATH;
@@ -27,7 +28,10 @@ class MappingServiceTest {
     @BeforeEach
     void setUp() {
         InMemoryConceptRepository concepts = new InMemoryConceptRepository();
-        concepts.initialize(List.of(ServiceTestData.returnable(), ServiceTestData.refundable()));
+        concepts.initialize(List.of(
+                ServiceTestData.returnable(),
+                ServiceTestData.refundable(),
+                ServiceTestData.delivered()));
 
         mappings = new InMemoryMappingRepository();
         mappings.create(mapping("rel_018", RETURN_PATH, REFUND_PATH));
@@ -184,6 +188,30 @@ class MappingServiceTest {
                 .withMessageContaining("already mapped");
 
         assertThat(mappings.findAll()).hasSize(1);
+    }
+
+    @Test
+    void addMappingRejectsASecondMappingOfTheSameFactWithinAConceptPair() {
+        assertThatExceptionOfType(InvalidMappingException.class)
+                .isThrownBy(() -> mappingService.addMapping(
+                        mapping("rel_100", RETURN_PATH, RETURN_APPROVED)))
+                .withMessageContaining("already mapped within this concept pair");
+        assertThatExceptionOfType(InvalidMappingException.class)
+                .isThrownBy(() -> mappingService.addMapping(
+                        mapping("rel_100", RETURN_WINDOW, REFUND_PATH)))
+                .withMessageContaining("already mapped within this concept pair");
+        assertThat(mappings.findAll()).hasSize(1);
+    }
+
+    @Test
+    void addMappingAllowsTheSameFactToMapToADifferentConcept() {
+        SemanticMapping created =
+                mappingService.addMapping(mapping("rel_100", RETURN_PATH, REACHED_DESTINATION));
+
+        assertThat(created.rightFactId()).isEqualTo(REACHED_DESTINATION);
+        assertThat(mappingService.getAllMappings())
+                .extracting(SemanticMapping::id)
+                .containsExactly("rel_018", "rel_100");
     }
 
     @Test

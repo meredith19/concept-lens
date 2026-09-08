@@ -18,8 +18,9 @@ import com.conceptlens.repository.MappingRepository;
  *
  * <p>Mappings are the only thing the application may change, so this service is where the rules
  * about what counts as a valid claim live. It reads concepts in order to check that a proposed
- * mapping actually refers to facts that exist and that it relates two different source systems'
- * concepts rather than restating one concept's own vocabulary.
+ * mapping actually refers to facts that exist, that it relates two different source systems'
+ * concepts rather than restating one concept's own vocabulary, and that within a concept pair a
+ * fact has at most one confirmed mapping to the other concept.
  *
  * <p>Creates, deletes and resets share one lock so a validate-then-insert cannot interleave with
  * another write. That is in-process serialization for a single-user prototype, not a load-tested
@@ -161,6 +162,14 @@ public class MappingService {
             reject("These facts are already mapped: %s and %s"
                     .formatted(mapping.leftFactId(), mapping.rightFactId()));
         }
+        if (mappedWithinPair(mapping.leftFactId(), left, right)) {
+            reject("Fact %s is already mapped within this concept pair"
+                    .formatted(mapping.leftFactId()));
+        }
+        if (mappedWithinPair(mapping.rightFactId(), left, right)) {
+            reject("Fact %s is already mapped within this concept pair"
+                    .formatted(mapping.rightFactId()));
+        }
     }
 
     private void reject(String reason) {
@@ -198,5 +207,22 @@ public class MappingService {
     private boolean equivalentMappingExists(String leftFactId, String rightFactId) {
         return mappingRepository.findAll().stream()
                 .anyMatch(existing -> existing.relates(leftFactId, rightFactId));
+    }
+
+    /**
+     * True if this fact already has a confirmed mapping to the other concept of this pair.
+     *
+     * <p>The same fact may still map to an equivalent fact owned by a different concept.
+     */
+    private boolean mappedWithinPair(String factId, Concept left, Concept right) {
+        return mappingRepository.findAll().stream().anyMatch(existing -> {
+            if (!existing.leftFactId().equals(factId) && !existing.rightFactId().equals(factId)) {
+                return false;
+            }
+            Concept existingLeft = conceptOwning(existing.leftFactId());
+            Concept existingRight = conceptOwning(existing.rightFactId());
+            return (left.id().equals(existingLeft.id()) && right.id().equals(existingRight.id()))
+                    || (left.id().equals(existingRight.id()) && right.id().equals(existingLeft.id()));
+        });
     }
 }
