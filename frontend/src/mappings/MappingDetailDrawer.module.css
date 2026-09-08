@@ -12,10 +12,18 @@
   color: var(--muted);
 }
 
-.native {
-  font-family: var(--font-mono);
-  font-size: 12px;
+.label {
+  font-size: 15px;
+  font-weight: 850;
   margin-top: 5px;
+}
+
+.factId {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #999;
+  margin-top: 7px;
+  overflow-wrap: anywhere;
 }
 
 .description {
@@ -50,4 +58,38 @@
 
 .details b {
   font-size: 12px;
+}
+
+.rationale {
+  border-top: 1px solid var(--line);
+  padding-top: 15px;
+  margin-top: 17px;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.rationale small {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.remove {
+  border: 1px solid #d9c3bf;
+  background: #fbefed;
+  color: #7a4a3d;
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
 }

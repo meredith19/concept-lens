@@ -13,7 +13,7 @@ import com.conceptlens.model.MappingType;
  * @param rightFactId fully qualified id of the other
  * @param type what the mapping claims; validated on creation
  * @param status how far it has been reviewed; validated on creation
- * @param rationale why the claim holds
+ * @param rationale why the claim holds; must not be blank
  * @param reviewedBy who accepted it
  */
 public record MappingDraft(

@@ -45,9 +45,9 @@ class SeedDataLoaderTest {
     @Test
     void loadsEverySeedMappingAtStartup() {
         assertThat(mappingRepository.findAll())
-                .hasSize(5)
+                .hasSize(6)
                 .extracting(SemanticMapping::id)
-                .containsExactly("rel_018", "rel_024", "rel_031", "rel_032", "rel_033");
+                .containsExactly("rel_018", "rel_024", "rel_031", "rel_032", "rel_033", "rel_034");
     }
 
     @Test
@@ -58,7 +58,7 @@ class SeedDataLoaderTest {
         assertThat(concept.sourceSystem()).isEqualTo("Returns");
         assertThat(concept.publishedAt()).isNotNull();
         assertThat(concept.facts())
-                .hasSize(3)
+                .hasSize(4)
                 .first()
                 .satisfies(fact -> {
                     assertThat(fact.id()).isEqualTo("returns.returnable.valid_return_path");

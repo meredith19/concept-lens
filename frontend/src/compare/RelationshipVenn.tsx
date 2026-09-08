@@ -26,12 +26,22 @@ interface Overlap {
 
 interface Layout {
   circles: Circle[]
-  overlap: Overlap
+  /** Omitted for containment: shared facts already sit in the inner circle. */
+  overlap?: Overlap
 }
 
 /**
  * Geometry for each relationship shape, in pixels against the fixed 700x370 canvas.
- * The values are taken from the UX mock; changing them changes the drawing.
+ *
+ * <p>Each layout's numbers are hand-fitted to that one shape and to each other; there is no
+ * layout engine behind them, so moving a circle means re-fitting by eye the labels inside it.
+ * The canvas does not scale — a narrow viewport clips rather than reflows. If these shapes
+ * ever need to change, rebuild as SVG with computed positions rather than nudging the
+ * constants.
+ *
+ * <p>Regions are labelled "no confirmed match" rather than "X only": a fact without a match in
+ * the other concept may still be mapped elsewhere, and is in any case unknown rather than
+ * exclusive to its own side.
  */
 function layoutFor(
   shape: VennShape,
@@ -51,7 +61,7 @@ function layoutFor(
             style: { left: 85, top: 20, width: 310, height: 310 },
             titleStyle: { left: 54, top: 42 },
             region: {
-              label: `${a.name.toUpperCase()} ONLY`,
+              label: 'NO CONFIRMED MATCH',
               lines: onlyA,
               style: { left: 22, top: 112, width: 150 },
             },
@@ -62,7 +72,7 @@ function layoutFor(
             style: { left: 305, top: 20, width: 310, height: 310 },
             titleStyle: { right: 54, top: 42 },
             region: {
-              label: `${b.name.toUpperCase()} ONLY`,
+              label: 'NO CONFIRMED MATCH',
               lines: onlyB,
               style: { right: 22, top: 112, width: 150 },
             },
@@ -72,7 +82,8 @@ function layoutFor(
       }
 
     case 'RIGHT_INSIDE_LEFT':
-      // B's facts sit entirely inside A's, so the inner circle is all shared.
+      // B's facts sit entirely inside A's, so the inner circle is all shared. A leftover
+      // "no confirmed match / none" overlay would contradict that.
       return {
         circles: [
           {
@@ -81,7 +92,7 @@ function layoutFor(
             style: { left: 155, top: 15, width: 390, height: 310 },
             titleStyle: { left: 58, top: 38 },
             region: {
-              label: `${a.name.toUpperCase()} ONLY`,
+              label: 'NO CONFIRMED MATCH',
               lines: onlyA,
               style: { left: 24, top: 126, width: 135 },
             },
@@ -94,11 +105,6 @@ function layoutFor(
             region: { label: 'SHARED', lines: shared, style: { left: 20, top: 76, width: 150 } },
           },
         ],
-        overlap: {
-          label: `${b.name.toUpperCase()} ONLY`,
-          lines: ['None'],
-          style: { left: 285, top: 274, width: 178 },
-        },
       }
 
     case 'LEFT_INSIDE_RIGHT':
@@ -110,7 +116,7 @@ function layoutFor(
             style: { left: 155, top: 15, width: 390, height: 310 },
             titleStyle: { right: 58, top: 38 },
             region: {
-              label: `${b.name.toUpperCase()} ONLY`,
+              label: 'NO CONFIRMED MATCH',
               lines: onlyB,
               style: { right: 24, top: 126, width: 135 },
             },
@@ -123,11 +129,6 @@ function layoutFor(
             region: { label: 'SHARED', lines: shared, style: { left: 20, top: 76, width: 150 } },
           },
         ],
-        overlap: {
-          label: `${a.name.toUpperCase()} ONLY`,
-          lines: ['None'],
-          style: { left: 238, top: 274, width: 178 },
-        },
       }
 
     case 'SAME_MEANING':
@@ -169,7 +170,7 @@ function layoutFor(
             style: { left: 45, top: 20, width: 285, height: 285 },
             titleStyle: { left: 55, top: 42 },
             region: {
-              label: `${a.name.toUpperCase()} ONLY`,
+              label: 'NO CONFIRMED MATCH',
               lines: onlyA,
               style: { left: 35, top: 102, width: 190 },
             },
@@ -180,7 +181,7 @@ function layoutFor(
             style: { left: 370, top: 20, width: 285, height: 285 },
             titleStyle: { right: 55, top: 42 },
             region: {
-              label: `${b.name.toUpperCase()} ONLY`,
+              label: 'NO CONFIRMED MATCH',
               lines: onlyB,
               style: { right: 35, top: 102, width: 190 },
             },
@@ -197,7 +198,7 @@ function layoutFor(
 
 function Lines({ values }: { values: string[] }) {
   return values.map((value, index) => (
-    <Fragment key={value}>
+    <Fragment key={`${index}-${value}`}>
       {index > 0 && <br />}
       {value}
     </Fragment>
@@ -242,12 +243,14 @@ export default function RelationshipVenn({ result }: RelationshipVennProps) {
           </div>
         ))}
 
-        <div className={styles.overlap} style={overlap.style}>
-          <b>{overlap.label}</b>
-          <strong>
-            <Lines values={overlap.lines} />
-          </strong>
-        </div>
+        {overlap && (
+          <div className={styles.overlap} style={overlap.style}>
+            <b>{overlap.label}</b>
+            <strong>
+              <Lines values={overlap.lines} />
+            </strong>
+          </div>
+        )}
       </div>
     </div>
   )

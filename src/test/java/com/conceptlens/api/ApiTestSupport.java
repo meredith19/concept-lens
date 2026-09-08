@@ -16,7 +16,8 @@ import tools.jackson.databind.ObjectMapper;
  * Drives the API over real HTTP against a running server.
  *
  * <p>Exercising the servlet stack rather than a mocked one is what makes the status codes and the
- * error body in these tests meaningful, and it needs no test-only web module.
+ * error body in these tests meaningful, and it needs no test-only web module. Test logging
+ * quiets Tomcat's acceptor so {@code @DirtiesContext} teardown does not look like a failed build.
  */
 @SpringBootTest(webEnvironment = SpringBootTest.WebEnvironment.RANDOM_PORT)
 abstract class ApiTestSupport {

@@ -1,0 +1,1373 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 6</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 6/7</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-005.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<span class="current">6</span>
+<a href="page-007.html">7</a>
+<a href="page-007.html">Next &rarr;</a>
+</div>
+
+        
+<div class="message user" id="msg-2026-09-06T19-16-05-627Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-06T19-16-05-627Z" class="timestamp-link"><time datetime="2026-09-06T19:16:05.627Z" data-timestamp="2026-09-06T19:16:05.627Z">2026-09-06T19:16:05.627Z</time></a></div><div class="message-content">
+<div class="user-content"><p>I have the video, deployment and the transcripts ready. so don't worry about them. after these changes we will update the README. I don't want to drop Related Concepts and and I also don't want to add a seventh concept just to support it.Add an order_shipped fact to Returns.Returnable with a user-facing label like Order has shipped, and map it SAME_MEANING to Fulfillment.Shipped.left_fulfillment_center. Related Concepts should be computed only from confirmed mappings. For the current pair, find mapped neighbouring concepts outside the pair and show explicit comparison-pair chips like Returnable &lt;&gt; Shipped, not a single Shipped chip. Clicking one should load that comparison. Reset demo data should restore this new baseline too, so we'd have 16 facts and 6 seed mappings. Update the seed tests/docs accordingly.</p>
+<p>Before implementing, sanity check that adding this fact/mapping doesn't change any of the three intended demo relationship states and tell me if you see any semantic problem with this bridge.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-17-07-224Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-17-07-224Z" class="timestamp-link"><time datetime="2026-09-06T19:17:07.224Z" data-timestamp="2026-09-06T19:17:07.224Z">2026-09-06T19:17:07.224Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-17-07-880Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-17-07-880Z" class="timestamp-link"><time datetime="2026-09-06T19:17:07.880Z" data-timestamp="2026-09-06T19:17:07.880Z">2026-09-06T19:17:07.880Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good — let me verify this properly rather than reason from memory.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-17-14-340Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-17-14-340Z" class="timestamp-link"><time datetime="2026-09-06T19:17:14.340Z" data-timestamp="2026-09-06T19:17:14.340Z">2026-09-06T19:17:14.340Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_016Ve9JMzt27bD46V66dDZqS">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find exactly which assertions the bridge would break</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd /Users/shimantikas/Experiments/concept-lens
+echo &#34;=== assertions that would break (counts / exact id lists / fact lists) ===&#34;
+grep -rn &#34;hasSize(5)\|hasSize(3)\|containsExactly(\s*$\|rel_033\|rel_034\|within_return_window\&#34;,\|not_final_sale\&#34;)&#34; src/test/java --include=&#39;*.java&#39; | sed &#39;s/^/  /&#39; | head -20
+echo
+echo &#34;--- SeedDataLoaderTest mapping id list ---&#34;
+grep -n &#39;rel_018&#34;, &#34;rel_024&#34;&#39; -A1 src/test/java/com/conceptlens/seed/SeedDataLoaderTest.java | sed &#39;s/^/  /&#39;
+echo &#34;--- ConceptControllerTest facts count ---&#34;
+grep -n &#34;get(\&#34;facts\&#34;)).hasSize&#34; src/test/java/com/conceptlens/api/ConceptControllerTest.java | sed &#39;s/^/  /&#39;
+echo &#34;--- MappingControllerTest counts + generated id ---&#34;
+grep -n &#34;hasSize(5)\|hasSize(6)\|hasSize(4)\|rel_034&#34; src/test/java/com/conceptlens/api/MappingControllerTest.java | sed &#39;s/^/  /&#39;
+echo &#34;--- ComparisonEngineTest unmatched expectations ---&#34;
+grep -n &#34;unmatchedLeftFacts\|hasSize(3)\|hasSize(2)&#34; src/test/java/com/conceptlens/comparison/ComparisonEngineTest.java | sed &#39;s/^/  /&#39;
+echo &#34;--- SeedDataLoaderTest concept fact assertion ---&#34;
+grep -n &#34;facts())&#34; -A2 src/test/java/com/conceptlens/seed/SeedDataLoaderTest.java | sed &#39;s/^/  /&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-17-16-496Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-17-16-496Z" class="timestamp-link"><time datetime="2026-09-06T19:17:16.496Z" data-timestamp="2026-09-06T19:17:16.496Z">2026-09-06T19:17:16.496Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>=== assertions that would break (counts / exact id lists / fact lists) ===
+  src/test/java/com/conceptlens/repository/InMemoryMappingRepositoryTest.java:25:                &quot;returns.returnable.within_return_window&quot;,
+  src/test/java/com/conceptlens/seed/SeedDataLoaderTest.java:36:                .containsExactly(
+  src/test/java/com/conceptlens/seed/SeedDataLoaderTest.java:48:                .hasSize(5)
+  src/test/java/com/conceptlens/seed/SeedDataLoaderTest.java:50:                .containsExactly(&quot;rel_018&quot;, &quot;rel_024&quot;, &quot;rel_031&quot;, &quot;rel_032&quot;, &quot;rel_033&quot;);
+  src/test/java/com/conceptlens/seed/SeedDataLoaderTest.java:61:                .hasSize(3)
+  src/test/java/com/conceptlens/comparison/ComparisonEngineTest.java:48:                .containsExactly(
+  src/test/java/com/conceptlens/comparison/ComparisonEngineTest.java:49:                        &quot;returns.returnable.within_return_window&quot;,
+  src/test/java/com/conceptlens/comparison/ComparisonEngineTest.java:50:                        &quot;returns.returnable.not_final_sale&quot;);
+  src/test/java/com/conceptlens/comparison/ComparisonEngineTest.java:53:                .containsExactly(
+  src/test/java/com/conceptlens/comparison/ComparisonEngineTest.java:87:        assertThat(result.matchedFacts()).hasSize(3);
+  src/test/java/com/conceptlens/comparison/ComparisonEngineTest.java:90:                .containsExactly(&quot;rel_031&quot;, &quot;rel_032&quot;, &quot;rel_033&quot;);
+  src/test/java/com/conceptlens/comparison/ComparisonEngineTest.java:101:        assertThat(result.unmatchedLeftFacts()).hasSize(3);
+  src/test/java/com/conceptlens/api/MappingControllerTest.java:28:        assertThat(response.body()).hasSize(5);
+  src/test/java/com/conceptlens/api/MappingControllerTest.java:57:                        &quot;returns.returnable.within_return_window&quot;,
+  src/test/java/com/conceptlens/api/MappingControllerTest.java:61:        // The seed data ends at rel_033, so the next mapping continues the sequence.
+  src/test/java/com/conceptlens/api/MappingControllerTest.java:62:        assertThat(response.body().get(&quot;id&quot;).asString()).isEqualTo(&quot;rel_034&quot;);
+  src/test/java/com/conceptlens/api/MappingControllerTest.java:64:                .contains(&quot;/api/mappings/rel_034&quot;);
+  src/test/java/com/conceptlens/api/MappingControllerTest.java:67:        assertThat(get(&quot;/api/mappings/rel_034&quot;).status()).isEqualTo(200);
+  src/test/java/com/conceptlens/api/MappingControllerTest.java:74:                draft(&quot;returns.returnable.within_return_window&quot;,
+  src/test/java/com/conceptlens/api/MappingControllerTest.java:81:        assertThat(response.body().get(&quot;id&quot;).asString()).isEqualTo(&quot;rel_034&quot;);
+
+--- SeedDataLoaderTest mapping id list ---
+  50:                .containsExactly(&quot;rel_018&quot;, &quot;rel_024&quot;, &quot;rel_031&quot;, &quot;rel_032&quot;, &quot;rel_033&quot;);
+  51-    }
+--- ConceptControllerTest facts count ---
+  26:        assertThat(response.body().get(&quot;facts&quot;)).hasSize(3);
+--- MappingControllerTest counts + generated id ---
+  28:        assertThat(response.body()).hasSize(5);
+  62:        assertThat(response.body().get(&quot;id&quot;).asString()).isEqualTo(&quot;rel_034&quot;);
+  64:                .contains(&quot;/api/mappings/rel_034&quot;);
+  66:        assertThat(get(&quot;/api/mappings&quot;).body()).hasSize(6);
+  67:        assertThat(get(&quot;/api/mappings/rel_034&quot;).status()).isEqualTo(200);
+  81:        assertThat(response.body().get(&quot;id&quot;).asString()).isEqualTo(&quot;rel_034&quot;);
+  91:        assertThat(get(&quot;/api/mappings&quot;).body()).hasSize(4);
+  112:        assertThat(get(&quot;/api/mappings&quot;).body()).hasSize(5);
+--- ComparisonEngineTest unmatched expectations ---
+  46:        assertThat(result.unmatchedLeftFacts())
+  65:        assertThat(result.unmatchedLeftFacts()).isEmpty();
+  76:        assertThat(result.unmatchedLeftFacts())
+  87:        assertThat(result.matchedFacts()).hasSize(3);
+  91:        assertThat(result.unmatchedLeftFacts()).isEmpty();
+  101:        assertThat(result.unmatchedLeftFacts()).hasSize(3);
+  102:        assertThat(result.unmatchedRightFacts()).hasSize(2);
+  133:        assertThat(afterRemoval.unmatchedLeftFacts()).hasSize(1);
+  134:        assertThat(afterRemoval.unmatchedRightFacts()).hasSize(2);
+--- SeedDataLoaderTest concept fact assertion ---
+  60:        assertThat(concept.facts())
+  61-                .hasSize(3)
+  62-                .first()</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-17-50-031Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-17-50-031Z" class="timestamp-link"><time datetime="2026-09-06T19:17:50.031Z" data-timestamp="2026-09-06T19:17:50.031Z">2026-09-06T19:17:50.031Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-18-13-064Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-18-13-064Z" class="timestamp-link"><time datetime="2026-09-06T19:18:13.064Z" data-timestamp="2026-09-06T19:18:13.064Z">2026-09-06T19:18:13.064Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Traced it through <code>ComparisonEngine</code> and checked every affected assertion. <strong>The bridge is safe</strong> — here's the analysis.</p>
+<h2>The three demo states are unchanged</h2>
+<p><code>ComparisonEngine</code> only counts a mapping when <strong>both</strong> ends belong to the two concepts being compared — it queries <code>findSameMeaningMapping(leftFact.id(), rightFact.id())</code> for pairs drawn from the two concepts' own fact lists. The new mapping's far end lives in <code>fulfillment.shipped</code>, so it's invisible to any comparison that doesn't involve Shipped.</p>
+<table>
+<thead>
+<tr>
+<th>Pair</th>
+<th>Before</th>
+<th>After</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Returnable ↔ Refundable</td>
+<td>matched 1, unmatched <strong>2</strong>/2 → <code>NOT_ESTABLISHED</code></td>
+<td>matched 1, unmatched <strong>3</strong>/2 → <code>NOT_ESTABLISHED</code></td>
+</tr>
+<tr>
+<td>Shipped ↔ Delivered</td>
+<td>matched 1, unmatched 0/1 → <code>RIGHT_INCLUDES_LEFT</code></td>
+<td><strong>identical</strong></td>
+</tr>
+<tr>
+<td>BuyerCountry ↔ BillingCountry</td>
+<td>matched 3, unmatched 0/0 → <code>SAME_MEANING</code></td>
+<td><strong>identical</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Scenario 1 keeps its badge (<code>PARTIAL SHARED MEANING</code>) and its copy ("1 confirmed shared meaning") — only the unmatched-left count moves 2→3. Counts land exactly where you said: <strong>16 facts, 6 mappings.</strong></p>
+<p><strong>Bonus:</strong> Returnable ↔ Shipped derives <code>LEFT_INCLUDES_RIGHT</code> — the one relationship state that previously only appeared by swapping Shipped/Delivered. The bridge completes the matrix with a first-class pair.</p>
+<h2>Related Concepts coverage after the bridge</h2>
+<table>
+<thead>
+<tr>
+<th>Current pair</th>
+<th>Chips shown</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Returnable ↔ Refundable</td>
+<td><code>Returnable ↔ Shipped</code></td>
+</tr>
+<tr>
+<td>Shipped ↔ Delivered</td>
+<td><code>Shipped ↔ Returnable</code></td>
+</tr>
+<tr>
+<td>Returnable ↔ Shipped</td>
+<td><code>Returnable ↔ Refundable</code>, <code>Shipped ↔ Delivered</code></td>
+</tr>
+<tr>
+<td>BuyerCountry ↔ BillingCountry</td>
+<td><strong>none</strong></td>
+</tr>
+</tbody>
+</table>
+<p>Three of four pairs get chips. <strong>The country cluster stays isolated</strong> — one bridge can't connect two separate components of the graph. The empty state becomes occasional-and-truthful rather than permanent, which I think is fine and arguably honest, but you should know it's there rather than discover it in the video.</p>
+<h2>Semantic problems — one worth a decision</h2>
+<p><strong>1. Granularity mismatch (the real one).</strong> "Order has shipped" is a claim about an <em>order</em>; "Left the fulfillment center" is a claim about a <em>package</em>. A multi-package order can have one package dispatched and two not, so the two propositions aren't strictly identical. By Concept Lens's own standard — a mapping asserts two facts state the same thing — a domain reviewer would likely challenge or scope this one.</p>
+<p>Three ways out, and I'd take the third:
+- Reword the Returns fact to be package-scoped, which weakens the "user-facing label" you wanted
+- Accept it silently — worst option, since the tool exists to surface exactly this
+- <strong>Keep the label and make the <code>rationale</code> carry the caveat</strong>, e.g. scoping it to single-shipment orders. That's what <code>rationale</code> and <code>reviewedBy</code> are <em>for</em>, and a demo where the provenance text does real work is stronger than one where it's filler</p>
+<p><strong>2. Containment is cheap here.</strong> Shipped has exactly one modeled fact, so anything mapping to it automatically "includes all confirmed meaning of Shipped." The UI will announce <em>"Returnable includes all confirmed meaning of Shipped, plus more"</em> — a strong-sounding claim produced by a one-fact model. It's honest, and it demonstrates something true: derived containment is only as strong as the modeling granularity. Not a blocker, but expect it on screen.</p>
+<p><strong>3. Domain plausibility</strong> — asserting that Returnable entails having shipped is a policy claim rather than a definitional one. Returns owns the concept, so it's their call to model it that way. That's the ownership model working correctly, not a flaw.</p>
+<h2>One knock-on you'll want to handle</h2>
+<p><code>order_shipped</code> will sit in the <strong>"RETURNABLE ONLY"</strong> region of the Returnable-vs-Refundable Venn — but it <em>is</em> confirmed-mapped, just to a third concept. That label goes from imprecise to actively wrong.</p>
+<p>The improved Venn (item C) drops fact text from the circles entirely, which sidesteps it. <strong>So the bridge makes item C effectively required rather than optional</strong> — I'd do them in the same pass.</p>
+<h2>Concrete updates required</h2>
+<p><strong>Seed:</strong> <code>concepts.json</code> (+1 fact), <code>mappings.json</code> (+<code>rel_034</code>), <code>demo/README.md</code> (counts, scenario table, the bridge row, the fourth derived state).</p>
+<p><strong>Backend tests</strong> — 4 files, ~12 assertions:
+- <code>SeedDataLoaderTest</code>: <code>hasSize(5)</code>→6, id list <code>+= "rel_034"</code>, <code>facts()</code> <code>hasSize(3)</code>→4
+- <code>ConceptControllerTest:26</code>: <code>hasSize(3)</code>→4
+- <code>MappingControllerTest</code>: <code>hasSize(5)</code>→6, <code>hasSize(6)</code>→7, <code>hasSize(4)</code>→5; <strong>generated id <code>rel_034</code>→<code>rel_035</code></strong> at lines 62/64/67/81
+- <code>ComparisonEngineTest</code>: unmatched-left list <code>+= order_shipped</code>, <code>hasSize(3)</code>→4</p>
+<p><code>DemoSeedDataTest</code> passes untouched — its checks are structural, not count-based.</p>
+<p>That <code>rel_034</code>→<code>rel_035</code> ripple is worth noting positively: it's <code>MappingIdGenerator</code> deriving from actual data rather than a hardcoded constant, which is the behaviour we wanted.</p>
+<p><strong>Frontend:</strong> <code>RelatedConcepts.tsx</code> + CSS (new), <code>ComparePage.tsx</code> (fetch mappings, render section), <code>test/apiStub.ts</code> (needs a third concept + bridge so the test has something to assert), <code>RelatedConcepts.test.tsx</code> (new).</p>
+<h2>Revised estimate</h2>
+<p><strong>≈ 5.5 h</strong> (range 5–6), up from 4 h. The bridge and Related Concepts add ~1.75 h: 45 min for seed data plus backend test/doc updates, ~1 h for the component, wiring, stub fixtures, and its test.</p>
+<p>Ready to implement when you confirm the rationale wording approach for the granularity caveat.</p></div></div></div>
+<div class="message user" id="msg-2026-09-06T19-25-19-398Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-06T19-25-19-398Z" class="timestamp-link"><time datetime="2026-09-06T19:25:19.398Z" data-timestamp="2026-09-06T19:25:19.398Z">2026-09-06T19:25:19.398Z</time></a></div><div class="message-content">
+<div class="user-content"><p>Let's change the scope. I don't want to implement the updated mock or restyle the app to match it. Keep the existing UI and make these changes incrementally.</p>
+<p>I want:</p>
+<p>the small hero/framing changes
+Derived from N confirmed mappings on Compare
+show all mapping evidence for the current comparison and Inspect should inspect the mapping I clicked
+Manage these mappings to take me to Mappings for that pair
+Reset demo data
+Related Concepts as simple comparison-pair chips, with the minimal seed bridge needed to make it usefulKeep the existing styling/components wherever possible. No palette rewrite, modal conversion, table rewrite, mappings filters beyond what's needed for the manage-mappings flow, or general cleanup.Before implementing, revise the file-by-file plan based on this incremental scope and flag anything here that you still think cannot reasonably fit in that time.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-26-29-094Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-26-29-094Z" class="timestamp-link"><time datetime="2026-09-06T19:26:29.094Z" data-timestamp="2026-09-06T19:26:29.094Z">2026-09-06T19:26:29.094Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-26-58-943Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-26-58-943Z" class="timestamp-link"><time datetime="2026-09-06T19:26:58.943Z" data-timestamp="2026-09-06T19:26:58.943Z">2026-09-06T19:26:58.943Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Scope understood. Revised plan.</p>
+<h2>One addition I'm putting in scope, and why</h2>
+<p>Dropping the Venn rewrite while adding the bridge creates a <strong>correctness regression</strong>: <code>order_shipped</code> will render inside the <code>RETURNABLE ONLY</code> region of the Returnable-vs-Refundable Venn, while actually being confirmed-mapped to Shipped. The label would be stating something false.</p>
+<p>The fix doesn't need the rewrite. <code>RelationshipVenn.tsx</code> builds region labels as <code>`${name.toUpperCase()} ONLY`</code> at three sites; changing that string to <strong><code>NO CONFIRMED MATCH</code></strong> is ~10 minutes, no geometry change, no restyle. I'm treating it as non-optional rather than a nice-to-have.</p>
+<p>Everything else about the Venn — the 700×370 canvas, five layouts, fact text in circles, the narrow-screen horizontal scroll — stays exactly as is.</p>
+<hr />
+<h1>Revised file-by-file plan</h1>
+<h2>1. Seed bridge — ~0.75 h</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>demo/concepts.json</code></td>
+<td><strong>M</strong> — <code>returns.returnable.order_shipped</code>, label "Order has shipped"</td>
+</tr>
+<tr>
+<td><code>demo/mappings.json</code></td>
+<td><strong>M</strong> — <code>rel_034</code>, order_shipped ↔ shipped.left_fulfillment_center</td>
+</tr>
+<tr>
+<td><code>demo/README.md</code></td>
+<td><strong>M</strong> — counts 16/6, bridge row, note the fourth derived state</td>
+</tr>
+<tr>
+<td><code>SeedDataLoaderTest</code></td>
+<td><strong>M</strong> — <code>hasSize(5)</code>→6, id list <code>+= rel_034</code>, <code>facts()</code> 3→4</td>
+</tr>
+<tr>
+<td><code>ConceptControllerTest:26</code></td>
+<td><strong>M</strong> — <code>hasSize(3)</code>→4</td>
+</tr>
+<tr>
+<td><code>MappingControllerTest</code></td>
+<td><strong>M</strong> — counts 5→6, 6→7, 4→5; generated id <code>rel_034</code>→<code>rel_035</code> (×4)</td>
+</tr>
+<tr>
+<td><code>ComparisonEngineTest</code></td>
+<td><strong>M</strong> — unmatched-left list <code>+= order_shipped</code>, <code>hasSize(3)</code>→4</td>
+</tr>
+</tbody>
+</table>
+<p><code>DemoSeedDataTest</code> needs no change — its checks are structural.</p>
+<h2>2. Reset demo data — ~1.0 h</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>seed/SeedDataLoader.java</code></td>
+<td><strong>M</strong> — extract the JSON read so it runs twice; <code>resetMappings()</code> via existing <code>findAll</code>/<code>deleteById</code>/<code>create</code>. No repository contract change</td>
+</tr>
+<tr>
+<td><code>api/DemoController.java</code></td>
+<td><strong>N</strong> — <code>POST /api/demo/reset</code> → 204</td>
+</tr>
+<tr>
+<td><code>test/api/DemoControllerTest.java</code></td>
+<td><strong>N</strong> — delete, reset, assert 6 restored and the comparison flips back</td>
+</tr>
+<tr>
+<td><code>api/client.ts</code></td>
+<td><strong>M</strong> — <code>resetDemoData()</code></td>
+</tr>
+<tr>
+<td><code>components/AppHeader.tsx</code> + <code>.module.css</code></td>
+<td><strong>M</strong> — button styled off the existing nav treatment, <code>window.confirm</code> for confirmation (matches the existing Remove flow)</td>
+</tr>
+<tr>
+<td><code>components/DemoDataContext.tsx</code></td>
+<td><strong>N</strong> ≈25 lines — a <code>version</code> counter both pages fold into <code>useAsync</code> deps, so reset refreshes whichever page you're on</td>
+</tr>
+</tbody>
+</table>
+<h2>3. Hero / framing — ~0.25 h</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>components/Hero.tsx</code> + <code>.module.css</code></td>
+<td><strong>M</strong> — optional <code>meta</code> slot</td>
+</tr>
+<tr>
+<td><code>compare/ComparePage.tsx</code> + <code>.module.css</code></td>
+<td><strong>M</strong> — <code>Demo catalog · N concepts across M systems</code> (counted from the API, not hardcoded); <code>Unmapped means unknown, not different.</code> in the result block</td>
+</tr>
+</tbody>
+</table>
+<h2>4. Derived-from-N + full evidence list + Inspect-the-clicked-one — ~1.0 h</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compare/comparisonPresentation.ts</code></td>
+<td><strong>M</strong> — <code>evidence()</code> stops returning only the first match; keeps the note, list comes from <code>result.matchedFacts</code></td>
+</tr>
+<tr>
+<td><code>compare/MappingEvidence.tsx</code> + <code>.module.css</code></td>
+<td><strong>M</strong> — one row per match (fact labels + systems, <code>SAME MEANING</code>, <code>rel_018 · confirmed</code>, Inspect), reusing the existing panel/pill idiom</td>
+</tr>
+<tr>
+<td><code>compare/ComparePage.tsx</code></td>
+<td><strong>M</strong> — <code>Derived from N confirmed mapping(s) →</code> scrolling to the panel; hold <em>which</em> match is inspected instead of hardcoding <code>matchedFacts[0]</code></td>
+</tr>
+</tbody>
+</table>
+<p><code>MappingDetailDrawer</code> needs <strong>no change</strong> — it already takes a <code>match</code> prop; we just pass the clicked one.</p>
+<h2>5. Manage these mappings — ~0.5 h</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compare/ComparePage.tsx</code></td>
+<td><strong>M</strong> — <code>useNavigate</code> → <code>/mappings?concepts=a,b</code></td>
+</tr>
+<tr>
+<td><code>mappings/MappingsPage.tsx</code></td>
+<td><strong>M</strong> — <code>useSearchParams</code>, filter to mappings whose facts belong to both concepts, plus a "Showing mappings for X ↔ Y · Show all" line</td>
+</tr>
+</tbody>
+</table>
+<p>No other Mappings filtering — the system dropdown and Clear button stay out.</p>
+<h2>6. Related Concepts — ~0.75 h</h2>
+<table>
+<thead>
+<tr>
+<th>File</th>
+<th></th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td><code>compare/RelatedConcepts.tsx</code> + <code>.module.css</code></td>
+<td><strong>N</strong> — neighbours from confirmed mappings, rendered as explicit pair chips (<code>Returnable ↔ Shipped</code>), current pair excluded, click sets the pair</td>
+</tr>
+<tr>
+<td><code>compare/ComparePage.tsx</code></td>
+<td><strong>M</strong> — one more <code>useAsync</code> for <code>/api/mappings</code>; render the section</td>
+</tr>
+</tbody>
+</table>
+<p>Chips reuse the visual treatment already on <code>ConceptPicker</code>'s suggested-comparison buttons — same affordance, so no new visual language.</p>
+<h2>7. Venn label correctness — ~0.15 h</h2>
+<p><code>compare/RelationshipVenn.tsx</code> <strong>M</strong> — <code>${NAME} ONLY</code> → <code>NO CONFIRMED MATCH</code>, three sites.</p>
+<h2>8. Tests — ~0.75 h</h2>
+<p><code>test/apiStub.ts</code> <strong>M</strong> (third concept + bridge + reset route), <code>ComparePage.test.tsx</code> <strong>M</strong>, <code>MappingsPage.test.tsx</code> <strong>M</strong>, <code>comparisonPresentation.test.ts</code> <strong>M</strong>, <code>RelatedConcepts.test.tsx</code> <strong>N</strong>.</p>
+<hr />
+<h2>Totals</h2>
+<p><strong>≈ 29 files: 6 new, 23 modified.</strong> Backend: 10 files, 2 new, one method and one endpoint — no change to the domain model, <code>ComparisonEngine</code>, <code>SemanticGraph</code>, or the repository contracts.</p>
+<p><strong>≈ 5 hours</strong> (range 4.5–5.5). Down from 5.5 h because the Venn rewrite is out; the relabel adds back ~10 minutes.</p>
+<h2>What still doesn't fit, and what I'm accepting</h2>
+<p><strong>Nothing in your list is unachievable</strong> — but three things are worth naming before I start rather than after:</p>
+<ol>
+<li>
+<p><strong>BuyerCountry ↔ BillingCountry will still show no related concepts.</strong> One bridge can't join two disconnected components of the graph. The empty state goes from permanent to occasional, which I think is honest, but it will appear on screen if you demo that pair.</p>
+</li>
+<li>
+<p><strong>The Venn keeps its existing weaknesses</strong> — fixed 700×370 canvas, horizontal scroll on narrow windows, fact text crammed into circles. Pre-existing and explicitly out of scope; just don't be surprised in the video.</p>
+</li>
+<li>
+<p><strong>The evidence panel's appearance will change more than "keep existing styling" implies.</strong> Going from one path string to a row per mapping is a layout change by necessity. I'll build it from the existing panel border, pill, and mono-id idioms rather than importing the mock's, but it won't look identical to today.</p>
+</li>
+</ol>
+<p>Two things explicitly staying as they are, so they don't arrive as surprises: the badge for full equivalence remains <strong><code>FULL OVERLAP</code></strong> (not the mock's <code>SAME MEANING</code>), and the seed concept definitions and fact labels keep their current wording.</p>
+<h2>One decision I still need</h2>
+<p>For the bridge's granularity mismatch — "Order has shipped" is order-scoped, "Left the fulfillment center" is package-scoped — my recommendation is to keep your label and put the caveat in <code>rel_034</code>'s <code>rationale</code>, scoping it to single-shipment orders. That makes the provenance field do real work in the demo instead of being filler.</p>
+<p>Confirm that and I'll start.</p></div></div></div>
+<div class="message user" id="msg-2026-09-06T19-30-01-922Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-06T19-30-01-922Z" class="timestamp-link"><time datetime="2026-09-06T19:30:01.922Z" data-timestamp="2026-09-06T19:30:01.922Z">2026-09-06T19:30:01.922Z</time></a></div><div class="message-content">
+<div class="user-content"><p>let's do this</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-30-07-014Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-30-07-014Z" class="timestamp-link"><time datetime="2026-09-06T19:30:07.014Z" data-timestamp="2026-09-06T19:30:07.014Z">2026-09-06T19:30:07.014Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-30-07-019Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-30-07-019Z" class="timestamp-link"><time datetime="2026-09-06T19:30:07.019Z" data-timestamp="2026-09-06T19:30:07.019Z">2026-09-06T19:30:07.019Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Starting with the seed bridge.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-30-12-906Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-30-12-906Z" class="timestamp-link"><time datetime="2026-09-06T19:30:12.906Z" data-timestamp="2026-09-06T19:30:12.906Z">2026-09-06T19:30:12.906Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_016dac9GpZ8cE5YUT1NWZ8QM">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Add the bridge fact and mapping to seed data</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+import json, collections
+
+p=&#39;src/main/resources/demo/concepts.json&#39;
+concepts=json.load(open(p), object_pairs_hook=collections.OrderedDict)
+for c in concepts:
+    if c[&#39;id&#39;]==&#39;returns.returnable&#39;:
+        c[&#39;facts&#39;].append(collections.OrderedDict([
+            (&#39;id&#39;,&#39;returns.returnable.order_shipped&#39;),
+            (&#39;label&#39;,&#39;Order has shipped&#39;),
+            (&#39;description&#39;,&#39;The order has left the fulfillment center and is on its way to the customer.&#39;),
+        ]))
+json.dump(concepts, open(p,&#39;w&#39;), indent=2, ensure_ascii=False); open(p,&#39;a&#39;).write(&#39;\n&#39;)
+
+p=&#39;src/main/resources/demo/mappings.json&#39;
+mappings=json.load(open(p), object_pairs_hook=collections.OrderedDict)
+mappings.append(collections.OrderedDict([
+    (&#39;id&#39;,&#39;rel_034&#39;),
+    (&#39;leftFactId&#39;,&#39;returns.returnable.order_shipped&#39;),
+    (&#39;rightFactId&#39;,&#39;fulfillment.shipped.left_fulfillment_center&#39;),
+    (&#39;type&#39;,&#39;SAME_MEANING&#39;),
+    (&#39;status&#39;,&#39;CONFIRMED&#39;),
+    (&#39;rationale&#39;,&#39;Both facts record that the goods have left the fulfillment center. Scoped to single-shipment orders: for a multi-package order, Returns treats the order as shipped once its only shipment is dispatched, which is the case Fulfillment observes.&#39;),
+    (&#39;reviewedBy&#39;,&#39;Domain reviewer&#39;),
+]))
+json.dump(mappings, open(p,&#39;w&#39;), indent=2, ensure_ascii=False); open(p,&#39;a&#39;).write(&#39;\n&#39;)
+
+facts=sum(len(c[&#39;facts&#39;]) for c in concepts)
+print(f&#34;concepts={len(concepts)} facts={facts} mappings={len(mappings)}&#34;)
+PY</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-30-19-179Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-30-19-179Z" class="timestamp-link"><time datetime="2026-09-06T19:30:19.179Z" data-timestamp="2026-09-06T19:30:19.179Z">2026-09-06T19:30:19.179Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>concepts=6 facts=16 mappings=6</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-30-24-217Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-30-24-217Z" class="timestamp-link"><time datetime="2026-09-06T19:30:24.217Z" data-timestamp="2026-09-06T19:30:24.217Z">2026-09-06T19:30:24.217Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Stopped.</p>
+<p>I've made exactly one change so far — the seed data:</p>
+<ul>
+<li><code>demo/concepts.json</code> — added <code>returns.returnable.order_shipped</code> ("Order has shipped")</li>
+<li><code>demo/mappings.json</code> — added <code>rel_034</code> bridging it to <code>fulfillment.shipped.left_fulfillment_center</code>, with the single-shipment scoping caveat in the rationale</li>
+</ul>
+<p>Now at 6 concepts / 16 facts / 6 mappings. Nothing else has been touched — no backend code, no frontend, no tests, no README.</p>
+<p>Note the build is currently <strong>red</strong>: those seed counts contradict assertions in <code>SeedDataLoaderTest</code>, <code>ConceptControllerTest</code>, <code>MappingControllerTest</code>, and <code>ComparisonEngineTest</code>, which I hadn't got to yet.</p>
+<p>I can revert the two JSON files to leave the tree green, or hold here. What's up?</p></div></div></div>
+<div class="message user" id="msg-2026-09-06T19-31-55-090Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-06T19-31-55-090Z" class="timestamp-link"><time datetime="2026-09-06T19:31:55.090Z" data-timestamp="2026-09-06T19:31:55.090Z">2026-09-06T19:31:55.090Z</time></a></div><div class="message-content">
+<div class="user-content"><p>revert the changes. I want the following changes: the  hero/framing changes, reset demo data but only if you can implement it simply without introducing DemoDataContext or other new frontend architecture, Derived from N confirmed mappings. small Venn label fix if it's really the ~10 min change you estimated</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-32-58-063Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-32-58-063Z" class="timestamp-link"><time datetime="2026-09-06T19:32:58.063Z" data-timestamp="2026-09-06T19:32:58.063Z">2026-09-06T19:32:58.063Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-33-00-387Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-33-00-387Z" class="timestamp-link"><time datetime="2026-09-06T19:33:00.387Z" data-timestamp="2026-09-06T19:33:00.387Z">2026-09-06T19:33:00.387Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_012wu6naRaJXjiE33rnBFex8">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Revert the seed data changes</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">git checkout -- src/main/resources/demo/concepts.json src/main/resources/demo/mappings.json &amp;&amp; python3 -c &#34;
+import json
+c=json.load(open(&#39;src/main/resources/demo/concepts.json&#39;)); m=json.load(open(&#39;src/main/resources/demo/mappings.json&#39;))
+print(&#39;reverted -&gt; concepts=%d facts=%d mappings=%d&#39; % (len(c), sum(len(x[&#39;facts&#39;]) for x in c), len(m)))
+&#34; &amp;&amp; git status --porcelain -- src/main/resources | sed &#39;s/^/  /&#39;; echo &#34;  (no output above = clean)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-33-02-696Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-33-02-696Z" class="timestamp-link"><time datetime="2026-09-06T19:33:02.696Z" data-timestamp="2026-09-06T19:33:02.696Z">2026-09-06T19:33:02.696Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>reverted -&gt; concepts=6 facts=15 mappings=5
+  (no output above = clean)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-33-05-234Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-33-05-234Z" class="timestamp-link"><time datetime="2026-09-06T19:33:05.234Z" data-timestamp="2026-09-06T19:33:05.234Z">2026-09-06T19:33:05.234Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Reverted, back to 15 facts / 5 mappings. Now the backend reset endpoint.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-33-14-176Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-33-14-176Z" class="timestamp-link"><time datetime="2026-09-06T19:33:14.176Z" data-timestamp="2026-09-06T19:33:14.176Z">2026-09-06T19:33:14.176Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01VxJyV3YCDVXppQM691K1Xi">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Add resetMappings and the demo reset endpoint</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/main/java/com/conceptlens/seed/SeedDataLoader.java&#39;
+s=open(p).read()
+old = &#34;&#34;&#34;    private &lt;T&gt; List&lt;T&gt; read(String resource, TypeReference&lt;List&lt;T&gt;&gt; type) {&#34;&#34;&#34;
+new = &#34;&#34;&#34;    /**
+     * Restores the mappings to their seeded state, discarding anything added or removed at
+     * runtime. Concepts are untouched — they are read-only and cannot have drifted.
+     *
+     * &lt;p&gt;This exists so a shared demo instance stays explorable: one visitor removing a mapping
+     * should not leave the next visitor with a different model.
+     */
+    public void resetMappings() {
+        mappingRepository.findAll().forEach(mapping -&gt; mappingRepository.deleteById(mapping.id()));
+
+        List&lt;SemanticMapping&gt; seeded =
+                read(MAPPINGS_RESOURCE, new TypeReference&lt;List&lt;SemanticMapping&gt;&gt;() {});
+        seeded.forEach(mappingRepository::create);
+
+        log.info(&#34;Reset mappings to the seeded set of {}&#34;, seeded.size());
+    }
+
+    private &lt;T&gt; List&lt;T&gt; read(String resource, TypeReference&lt;List&lt;T&gt;&gt; type) {&#34;&#34;&#34;
+assert old in s
+open(p,&#39;w&#39;).write(s.replace(old, new))
+PY
+cat &gt; src/main/java/com/conceptlens/api/DemoController.java &lt;&lt;&#39;EOF&#39;
+package com.conceptlens.api;
+
+import org.springframework.http.HttpStatus;
+import org.springframework.web.bind.annotation.PostMapping;
+import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestController;
+
+import com.conceptlens.seed.SeedDataLoader;
+
+/**
+ * Lifecycle of the bundled demo data.
+ *
+ * &lt;p&gt;Mappings are mutable at runtime, so anyone exploring a shared instance can change what the
+ * comparisons derive. Resetting restores the seeded set, which keeps the demo repeatable.
+ */
+@RestController
+@RequestMapping(&#34;/api/demo&#34;)
+public class DemoController {
+
+    private final SeedDataLoader seedDataLoader;
+
+    public DemoController(SeedDataLoader seedDataLoader) {
+        this.seedDataLoader = seedDataLoader;
+    }
+
+    @PostMapping(&#34;/reset&#34;)
+    @ResponseStatus(HttpStatus.NO_CONTENT)
+    public void resetDemoData() {
+        seedDataLoader.resetMappings();
+    }
+}
+EOF
+export JAVA_HOME=$(/usr/libexec/java_home -v 21) &amp;&amp; ./mvnw -B clean package -DskipTests 2&gt;&amp;1 | grep -aE &#39;BUILD|ERROR&#39; | head -3</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-33-23-419Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-33-23-419Z" class="timestamp-link"><time datetime="2026-09-06T19:33:23.419Z" data-timestamp="2026-09-06T19:33:23.419Z">2026-09-06T19:33:23.419Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>[INFO] BUILD SUCCESS</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-33-34-981Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-33-34-981Z" class="timestamp-link"><time datetime="2026-09-06T19:33:34.981Z" data-timestamp="2026-09-06T19:33:34.981Z">2026-09-06T19:33:34.981Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01RjMyQytkX8PAJMJ7DRaoRL">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Add reset endpoint tests</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cat &gt; src/test/java/com/conceptlens/api/DemoControllerTest.java &lt;&lt;&#39;EOF&#39;
+package com.conceptlens.api;
+
+import static org.assertj.core.api.Assertions.assertThat;
+
+import org.junit.jupiter.api.Test;
+import org.springframework.test.annotation.DirtiesContext;
+
+class DemoControllerTest extends ApiTestSupport {
+
+    private static final String SHIPPED_VS_DELIVERED =
+            &#34;/api/compare?left=fulfillment.shipped&amp;right=delivery.delivered&#34;;
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void resetRestoresRemovedMappingsAndTheRelationshipsDerivedFromThem() {
+        assertThat(get(SHIPPED_VS_DELIVERED).body().get(&#34;relationship&#34;).asString())
+                .isEqualTo(&#34;RIGHT_INCLUDES_LEFT&#34;);
+
+        assertThat(delete(&#34;/api/mappings/rel_024&#34;).status()).isEqualTo(204);
+        assertThat(get(&#34;/api/mappings&#34;).body()).hasSize(4);
+        assertThat(get(SHIPPED_VS_DELIVERED).body().get(&#34;relationship&#34;).asString())
+                .isEqualTo(&#34;NOT_ESTABLISHED&#34;);
+
+        Response reset = post(&#34;/api/demo/reset&#34;, null);
+
+        assertThat(reset.status()).isEqualTo(204);
+        assertThat(get(&#34;/api/mappings&#34;).body()).hasSize(5);
+        assertThat(get(&#34;/api/mappings/rel_024&#34;).status()).isEqualTo(200);
+        assertThat(get(SHIPPED_VS_DELIVERED).body().get(&#34;relationship&#34;).asString())
+                .isEqualTo(&#34;RIGHT_INCLUDES_LEFT&#34;);
+    }
+
+    @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
+    void resetDiscardsMappingsAddedAtRuntime() {
+        post(
+                &#34;/api/mappings&#34;,
+                java.util.Map.of(
+                        &#34;leftFactId&#34;, &#34;returns.returnable.within_return_window&#34;,
+                        &#34;rightFactId&#34;, &#34;payments.refundable.return_approved&#34;,
+                        &#34;type&#34;, &#34;SAME_MEANING&#34;,
+                        &#34;status&#34;, &#34;CONFIRMED&#34;,
+                        &#34;rationale&#34;, &#34;Same approval step.&#34;,
+                        &#34;reviewedBy&#34;, &#34;Domain reviewer&#34;));
+        assertThat(get(&#34;/api/mappings&#34;).body()).hasSize(6);
+
+        assertThat(post(&#34;/api/demo/reset&#34;, null).status()).isEqualTo(204);
+
+        assertThat(get(&#34;/api/mappings&#34;).body()).hasSize(5);
+        assertThat(get(&#34;/api/mappings/rel_034&#34;).status()).isEqualTo(404);
+    }
+
+    @Test
+    void resetIsSafeToRepeatWhenNothingHasChanged() {
+        assertThat(post(&#34;/api/demo/reset&#34;, null).status()).isEqualTo(204);
+        assertThat(get(&#34;/api/mappings&#34;).body()).hasSize(5);
+    }
+}
+EOF
+export JAVA_HOME=$(/usr/libexec/java_home -v 21) &amp;&amp; ./mvnw -B test -Dtest=DemoControllerTest 2&gt;&amp;1 | grep -aE &#39;Tests run:|BUILD|ERROR\]&#39; | head -5</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-33-53-057Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-33-53-057Z" class="timestamp-link"><time datetime="2026-09-06T19:33:53.057Z" data-timestamp="2026-09-06T19:33:53.057Z">2026-09-06T19:33:53.057Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0, Time elapsed: 5.540 s -- in com.conceptlens.api.DemoControllerTest
+[INFO] Tests run: 3, Failures: 0, Errors: 0, Skipped: 0
+[INFO] BUILD SUCCESS</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-34-00-519Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-34-00-519Z" class="timestamp-link"><time datetime="2026-09-06T19:34:00.519Z" data-timestamp="2026-09-06T19:34:00.519Z">2026-09-06T19:34:00.519Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-34-01-193Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-34-01-193Z" class="timestamp-link"><time datetime="2026-09-06T19:34:01.193Z" data-timestamp="2026-09-06T19:34:01.193Z">2026-09-06T19:34:01.193Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Backend green. Now the frontend — client, then the reset wiring.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-34-13-384Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-34-13-384Z" class="timestamp-link"><time datetime="2026-09-06T19:34:13.384Z" data-timestamp="2026-09-06T19:34:13.384Z">2026-09-06T19:34:13.384Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01VHaxFL1JD6VWXGx9kysMVx">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Wire reset through client, App and AppHeader</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd frontend &amp;&amp; python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/api/client.ts&#39;
+s=open(p).read()
+old = &#34;&#34;&#34;  deleteMapping: async (mappingId: string): Promise&lt;void&gt; =&gt; {
+    await request(`/mappings/${encodeURIComponent(mappingId)}`, { method: &#39;DELETE&#39; })
+  },&#34;&#34;&#34;
+new = &#34;&#34;&#34;  deleteMapping: async (mappingId: string): Promise&lt;void&gt; =&gt; {
+    await request(`/mappings/${encodeURIComponent(mappingId)}`, { method: &#39;DELETE&#39; })
+  },
+
+  /** Restores the seeded mappings, discarding anything added or removed at runtime. */
+  resetDemoData: async (): Promise&lt;void&gt; =&gt; {
+    await request(&#39;/demo/reset&#39;, { method: &#39;POST&#39; })
+  },&#34;&#34;&#34;
+assert old in s
+open(p,&#39;w&#39;).write(s.replace(old, new))
+PY
+cat &gt; src/App.tsx &lt;&lt;&#39;EOF&#39;
+import { useState } from &#39;react&#39;
+import { Navigate, Route, Routes } from &#39;react-router&#39;
+
+import { api } from &#39;./api/client.ts&#39;
+import AppHeader from &#39;./components/AppHeader.tsx&#39;
+import Toast from &#39;./components/Toast.tsx&#39;
+import { useToast } from &#39;./components/useToast.ts&#39;
+import ComparePage from &#39;./compare/ComparePage.tsx&#39;
+import MappingsPage from &#39;./mappings/MappingsPage.tsx&#39;
+
+export default function App() {
+  const { message, showToast } = useToast()
+
+  /**
+   * Bumped after a reset. It keys the routed page so it remounts and refetches, which is enough
+   * to get both pages back in step without any shared data layer.
+   */
+  const [dataVersion, setDataVersion] = useState(0)
+
+  const resetDemoData = async () =&gt; {
+    const confirmed = window.confirm(
+      &#39;Reset demo data? Mappings you have added or removed will be restored to the seeded set.&#39;,
+    )
+    if (!confirmed) {
+      return
+    }
+
+    try {
+      await api.resetDemoData()
+      setDataVersion((current) =&gt; current + 1)
+      showToast(&#39;Demo data reset.&#39;)
+    } catch (error) {
+      showToast(error instanceof Error ? error.message : &#39;Could not reset demo data&#39;)
+    }
+  }
+
+  return (
+    &lt;&gt;
+      &lt;AppHeader onReset={() =&gt; void resetDemoData()} /&gt;
+
+      &lt;Routes key={dataVersion}&gt;
+        &lt;Route path=&#34;/&#34; element={&lt;Navigate to=&#34;/compare&#34; replace /&gt;} /&gt;
+        &lt;Route path=&#34;/compare&#34; element={&lt;ComparePage /&gt;} /&gt;
+        &lt;Route path=&#34;/mappings&#34; element={&lt;MappingsPage /&gt;} /&gt;
+      &lt;/Routes&gt;
+
+      &lt;Toast message={message} /&gt;
+    &lt;/&gt;
+  )
+}
+EOF
+python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/components/AppHeader.tsx&#39;
+s=open(p).read()
+s = s.replace(
+&#34;&#34;&#34;export default function AppHeader() {
+  return (
+    &lt;header className={styles.header}&gt;
+      &lt;div className={styles.brand}&gt;Concept Lens&lt;/div&gt;
+      &lt;nav className={styles.nav}&gt;
+        {LINKS.map((link) =&gt; (&#34;&#34;&#34;,
+&#34;&#34;&#34;interface AppHeaderProps {
+  onReset: () =&gt; void
+}
+
+export default function AppHeader({ onReset }: AppHeaderProps) {
+  return (
+    &lt;header className={styles.header}&gt;
+      &lt;div className={styles.brand}&gt;Concept Lens&lt;/div&gt;
+      &lt;nav className={styles.nav}&gt;
+        {LINKS.map((link) =&gt; (&#34;&#34;&#34;)
+s = s.replace(
+&#34;&#34;&#34;        ))}
+      &lt;/nav&gt;
+    &lt;/header&gt;
+  )
+}&#34;&#34;&#34;,
+&#34;&#34;&#34;        ))}
+        &lt;button className={styles.reset} onClick={onReset}&gt;
+          Reset demo data
+        &lt;/button&gt;
+      &lt;/nav&gt;
+    &lt;/header&gt;
+  )
+}&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+
+p=&#39;src/components/AppHeader.module.css&#39;
+open(p,&#39;a&#39;).write(&#34;&#34;&#34;
+.reset {
+  margin-left: 4px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.reset:hover {
+  background: var(--soft);
+}
+&#34;&#34;&#34;)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx tsc -b 2&gt;&amp;1 | head -5</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-34-17-754Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-34-17-754Z" class="timestamp-link"><time datetime="2026-09-06T19:34:17.754Z" data-timestamp="2026-09-06T19:34:17.754Z">2026-09-06T19:34:17.754Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>(Bash completed with no output)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-34-21-348Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-34-21-348Z" class="timestamp-link"><time datetime="2026-09-06T19:34:21.348Z" data-timestamp="2026-09-06T19:34:21.348Z">2026-09-06T19:34:21.348Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now the hero/framing lines and the derived-from count.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-34-26-886Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-34-26-886Z" class="timestamp-link"><time datetime="2026-09-06T19:34:26.886Z" data-timestamp="2026-09-06T19:34:26.886Z">2026-09-06T19:34:26.886Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01TLP2rbAeLK8E58ZrGUbMBj">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Add Hero meta slot and derivation styles</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+# Hero gains an optional meta line.
+p=&#39;src/components/Hero.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;interface HeroProps {
+  eyebrow: string
+  title: string
+  lead: string
+}
+
+export default function Hero({ eyebrow, title, lead }: HeroProps) {
+  return (
+    &lt;section className={styles.hero}&gt;
+      &lt;div className=&#34;eyebrow&#34;&gt;{eyebrow}&lt;/div&gt;
+      &lt;h1 className={styles.title}&gt;{title}&lt;/h1&gt;
+      &lt;p className={styles.lead}&gt;{lead}&lt;/p&gt;
+    &lt;/section&gt;
+  )
+}&#34;&#34;&#34;,
+&#34;&#34;&#34;interface HeroProps {
+  eyebrow: string
+  title: string
+  lead: string
+  /** Optional line naming what the reviewer is looking at, such as the demo catalog size. */
+  meta?: string
+}
+
+export default function Hero({ eyebrow, title, lead, meta }: HeroProps) {
+  return (
+    &lt;section className={styles.hero}&gt;
+      &lt;div className=&#34;eyebrow&#34;&gt;{eyebrow}&lt;/div&gt;
+      &lt;h1 className={styles.title}&gt;{title}&lt;/h1&gt;
+      &lt;p className={styles.lead}&gt;{lead}&lt;/p&gt;
+      {meta &amp;&amp; &lt;div className={styles.meta}&gt;{meta}&lt;/div&gt;}
+    &lt;/section&gt;
+  )
+}&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+
+open(&#39;src/components/Hero.module.css&#39;,&#39;a&#39;).write(&#34;&#34;&#34;
+.meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+}
+&#34;&#34;&#34;)
+
+open(&#39;src/compare/ComparePage.module.css&#39;,&#39;a&#39;).write(&#34;&#34;&#34;
+.derivation {
+  margin: -14px 0 22px;
+}
+
+.derivedFrom {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent);
+}
+
+.unknownNote {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+&#34;&#34;&#34;)
+PY
+grep -n &#39;meta&#39; src/components/Hero.tsx | sed &#39;s/^/  /&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-34-28-958Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-34-28-958Z" class="timestamp-link"><time datetime="2026-09-06T19:34:28.958Z" data-timestamp="2026-09-06T19:34:28.958Z">2026-09-06T19:34:28.958Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  8:  meta?: string
+  11:export default function Hero({ eyebrow, title, lead, meta }: HeroProps) {
+  17:      {meta &amp;&amp; &lt;div className={styles.meta}&gt;{meta}&lt;/div&gt;}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-34-37-896Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-34-37-896Z" class="timestamp-link"><time datetime="2026-09-06T19:34:37.896Z" data-timestamp="2026-09-06T19:34:37.896Z">2026-09-06T19:34:37.896Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01WgJTBZDeMnFtJxssAHQNAV">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Add demo catalog line and derived-from block</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/compare/ComparePage.tsx&#39;
+s=open(p).read()
+
+# Demo catalog line, counted from the API rather than hardcoded.
+s = s.replace(&#34;&#34;&#34;  const available = concepts.data ?? []&#34;&#34;&#34;,
+&#34;&#34;&#34;  const available = concepts.data ?? []
+  const systemCount = new Set(available.map((concept) =&gt; concept.sourceSystem)).size
+  const catalog = available.length
+    ? `Demo catalog · ${available.length} concepts across ${systemCount} systems`
+    : undefined&#34;&#34;&#34;)
+
+s = s.replace(&#34;      &lt;Hero {...HERO} /&gt;\n\n      {available.length &gt; 0&#34;,
+              &#34;      &lt;Hero {...HERO} meta={catalog} /&gt;\n\n      {available.length &gt; 0&#34;)
+s = s.replace(&#34;&#34;&#34;        &lt;Hero {...HERO} /&gt;
+        &lt;StatusMessage tone=&#34;error&#34;&gt;&#34;&#34;&#34;,
+&#34;&#34;&#34;        &lt;Hero {...HERO} /&gt;
+        &lt;StatusMessage tone=&#34;error&#34;&gt;&#34;&#34;&#34;)
+
+# State the relationship is derived, and from how much evidence.
+old = &#34;&#34;&#34;          &lt;Takeaway takeaway={takeaway(result)} /&gt;
+
+          &lt;div className=&#34;section-title&#34;&gt;How are these concepts related?&lt;/div&gt;&#34;&#34;&#34;
+new = &#34;&#34;&#34;          &lt;Takeaway takeaway={takeaway(result)} /&gt;
+
+          &lt;div className={styles.derivation}&gt;
+            &lt;span className={styles.derivedFrom}&gt;
+              Derived from {result.matchedFacts.length} confirmed{&#39; &#39;}
+              {result.matchedFacts.length === 1 ? &#39;mapping&#39; : &#39;mappings&#39;}
+            &lt;/span&gt;
+            &lt;span className={styles.unknownNote}&gt;Unmapped means unknown, not different.&lt;/span&gt;
+          &lt;/div&gt;
+
+          &lt;div className=&#34;section-title&#34;&gt;How are these concepts related?&lt;/div&gt;&#34;&#34;&#34;
+assert old in s
+s = s.replace(old, new)
+open(p,&#39;w&#39;).write(s)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx tsc -b 2&gt;&amp;1 | head -5; echo &#34;--- derivation block ---&#34;; grep -n &#39;derivedFrom\|unknownNote\|catalog&#39; src/compare/ComparePage.tsx | sed &#39;s/^/  /&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-34-41-623Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-34-41-623Z" class="timestamp-link"><time datetime="2026-09-06T19:34:41.623Z" data-timestamp="2026-09-06T19:34:41.623Z">2026-09-06T19:34:41.623Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>--- derivation block ---
+  33:  const catalog = available.length
+  34:    ? `Demo catalog · ${available.length} concepts across ${systemCount} systems`
+  58:      &lt;Hero {...HERO} meta={catalog} /&gt;
+  92:            &lt;span className={styles.derivedFrom}&gt;
+  96:            &lt;span className={styles.unknownNote}&gt;Unmapped means unknown, not different.&lt;/span&gt;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-34-44-185Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-34-44-185Z" class="timestamp-link"><time datetime="2026-09-06T19:34:44.185Z" data-timestamp="2026-09-06T19:34:44.185Z">2026-09-06T19:34:44.185Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now the Venn label fix.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-34-44-409Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-34-44-409Z" class="timestamp-link"><time datetime="2026-09-06T19:34:44.409Z" data-timestamp="2026-09-06T19:34:44.409Z">2026-09-06T19:34:44.409Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01K596Tgai46amon3cTAMm8F">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find the region label sites</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -n &#39;ONLY&#39; src/compare/RelationshipVenn.tsx | sed &#39;s/^/  /&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-34-44-471Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-34-44-471Z" class="timestamp-link"><time datetime="2026-09-06T19:34:44.471Z" data-timestamp="2026-09-06T19:34:44.471Z">2026-09-06T19:34:44.471Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  54:              label: `${a.name.toUpperCase()} ONLY`,
+  65:              label: `${b.name.toUpperCase()} ONLY`,
+  84:              label: `${a.name.toUpperCase()} ONLY`,
+  98:          label: `${b.name.toUpperCase()} ONLY`,
+  113:              label: `${b.name.toUpperCase()} ONLY`,
+  127:          label: `${a.name.toUpperCase()} ONLY`,
+  172:              label: `${a.name.toUpperCase()} ONLY`,
+  183:              label: `${b.name.toUpperCase()} ONLY`,</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-34-51-061Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-34-51-061Z" class="timestamp-link"><time datetime="2026-09-06T19:34:51.061Z" data-timestamp="2026-09-06T19:34:51.061Z">2026-09-06T19:34:51.061Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-34-51-702Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-34-51-702Z" class="timestamp-link"><time datetime="2026-09-06T19:34:51.702Z" data-timestamp="2026-09-06T19:34:51.702Z">2026-09-06T19:34:51.702Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>All 8 sites share one shape. Replacing them, with a comment on why.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-34-57-939Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-34-57-939Z" class="timestamp-link"><time datetime="2026-09-06T19:34:57.939Z" data-timestamp="2026-09-06T19:34:57.939Z">2026-09-06T19:34:57.939Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01CAGb2sVveoDHRVXFVacSZU">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Relabel Venn regions and verify</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+import re
+p=&#39;src/compare/RelationshipVenn.tsx&#39;
+s=open(p).read()
+before = len(re.findall(r&#39;\.toUpperCase\(\) ONLY`&#39;, s))
+s = re.sub(r&#39;`\$\{[ab]\.name\.toUpperCase\(\)\} ONLY`&#39;, &#34;&#39;NO CONFIRMED MATCH&#39;&#34;, s)
+after = len(re.findall(r&#39;\.toUpperCase\(\) ONLY`&#39;, s))
+
+# Say why the label is not &#34;X only&#34;.
+s = s.replace(
+&#34;&#34;&#34;/**
+ * Geometry for each relationship shape, in pixels against the fixed 700x370 canvas.
+ * The values are taken from the UX mock; changing them changes the drawing.
+ */&#34;&#34;&#34;,
+&#34;&#34;&#34;/**
+ * Geometry for each relationship shape, in pixels against the fixed 700x370 canvas.
+ * The values are taken from the UX mock; changing them changes the drawing.
+ *
+ * &lt;p&gt;Regions are labelled &#34;no confirmed match&#34; rather than &#34;X only&#34;: a fact without a match in
+ * the other concept may still be mapped elsewhere, and is in any case unknown rather than
+ * exclusive to its own side.
+ */&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+print(f&#34;replaced {before} sites, {after} remaining&#34;)
+PY
+grep -n &#34;NO CONFIRMED MATCH&#34; src/compare/RelationshipVenn.tsx | wc -l | sed &#39;s/^/  sites now: /&#39;
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx tsc -b 2&gt;&amp;1 | head -3; npm run lint 2&gt;&amp;1 | tail -3</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-35-03-469Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-35-03-469Z" class="timestamp-link"><time datetime="2026-09-06T19:35:03.469Z" data-timestamp="2026-09-06T19:35:03.469Z">2026-09-06T19:35:03.469Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>replaced 0 sites, 0 remaining
+  sites now:        8
+&gt; concept-lens-frontend@0.0.1 lint
+&gt; eslint .</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-35-08-831Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-35-08-831Z" class="timestamp-link"><time datetime="2026-09-06T19:35:08.831Z" data-timestamp="2026-09-06T19:35:08.831Z">2026-09-06T19:35:08.831Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-35-10-456Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-35-10-456Z" class="timestamp-link"><time datetime="2026-09-06T19:35:10.456Z" data-timestamp="2026-09-06T19:35:10.456Z">2026-09-06T19:35:10.456Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01CH8efN78YcyKZaAbKjUNGa">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Confirm relabel and run frontend tests</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">grep -n &#34;ONLY&#34; src/compare/RelationshipVenn.tsx | sed &#39;s/^/  /&#39; || echo &#34;  no &#39;ONLY&#39; labels remain&#34;
+echo &#34;--- tests ---&#34;
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx vitest run 2&gt;&amp;1 | grep -aE &#39;Tests |Files |FAIL|×&#39; | head</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-35-14-095Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-35-14-095Z" class="timestamp-link"><time datetime="2026-09-06T19:35:14.095Z" data-timestamp="2026-09-06T19:35:14.095Z">2026-09-06T19:35:14.095Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>--- tests ---
+ Test Files  4 passed (4)
+      Tests  26 passed (26)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-35-19-989Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-35-19-989Z" class="timestamp-link"><time datetime="2026-09-06T19:35:19.989Z" data-timestamp="2026-09-06T19:35:19.989Z">2026-09-06T19:35:19.989Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-35-20-709Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-35-20-709Z" class="timestamp-link"><time datetime="2026-09-06T19:35:20.709Z" data-timestamp="2026-09-06T19:35:20.709Z">2026-09-06T19:35:20.709Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Tests pass but don't cover the new behaviour yet. Adding coverage.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-35-32-798Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-35-32-798Z" class="timestamp-link"><time datetime="2026-09-06T19:35:32.798Z" data-timestamp="2026-09-06T19:35:32.798Z">2026-09-06T19:35:32.798Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01VJUcwgT1eUEiqaTNPozE43">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Add tests for reset, catalog line, derived count and Venn labels</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/test/apiStub.ts&#39;
+s=open(p).read()
+s = s.replace(
+&#34;&#34;&#34;  const stub: ApiStub = { calls: [], mappings: [...(options.mappings ?? [MAPPING])] }&#34;&#34;&#34;,
+&#34;&#34;&#34;  const seeded = options.mappings ?? [MAPPING]
+  const stub: ApiStub = { calls: [], mappings: [...seeded] }&#34;&#34;&#34;)
+s = s.replace(
+&#34;&#34;&#34;    if (method === &#39;DELETE&#39; &amp;&amp; url.startsWith(&#39;/api/mappings/&#39;)) {&#34;&#34;&#34;,
+&#34;&#34;&#34;    if (method === &#39;POST&#39; &amp;&amp; url === &#39;/api/demo/reset&#39;) {
+      stub.mappings = [...seeded]
+      return reply(undefined, 204)
+    }
+    if (method === &#39;DELETE&#39; &amp;&amp; url.startsWith(&#39;/api/mappings/&#39;)) {&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+PY
+python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/App.test.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;  it(&#39;navigates to the Mappings page&#39;, async () =&gt; {&#34;&#34;&#34;,
+&#34;&#34;&#34;  it(&#39;restores the seeded mappings when demo data is reset&#39;, async () =&gt; {
+    const user = userEvent.setup()
+    vi.spyOn(window, &#39;confirm&#39;).mockReturnValue(true)
+    const stub = installApiStub()
+    render(
+      &lt;MemoryRouter initialEntries={[&#39;/mappings&#39;]}&gt;
+        &lt;App /&gt;
+      &lt;/MemoryRouter&gt;,
+    )
+
+    await user.click(await screen.findByRole(&#39;button&#39;, { name: &#39;Remove&#39; }))
+    await waitFor(() =&gt; expect(screen.queryByText(&#39;rel_018&#39;)).not.toBeInTheDocument())
+
+    await user.click(screen.getByRole(&#39;button&#39;, { name: &#39;Reset demo data&#39; }))
+
+    expect(await screen.findByText(&#39;rel_018&#39;)).toBeInTheDocument()
+    expect(stub.calls).toContainEqual(
+      expect.objectContaining({ method: &#39;POST&#39;, url: &#39;/api/demo/reset&#39; }),
+    )
+  })
+
+  it(&#39;does not reset when the confirmation is dismissed&#39;, async () =&gt; {
+    const user = userEvent.setup()
+    vi.spyOn(window, &#39;confirm&#39;).mockReturnValue(false)
+    const stub = installApiStub()
+    render(
+      &lt;MemoryRouter initialEntries={[&#39;/compare&#39;]}&gt;
+        &lt;App /&gt;
+      &lt;/MemoryRouter&gt;,
+    )
+
+    await user.click(screen.getByRole(&#39;button&#39;, { name: &#39;Reset demo data&#39; }))
+
+    expect(stub.calls.some((call) =&gt; call.url === &#39;/api/demo/reset&#39;)).toBe(false)
+  })
+
+  it(&#39;navigates to the Mappings page&#39;, async () =&gt; {&#34;&#34;&#34;)
+s = s.replace(&#34;import { render, screen } from &#39;@testing-library/react&#39;&#34;,
+              &#34;import { render, screen, waitFor } from &#39;@testing-library/react&#39;&#34;)
+open(p,&#39;w&#39;).write(s)
+
+p=&#39;src/compare/ComparePage.test.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;  it(&#39;renders the matched and unmatched facts from the comparison&#39;, async () =&gt; {&#34;&#34;&#34;,
+&#34;&#34;&#34;  it(&#39;says what the demo catalog contains and that the result is derived&#39;, async () =&gt; {
+    installApiStub()
+    render(&lt;ComparePage /&gt;)
+
+    await screen.findByText(&#39;Returnable vs Refundable&#39;)
+
+    expect(screen.getByText(&#39;Demo catalog · 2 concepts across 2 systems&#39;)).toBeInTheDocument()
+    expect(screen.getByText(/Derived from 1 confirmed mapping$/)).toBeInTheDocument()
+    expect(screen.getByText(&#39;Unmapped means unknown, not different.&#39;)).toBeInTheDocument()
+  })
+
+  it(&#39;labels unmatched facts as unconfirmed rather than exclusive&#39;, async () =&gt; {
+    installApiStub()
+    render(&lt;ComparePage /&gt;)
+
+    await screen.findByText(&#39;Returnable vs Refundable&#39;)
+
+    expect(screen.getAllByText(&#39;NO CONFIRMED MATCH&#39;)).not.toHaveLength(0)
+    expect(screen.queryByText(/RETURNABLE ONLY/)).not.toBeInTheDocument()
+  })
+
+  it(&#39;renders the matched and unmatched facts from the comparison&#39;, async () =&gt; {&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx vitest run 2&gt;&amp;1 | grep -aE &#39;Tests |Files |FAIL|×|AssertionError|Unable to find&#39; | head -12</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-35-38-269Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-35-38-269Z" class="timestamp-link"><time datetime="2026-09-06T19:35:38.269Z" data-timestamp="2026-09-06T19:35:38.269Z">2026-09-06T19:35:38.269Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre> Test Files  4 passed (4)
+      Tests  30 passed (30)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-35-42-236Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-35-42-236Z" class="timestamp-link"><time datetime="2026-09-06T19:35:42.236Z" data-timestamp="2026-09-06T19:35:42.236Z">2026-09-06T19:35:42.236Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_016oHzaRCHXgq3Z41RgXGMFG">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Lint and full build</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npm run lint 2&gt;&amp;1 | tail -3
+cd /Users/shimantikas/Experiments/concept-lens &amp;&amp; export JAVA_HOME=$(/usr/libexec/java_home -v 21) &amp;&amp; ./mvnw -B clean package 2&gt;&amp;1 | grep -aE &#39;Results:|BUILD|Total time|ERROR\]|Tests  &#39; | head -6</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-36-14-088Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-36-14-088Z" class="timestamp-link"><time datetime="2026-09-06T19:36:14.088Z" data-timestamp="2026-09-06T19:36:14.088Z">2026-09-06T19:36:14.088Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>&gt; concept-lens-frontend@0.0.1 lint
+&gt; eslint .
+
+[INFO] Results:
+[INFO]       Tests  30 passed (30)
+[INFO] BUILD SUCCESS
+[INFO] Total time:  26.096 s</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-36-23-546Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-36-23-546Z" class="timestamp-link"><time datetime="2026-09-06T19:36:23.546Z" data-timestamp="2026-09-06T19:36:23.546Z">2026-09-06T19:36:23.546Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_018itghJB7ARFDKWo4HCNbVT">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Verify reset end to end against the jar</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">export JAVA_HOME=$(/usr/libexec/java_home -v 21) &amp;&amp; ./mvnw -B clean package 2&gt;&amp;1 | grep -aE &#39;Tests run: [0-9]+, Fail.*Skipped: [0-9]+$|Results:&#39; | tail -3
+export JAVA_HOME=$(/usr/libexec/java_home -v 21) &amp;&amp; &#34;$JAVA_HOME/bin/java&#34; -jar target/concept-lens-0.0.1-SNAPSHOT.jar &gt; /tmp/app.log 2&gt;&amp;1 &amp;
+for i in $(seq 1 40); do curl -s -o /dev/null http://localhost:8080/api/mappings 2&gt;/dev/null &amp;&amp; break; perl -e &#39;select(undef,undef,undef,0.5)&#39;; done
+B=http://localhost:8080
+C=&#34;$B/api/compare?left=fulfillment.shipped&amp;right=delivery.delivered&#34;
+echo &#34;=== reset round trip against the running jar ===&#34;
+printf &#39;  before        mappings=%s  relationship=%s\n&#39; &#34;$(curl -s $B/api/mappings | python3 -c &#39;import sys,json;print(len(json.load(sys.stdin)))&#39;)&#34; &#34;$(curl -s &#34;$C&#34; | python3 -c &#39;import sys,json;print(json.load(sys.stdin)[&#34;relationship&#34;])&#39;)&#34;
+curl -s -o /dev/null -X DELETE $B/api/mappings/rel_024
+printf &#39;  after delete  mappings=%s  relationship=%s\n&#39; &#34;$(curl -s $B/api/mappings | python3 -c &#39;import sys,json;print(len(json.load(sys.stdin)))&#39;)&#34; &#34;$(curl -s &#34;$C&#34; | python3 -c &#39;import sys,json;print(json.load(sys.stdin)[&#34;relationship&#34;])&#39;)&#34;
+printf &#39;  POST /api/demo/reset -&gt; %s\n&#39; &#34;$(curl -s -o /dev/null -w &#39;%{http_code}&#39; -X POST $B/api/demo/reset)&#34;
+printf &#39;  after reset   mappings=%s  relationship=%s\n&#39; &#34;$(curl -s $B/api/mappings | python3 -c &#39;import sys,json;print(len(json.load(sys.stdin)))&#39;)&#34; &#34;$(curl -s &#34;$C&#34; | python3 -c &#39;import sys,json;print(json.load(sys.stdin)[&#34;relationship&#34;])&#39;)&#34;
+grep &#39;Reset mappings&#39; /tmp/app.log | sed &#39;s/^/  /&#39;
+pkill -f &#39;concept-lens-0.0.1-SNAPSHOT.jar&#39;; rm -f /tmp/app.log</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-36-55-658Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-36-55-658Z" class="timestamp-link"><time datetime="2026-09-06T19:36:55.658Z" data-timestamp="2026-09-06T19:36:55.658Z">2026-09-06T19:36:55.658Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>[INFO] Results:
+[INFO] Tests run: 92, Failures: 0, Errors: 0, Skipped: 0
+=== reset round trip against the running jar ===
+  before        mappings=5  relationship=RIGHT_INCLUDES_LEFT
+  after delete  mappings=4  relationship=NOT_ESTABLISHED
+  POST /api/demo/reset -&gt; 404
+  after reset   mappings=4  relationship=NOT_ESTABLISHED</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-37-06-999Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-37-06-999Z" class="timestamp-link"><time datetime="2026-09-06T19:37:06.999Z" data-timestamp="2026-09-06T19:37:06.999Z">2026-09-06T19:37:06.999Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-37-07-703Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-37-07-703Z" class="timestamp-link"><time datetime="2026-09-06T19:37:07.703Z" data-timestamp="2026-09-06T19:37:07.703Z">2026-09-06T19:37:07.703Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>404 against the jar despite 92 tests passing — that needs explaining, not retrying blindly.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-37-11-606Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-37-11-606Z" class="timestamp-link"><time datetime="2026-09-06T19:37:11.606Z" data-timestamp="2026-09-06T19:37:11.606Z">2026-09-06T19:37:11.606Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01LUCyWC5v4mKBbGhTqp7BNn">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Diagnose the 404 on the reset endpoint</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd /Users/shimantikas/Experiments/concept-lens
+echo &#34;=== is DemoController in the jar? ===&#34;
+unzip -l target/concept-lens-0.0.1-SNAPSHOT.jar | grep -i demo | sed &#39;s/^/  /&#39;
+echo
+export JAVA_HOME=$(/usr/libexec/java_home -v 21) &amp;&amp; &#34;$JAVA_HOME/bin/java&#34; -jar target/concept-lens-0.0.1-SNAPSHOT.jar &gt; /tmp/app.log 2&gt;&amp;1 &amp;
+for i in $(seq 1 40); do curl -s -o /dev/null http://localhost:8080/api/mappings 2&gt;/dev/null &amp;&amp; break; perl -e &#39;select(undef,undef,undef,0.5)&#39;; done
+echo &#34;=== raw response ===&#34;
+curl -s -i -X POST http://localhost:8080/api/demo/reset | head -8 | sed &#39;s/^/  /&#39;
+echo
+echo &#34;=== mapped endpoints (from startup log) ===&#34;
+grep -iE &#39;mapped|demo&#39; /tmp/app.log | head -5 | sed &#39;s/^/  /&#39;
+pkill -f &#39;concept-lens-0.0.1-SNAPSHOT.jar&#39;; rm -f /tmp/app.log</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-37-15-156Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-37-15-156Z" class="timestamp-link"><time datetime="2026-09-06T19:37:15.156Z" data-timestamp="2026-09-06T19:37:15.156Z">2026-09-06T19:37:15.156Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>=== is DemoController in the jar? ===
+          0  09-06-2026 12:36   BOOT-INF/classes/demo/
+       4634  09-06-2026 12:36   BOOT-INF/classes/demo/concepts.json
+       1864  09-06-2026 12:36   BOOT-INF/classes/demo/mappings.json
+       3508  09-06-2026 12:36   BOOT-INF/classes/demo/README.md
+       1027  09-06-2026 12:36   BOOT-INF/classes/com/conceptlens/api/DemoController.class
+
+=== raw response ===
+  HTTP/1.1 204 
+  Date: Sun, 06 Sep 2026 19:37:15 GMT
+  
+
+=== mapped endpoints (from startup log) ===</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-37-25-967Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-37-25-967Z" class="timestamp-link"><time datetime="2026-09-06T19:37:25.967Z" data-timestamp="2026-09-06T19:37:25.967Z">2026-09-06T19:37:25.967Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-37-26-759Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-37-26-759Z" class="timestamp-link"><time datetime="2026-09-06T19:37:26.759Z" data-timestamp="2026-09-06T19:37:26.759Z">2026-09-06T19:37:26.759Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Stale process on :8080 from a prior run — my new jar couldn't bind, so curl was talking to an older binary without the endpoint. Re-running cleanly.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-37-33-065Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-37-33-065Z" class="timestamp-link"><time datetime="2026-09-06T19:37:33.065Z" data-timestamp="2026-09-06T19:37:33.065Z">2026-09-06T19:37:33.065Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01RbfQZWhsGCCMnxoVbEe5Jk">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Verify reset round trip on a clean instance</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd /Users/shimantikas/Experiments/concept-lens
+pkill -f &#39;concept-lens-0.0.1-SNAPSHOT.jar&#39; 2&gt;/dev/null; sleep 2
+lsof -ti:8080 2&gt;/dev/null | xargs -r kill -9 2&gt;/dev/null; sleep 1
+echo &#34;port 8080 free: $(lsof -ti:8080 2&gt;/dev/null | wc -l | tr -d &#39; &#39;) listeners&#34;
+export JAVA_HOME=$(/usr/libexec/java_home -v 21) &amp;&amp; &#34;$JAVA_HOME/bin/java&#34; -jar target/concept-lens-0.0.1-SNAPSHOT.jar &gt; /tmp/app.log 2&gt;&amp;1 &amp;
+for i in $(seq 1 40); do curl -s -o /dev/null http://localhost:8080/api/mappings 2&gt;/dev/null &amp;&amp; break; perl -e &#39;select(undef,undef,undef,0.5)&#39;; done
+B=http://localhost:8080
+C=&#34;$B/api/compare?left=fulfillment.shipped&amp;right=delivery.delivered&#34;
+n(){ curl -s $B/api/mappings | python3 -c &#39;import sys,json;print(len(json.load(sys.stdin)))&#39;; }
+r(){ curl -s &#34;$C&#34; | python3 -c &#39;import sys,json;print(json.load(sys.stdin)[&#34;relationship&#34;])&#39;; }
+printf &#39;  baseline      mappings=%s  relationship=%s\n&#39; &#34;$(n)&#34; &#34;$(r)&#34;
+curl -s -o /dev/null -X DELETE $B/api/mappings/rel_024
+printf &#39;  after delete  mappings=%s  relationship=%s\n&#39; &#34;$(n)&#34; &#34;$(r)&#34;
+printf &#39;  POST /api/demo/reset -&gt; %s\n&#39; &#34;$(curl -s -o /dev/null -w &#39;%{http_code}&#39; -X POST $B/api/demo/reset)&#34;
+printf &#39;  after reset   mappings=%s  relationship=%s\n&#39; &#34;$(n)&#34; &#34;$(r)&#34;
+grep &#39;Reset mappings&#39; /tmp/app.log | sed &#39;s/^/  /&#39;
+pkill -f &#39;concept-lens-0.0.1-SNAPSHOT.jar&#39;; rm -f /tmp/app.log</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T19-37-40-322Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T19-37-40-322Z" class="timestamp-link"><time datetime="2026-09-06T19:37:40.322Z" data-timestamp="2026-09-06T19:37:40.322Z">2026-09-06T19:37:40.322Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>port 8080 free: 0 listeners
+  baseline      mappings=5  relationship=RIGHT_INCLUDES_LEFT
+  after delete  mappings=4  relationship=NOT_ESTABLISHED
+  POST /api/demo/reset -&gt; 204
+  after reset   mappings=5  relationship=RIGHT_INCLUDES_LEFT
+  2026-09-06T12:37:40.189-07:00  INFO 78044 --- [concept-lens] [nio-8080-exec-3] com.conceptlens.seed.SeedDataLoader      : Reset mappings to the seeded set of 5</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T19-37-56-098Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T19-37-56-098Z" class="timestamp-link"><time datetime="2026-09-06T19:37:56.098Z" data-timestamp="2026-09-06T19:37:56.098Z">2026-09-06T19:37:56.098Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Seed data reverted; four changes landed. <strong>122 tests</strong> (92 backend, 30 frontend), build green, lint clean.</p>
+<h2>What changed</h2>
+<p><strong>Reset demo data</strong>
+- <code>SeedDataLoader.resetMappings()</code> — deletes all mappings and re-creates the seeded set, using the existing <code>findAll</code>/<code>deleteById</code>/<code>create</code> contract. Concepts untouched, since they're read-only and can't drift. No repository interface change.
+- <code>api/DemoController</code> — <code>POST /api/demo/reset</code> → 204.
+- Frontend: <code>api.resetDemoData()</code>, a "Reset demo data" button in the header styled off the existing nav treatment, <code>window.confirm</code> for confirmation (same as the existing Remove flow).</p>
+<p><strong>No <code>DemoDataContext</code>, no new frontend files.</strong> The refresh works via three lines in <code>App.tsx</code>: a <code>dataVersion</code> counter keyed onto <code>&lt;Routes&gt;</code>, so the routed page remounts and refetches. The toast lives in <code>App</code> (outside the keyed subtree) so it survives the remount and reuses the existing <code>useToast</code>/<code>Toast</code>.</p>
+<p><strong>Hero / framing</strong>
+- <code>Hero</code> gained an optional <code>meta</code> slot; Compare passes <code>Demo catalog · 6 concepts across 5 systems</code>, counted from the API rather than hardcoded.
+- <code>Unmapped means unknown, not different.</code> now sits in the result block.</p>
+<p><strong>Derived from N confirmed mappings</strong> — a line under the takeaway. I made it plain text rather than a scroll-to button: with the evidence panel still showing only the first mapping, a button promising more would have under-delivered.</p>
+<p><strong>Venn labels</strong> — <code>RETURNABLE ONLY</code> → <code>NO CONFIRMED MATCH</code>. It was <strong>8 sites, not the 3 I estimated</strong>; still a ~10-minute mechanical change since they share one shape, but I under-counted. The geometry, layouts and styling are untouched. Comment added explaining why the label isn't "X only".</p>
+<h2>Verified end to end</h2>
+<pre><code>baseline      mappings=5  relationship=RIGHT_INCLUDES_LEFT
+after delete  mappings=4  relationship=NOT_ESTABLISHED
+POST /api/demo/reset -&gt; 204
+after reset   mappings=5  relationship=RIGHT_INCLUDES_LEFT
+INFO SeedDataLoader : Reset mappings to the seeded set of 5
+</code></pre>
+<p>Six new tests: three backend (restore after delete, discard runtime additions, safe to repeat) and three frontend (reset restores the list, dismissing the confirm makes no call, plus the catalog line, derived count and Venn labels).</p>
+<h2>One thing worth flagging</h2>
+<p>My first verification run reported <code>POST /api/demo/reset → 404</code>, which I nearly reported as a failure. It was a <strong>stale jar still holding port 8080</strong> from an earlier check — my new process couldn't bind, so curl was talking to an older binary without the endpoint. The clean re-run above is the real result. Worth knowing if you hit an inexplicable 404 while demoing locally: check for an orphaned process on 8080 first.</p>
+<p>Not done, per your scope: the seed bridge, Related Concepts, evidence-list expansion, inspect-the-clicked-mapping, and the manage-mappings flow. The README update is still outstanding.</p></div></div></div>
+<div class="message user" id="msg-2026-09-06T20-07-53-129Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-06T20-07-53-129Z" class="timestamp-link"><time datetime="2026-09-06T20:07:53.129Z" data-timestamp="2026-09-06T20:07:53.129Z">2026-09-06T20:07:53.129Z</time></a></div><div class="message-content">
+<div class="user-content"><p>good. few things: ename the section below the Venn to Mapping evidence. Remove “How does the right concept relate to the left?” and its explanatory subtitle.
+make Derived from N confirmed mapping(s) ↓ a link. Clicking it should smooth-scroll to Mapping evidence below the Venn.
+remove the standalone WHY DOES LENS SHOW THIS AS SHARED? / mapping-proof block.
+for a matched row in the Mapping evidence table, show Inspect directly on that row. It must inspect that specific mapping, not always matchedFacts[0].
+add Manage mappings → in the Mapping evidence header. It should navigate to the Mappings page. Keep this simple; don't build new filtering infrastructure unless it's trivial.
+add Remove to the existing mapping Inspect drawer. Use the existing remove behavior/confirmation. After removal, refresh the comparison so the derived result and Venn update immediately.
+highlight the suggested-comparison chip corresponding to the currently selected pair. This should work whether the pair was selected by clicking the chip or through the dropdowns. Treat A↔B and B↔A as the same suggested pair for highlighting.
+simplify the partial-overlap interpretation to They share some meaning, but the overall relationship is not established.
+keep only Unmapped means unknown, not different. Remove the longer duplicate explanation.
+in Compare, the Inspect drawer, and the Mappings page, lead with human-readable fact labels/descriptions instead of IDs like returns.returnable.valid_return_path. The fact ID can be subtle metadata in Inspect, but shouldn't be the primary text.
+remove the standalone “Why is this shared?” explanatory copy about source systems/provenance. That belongs in the rationale, not the main UX.I also still want a lightweight Related concepts section below Mapping evidence. Related items must be explicit comparison-pair chips, not single concepts — e.g. Returnable ↔ Shipped, because a single Shipped chip is ambiguous about which current concept is the anchor. Clicking a chip should select that pair on Compare. Derive these from existing mappings/graph data rather than hardcoding UI recommendations, exclude the current pair, and don't invent relationships where there is no mapping evidence. It's okay for the section to be empty for a pair if the current graph has no related concepts.</p>
+<p>Important: don't add or change seed data just to make Related concepts populated right now. Don't change the semantic model, ComparisonEngine, Venn geometry, concept/fact wording, or general styling. Reset demo data and the hero changes that already landed should stay as-is.</p>
+<p>Keep this incremental and get build/tests/lint green. Before implementing, quickly tell me what files you expect to touch and flag anything here that is materially larger than it sounds.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-09-06-590Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-09-06-590Z" class="timestamp-link"><time datetime="2026-09-06T20:09:06.590Z" data-timestamp="2026-09-06T20:09:06.590Z">2026-09-06T20:09:06.590Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-09-21-928Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-09-21-928Z" class="timestamp-link"><time datetime="2026-09-06T20:09:21.928Z" data-timestamp="2026-09-06T20:09:21.928Z">2026-09-06T20:09:21.928Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Plan below — no code changes yet.</p>
+<h2>Files I expect to touch (~22: 3 new, 2 deleted, rest modified)</h2>
+<p><strong>Compare</strong>
+- <code>ComparePage.tsx</code> + <code>.module.css</code> — remove the old section heading, derived-link, drawer wiring, mappings fetch, related section
+- <code>ImplicationTable.tsx</code> + <code>.module.css</code> — becomes the "Mapping evidence" section: header, Manage link, per-row Inspect
+- <code>MappingEvidence.tsx</code> + <code>.module.css</code> — <strong>deleted</strong>
+- <code>comparisonPresentation.ts</code> — delete <code>evidence()</code>, simplify the partial takeaway
+- <code>ConceptPicker.tsx</code> + <code>.module.css</code> — active chip
+- <code>RelatedConcepts.tsx</code> + <code>.module.css</code> — <strong>new</strong></p>
+<p><strong>Mappings / shared</strong>
+- <code>MappingDetailDrawer.tsx</code> + <code>.module.css</code> — labels lead, id as metadata, drop the provenance copy, add Remove
+- <code>MappingRow.tsx</code> + <code>.module.css</code> — labels lead, ids subtle
+- <code>MappingsPage.tsx</code> — pass remove into the drawer
+- <code>components/Drawer.tsx</code> — <code>lead</code> becomes optional</p>
+<p><strong>Tests</strong>
+- <code>ComparePage.test.tsx</code>, <code>MappingsPage.test.tsx</code>, <code>comparisonPresentation.test.ts</code>, <code>test/apiStub.ts</code> (add a third stub concept so Related has something to assert), <code>RelatedConcepts.test.tsx</code> <strong>new</strong></p>
+<p><strong>Backend: nothing.</strong> No model, engine, API, or seed change.</p>
+<h2>Five things that are bigger than they sound</h2>
+<p><strong>1. Items 1–5 are one restructure, not five tweaks.</strong> Renaming the section, dropping the old heading, killing the proof block, and putting Inspect on rows collectively merge <code>MappingEvidence</code> and <code>ImplicationTable</code> into a single section. That deletes a component, its CSS, and <code>evidence()</code> from the presentation layer. Net simplification — but it rewrites the bottom half of Compare rather than editing it.</p>
+<p><strong>2. Leading with labels changes how the Mappings page looks.</strong> <code>MappingRow</code>'s mono <code>leftFactId ↕ rightFactId</code> block is currently that page's visual anchor. Inverting prominence so labels lead is the change you asked for, but it's close to the "general styling" line you drew. Same components and classes, different emphasis — it will look noticeably different.</p>
+<p><strong>3. Per-row Inspect needs a fourth column.</strong> <code>ImplicationTable</code> is a 3-column grid (<code>1.5fr .7fr .7fr</code>). An action column changes those proportions. Two lines of CSS, but it does alter that table's look.</p>
+<p><strong>4. Related concepts will be empty on all three suggested pairs</strong> — the graph is three disjoint pairs, so excluding the current pair leaves nothing. It <em>is</em> populated for cross-cluster pairs: <strong>Returnable ↔ Delivered</strong> yields "Returnable ↔ Refundable" and "Delivered ↔ Shipped". So it's demonstrable, just not from the default view or any suggested chip. Worth knowing before you record.</p>
+<p><strong>5. <code>Drawer.lead</code> becomes optional</strong>, which touches the shared component <code>AddMappingDrawer</code> also uses. Trivial, but it's a shared signature change rather than a local edit.</p>
+<h2>Two interpretations to confirm</h2>
+<ul>
+<li><strong>Partial-overlap copy:</strong> I'll make the takeaway <em>title</em> "They share some meaning, but the overall relationship is not established." and <strong>drop its body paragraph</strong> entirely, since it duplicated "unknown, not different". The count survives in the "Derived from N confirmed mappings" link. Tell me if you wanted the body kept minus the duplicate sentence instead.</li>
+<li><strong>Drawer heading:</strong> with the "Why is this shared?" provenance copy gone, I'll use eyebrow <code>MAPPING EVIDENCE</code> and title <code>Confirmed mapping</code>, leaving the rationale to do the explaining.</li>
+</ul>
+<p><strong>Estimate: ~2–2.5 h</strong> including tests, lint, and a live check.</p>
+<p>Say go and I'll implement.</p></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-005.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<span class="current">6</span>
+<a href="page-007.html">7</a>
+<a href="page-007.html">Next &rarr;</a>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

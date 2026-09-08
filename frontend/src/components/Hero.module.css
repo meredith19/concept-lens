@@ -14,3 +14,9 @@
   max-width: 820px;
   line-height: 1.5;
 }
+
+.meta {
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 10px;
+}

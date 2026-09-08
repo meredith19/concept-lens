@@ -2,6 +2,7 @@ package com.conceptlens.api;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.util.HashMap;
 import java.util.Map;
 
 import org.junit.jupiter.api.Test;
@@ -25,7 +26,7 @@ class MappingControllerTest extends ApiTestSupport {
         Response response = get("/api/mappings");
 
         assertThat(response.status()).isEqualTo(200);
-        assertThat(response.body()).hasSize(5);
+        assertThat(response.body()).hasSize(6);
         assertThat(response.body().get(0).get("id").asString()).isEqualTo("rel_018");
         assertThat(response.body().get(0).get("type").asString()).isEqualTo("SAME_MEANING");
     }
@@ -58,19 +59,21 @@ class MappingControllerTest extends ApiTestSupport {
                         "payments.refundable.return_approved"));
 
         assertThat(response.status()).isEqualTo(201);
-        // The seed data ends at rel_033, so the next mapping continues the sequence.
-        assertThat(response.body().get("id").asString()).isEqualTo("rel_034");
+        // The seed data ends at rel_034, so the next mapping continues the sequence.
+        assertThat(response.body().get("id").asString()).isEqualTo("rel_035");
+        assertThat(response.body().get("rationale").asString())
+                .isEqualTo("Both facts describe the same thing.");
         assertThat(response.raw().headers().firstValue("Location"))
-                .contains("/api/mappings/rel_034");
+                .contains("/api/mappings/rel_035");
 
-        assertThat(get("/api/mappings").body()).hasSize(6);
-        assertThat(get("/api/mappings/rel_034").status()).isEqualTo(200);
+        assertThat(get("/api/mappings").body()).hasSize(7);
+        assertThat(get("/api/mappings/rel_035").status()).isEqualTo(200);
     }
 
     @Test
     @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void ignoresAnyIdTheCallerTriesToSupply() {
-        Map<String, Object> withId = new java.util.HashMap<>(
+        Map<String, Object> withId = new HashMap<>(
                 draft("returns.returnable.within_return_window",
                         "payments.refundable.return_approved"));
         withId.put("id", "rel_999");
@@ -78,7 +81,7 @@ class MappingControllerTest extends ApiTestSupport {
         Response response = post("/api/mappings", withId);
 
         assertThat(response.status()).isEqualTo(201);
-        assertThat(response.body().get("id").asString()).isEqualTo("rel_034");
+        assertThat(response.body().get("id").asString()).isEqualTo("rel_035");
         assertThat(get("/api/mappings/rel_999").status()).isEqualTo(404);
     }
 
@@ -88,7 +91,7 @@ class MappingControllerTest extends ApiTestSupport {
         assertThat(delete("/api/mappings/rel_018").status()).isEqualTo(204);
 
         assertThat(get("/api/mappings/rel_018").status()).isEqualTo(404);
-        assertThat(get("/api/mappings").body()).hasSize(4);
+        assertThat(get("/api/mappings").body()).hasSize(5);
     }
 
     @Test
@@ -109,7 +112,7 @@ class MappingControllerTest extends ApiTestSupport {
         assertThat(response.status()).isEqualTo(400);
         assertThat(response.body().get("code").asString()).isEqualTo("INVALID_MAPPING");
         assertThat(response.body().get("message").asString()).contains("no_such_fact");
-        assertThat(get("/api/mappings").body()).hasSize(5);
+        assertThat(get("/api/mappings").body()).hasSize(6);
     }
 
     @Test
@@ -140,5 +143,37 @@ class MappingControllerTest extends ApiTestSupport {
 
         assertThat(response.status()).isEqualTo(400);
         assertThat(response.body().get("code").asString()).isEqualTo("MALFORMED_REQUEST");
+    }
+
+    @Test
+    void rejectsABlankRationale() {
+        Map<String, Object> blank = new HashMap<>(
+                draft(
+                        "returns.returnable.within_return_window",
+                        "payments.refundable.return_approved"));
+        blank.put("rationale", "  ");
+
+        Response response = post("/api/mappings", blank);
+
+        assertThat(response.status()).isEqualTo(400);
+        assertThat(response.body().get("code").asString()).isEqualTo("INVALID_MAPPING");
+        assertThat(response.body().get("message").asString()).contains("Rationale must not be blank");
+        assertThat(get("/api/mappings").body()).hasSize(6);
+    }
+
+    @Test
+    void rejectsAMissingRationale() {
+        Map<String, Object> missing = new HashMap<>(
+                draft(
+                        "returns.returnable.within_return_window",
+                        "payments.refundable.return_approved"));
+        missing.remove("rationale");
+
+        Response response = post("/api/mappings", missing);
+
+        assertThat(response.status()).isEqualTo(400);
+        assertThat(response.body().get("code").asString()).isEqualTo("INVALID_MAPPING");
+        assertThat(response.body().get("message").asString()).contains("Rationale must not be blank");
+        assertThat(get("/api/mappings").body()).hasSize(6);
     }
 }

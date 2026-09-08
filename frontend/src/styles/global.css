@@ -1,7 +1,7 @@
 @import './tokens.css';
 
 /*
- * Primitives shared across pages, ported from the UX mock's stylesheet.
+ * Primitives shared across pages.
  * Anything used by a single component lives in that component's CSS module instead.
  */
 

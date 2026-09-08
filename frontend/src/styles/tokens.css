@@ -1,6 +1,5 @@
 /*
- * Design tokens taken from the UX mock (ui-mock/concept_lens_mock_ui.html).
- * The mock remains the source of truth for the UX; keep these in sync with it.
+ * Shared color tokens for the UI.
  */
 :root {
   --bg: #f6f6f2;

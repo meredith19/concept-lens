@@ -13,6 +13,7 @@ import com.conceptlens.model.Concept;
 import com.conceptlens.model.SemanticMapping;
 import com.conceptlens.repository.InMemoryConceptRepository;
 import com.conceptlens.repository.MappingRepository;
+import com.conceptlens.service.MappingService;
 
 import jakarta.annotation.PostConstruct;
 import tools.jackson.core.type.TypeReference;
@@ -32,6 +33,10 @@ import tools.jackson.databind.ObjectMapper;
  * part of the read-only {@link com.conceptlens.repository.ConceptRepository} contract. That
  * exception is scoped to bootstrapping: runtime code such as a concept service depends on the
  * interface instead.
+ *
+ * <p>Startup writes each seed mapping through {@link MappingRepository#create} so a duplicate id
+ * in the seed file fails the boot. Reset uses {@link MappingService#replaceAll}, which swaps the
+ * whole set and would hide that check.
  */
 @Component
 public class SeedDataLoader {
@@ -43,14 +48,18 @@ public class SeedDataLoader {
 
     private final InMemoryConceptRepository conceptRepository;
     private final MappingRepository mappingRepository;
+    private final MappingService mappingService;
     private final ObjectMapper objectMapper;
+    private List<SemanticMapping> seedMappings = List.of();
 
     public SeedDataLoader(
             InMemoryConceptRepository conceptRepository,
             MappingRepository mappingRepository,
+            MappingService mappingService,
             ObjectMapper objectMapper) {
         this.conceptRepository = conceptRepository;
         this.mappingRepository = mappingRepository;
+        this.mappingService = mappingService;
         this.objectMapper = objectMapper;
     }
 
@@ -59,11 +68,23 @@ public class SeedDataLoader {
         List<Concept> concepts = read(CONCEPTS_RESOURCE, new TypeReference<List<Concept>>() {});
         conceptRepository.initialize(concepts);
 
-        List<SemanticMapping> mappings =
-                read(MAPPINGS_RESOURCE, new TypeReference<List<SemanticMapping>>() {});
-        mappings.forEach(mappingRepository::create);
+        seedMappings = List.copyOf(
+                read(MAPPINGS_RESOURCE, new TypeReference<List<SemanticMapping>>() {}));
+        seedMappings.forEach(mappingRepository::create);
 
-        log.info("Loaded {} seed concepts and {} seed mappings", concepts.size(), mappings.size());
+        log.info("Loaded {} seed concepts and {} seed mappings", concepts.size(), seedMappings.size());
+    }
+
+    /**
+     * Restores the mappings to their seeded state, discarding anything added or removed at
+     * runtime. Concepts are untouched — they are read-only and cannot have drifted.
+     *
+     * <p>This exists so a shared demo instance stays explorable: one visitor removing a mapping
+     * should not leave the next visitor with a different model.
+     */
+    public void resetMappings() {
+        mappingService.replaceAll(seedMappings);
+        log.info("Reset mappings to the seeded set of {}", seedMappings.size());
     }
 
     private <T> List<T> read(String resource, TypeReference<List<T>> type) {

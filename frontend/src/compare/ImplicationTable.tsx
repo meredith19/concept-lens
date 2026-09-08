@@ -7,24 +7,21 @@ function FactCell({ fact }: { fact: Fact | null }) {
     return <div>—</div>
   }
 
-  return (
-    <div>
-      <span className={styles.factName}>{fact.label}</span>
-      <span className={styles.factNative}>{fact.id}</span>
-    </div>
-  )
+  return <div className={styles.factName}>{fact.label}</div>
 }
 
 interface ImplicationTableProps {
   leftConcept: Concept
   rightConcept: Concept
   rows: ImplicationRow[]
+  onInspect: (match: NonNullable<ImplicationRow['match']>) => void
 }
 
 export default function ImplicationTable({
   leftConcept,
   rightConcept,
   rows,
+  onInspect,
 }: ImplicationTableProps) {
   return (
     <div className={styles.table}>
@@ -34,21 +31,39 @@ export default function ImplicationTable({
         <div>{rightConcept.name} means…</div>
       </div>
 
-      {rows.map((row, index) => (
-        <div key={index} className={styles.row}>
-          <FactCell fact={row.left} />
-          <div className={styles.center}>
-            <span
-              className={
-                row.relationship === NO_MATCH ? `${styles.pill} ${styles.unknown}` : styles.pill
-              }
-            >
-              {row.relationship}
-            </span>
+      {rows.map((row) => {
+        const match = row.match
+        return (
+          <div
+            key={match?.mapping.id ?? row.left?.id ?? row.right?.id}
+            className={styles.row}
+          >
+            <FactCell fact={row.left} />
+            <div className={styles.center}>
+              <span
+                className={
+                  row.relationship === NO_MATCH ? `${styles.pill} ${styles.unknown}` : styles.pill
+                }
+              >
+                {row.relationship}
+              </span>
+              {match && (
+                <div className={styles.rowMeta}>
+                  Confirmed ·{' '}
+                  <button
+                    className={styles.inspect}
+                    onClick={() => onInspect(match)}
+                    aria-label={`Inspect mapping ${match.mapping.id}`}
+                  >
+                    Inspect
+                  </button>
+                </div>
+              )}
+            </div>
+            <FactCell fact={row.right} />
           </div>
-          <FactCell fact={row.right} />
-        </div>
-      ))}
+        )
+      })}
     </div>
   )
 }

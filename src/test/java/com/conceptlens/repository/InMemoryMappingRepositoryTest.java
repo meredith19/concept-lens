@@ -3,6 +3,8 @@ package com.conceptlens.repository;
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatIllegalArgumentException;
 
+import java.util.List;
+
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 
@@ -79,6 +81,19 @@ class InMemoryMappingRepositoryTest {
     @Test
     void deleteReportsWhenNothingMatched() {
         assertThat(repository.deleteById("rel_999")).isFalse();
+    }
+
+    @Test
+    void replaceAllSwapsTheHeldSetInOneStep() {
+        repository.create(mapping("rel_100"));
+        repository.create(mapping("rel_101"));
+
+        repository.replaceAll(List.of(mapping("rel_200"), mapping("rel_201")));
+
+        assertThat(repository.findAll())
+                .extracting(SemanticMapping::id)
+                .containsExactly("rel_200", "rel_201");
+        assertThat(repository.findById("rel_100")).isEmpty();
     }
 
     @Test

@@ -1,3 +1,4 @@
+import { mappingStatusLabel, mappingTypeLabel } from '../api/labels.ts'
 import type { Fact, SemanticMapping } from '../api/types.ts'
 import styles from './MappingRow.module.css'
 
@@ -21,24 +22,24 @@ export default function MappingRow({
     <div className={styles.row}>
       <div>
         <div className={styles.nodes}>
-          {mapping.leftFactId}
+          {leftFact?.label ?? mapping.leftFactId}
           <br />↕<br />
-          {mapping.rightFactId}
+          {rightFact?.label ?? mapping.rightFactId}
         </div>
-        <div className={styles.relation}>{mapping.type.replace('_', ' ')}</div>
-        {leftFact && rightFact && (
-          <div className={styles.labels}>
-            {leftFact.label} ↔ {rightFact.label}
-          </div>
-        )}
+        <div className={styles.relation}>{mappingTypeLabel(mapping.type)}</div>
+        <div className={styles.factIds}>
+          {mapping.leftFactId} ↔ {mapping.rightFactId}
+        </div>
         <div className="tags">
-          <span className="tag">{mapping.status === 'CONFIRMED' ? 'Confirmed' : mapping.status}</span>
+          <span className="tag">{mappingStatusLabel(mapping.status)}</span>
           <span className="tag">{mapping.reviewedBy}</span>
           <span className="tag">{mapping.id}</span>
         </div>
       </div>
       <div className={styles.actions}>
-        <button onClick={onView}>View</button>
+        <button type="button" onClick={onView}>
+          View
+        </button>
         <button type="button" onClick={onRemove}>
           Remove
         </button>

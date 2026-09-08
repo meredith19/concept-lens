@@ -1,0 +1,334 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1"/>
+<title>Cursor session excerpt - Related Concepts</title>
+<style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+<div class="container">
+<div class="header-row"><h1>Cursor session excerpt &mdash; Related Concepts</h1></div>
+<div class="pagination"><a href="index.html" class="index-link">Claude Code transcript index</a></div>
+
+<div class="message assistant" style="border-left-color:#1976d2">
+<div class="message-content">
+<p><strong>Excerpt: the Related Concepts discussion.</strong> These prompts come from a
+second AI session run in Cursor, in parallel with the Claude Code session paginated in
+<a href="index.html">index.html</a>.</p>
+</div></div>
+
+<div class="message user" id="turn-8"><div class="message-header"><span class="role-label">User</span><a href="#turn-8" class="timestamp-link"><time>Sunday, Sep 6, 2026, 1:19 PM (UTC-7)</time></a></div><div class="message-content"><div class="user-content"><p>Analyze the existing Concept Lens seed data and find the smallest semantically correct way to connect two of the currently disconnected concept pairs so Related Concepts can be demonstrated.</p>
+<p>Ideally this should require only one new fact on an existing concept + one SAME_MEANING mapping to an existing fact. The new fact must genuinely belong to that concept — don&#x27;t add a fact just to make the graph connected.</p>
+<p>Give me 2-3 options. For each tell me:</p>
+<p>exact new fact which existing fact it maps to why SAME_MEANING is semantically valid what Related Concepts would show for Returnable ↔ Refundable, Shipped ↔ Delivered, and BuyerCountry ↔ BillingCountry whether it changes any of the existing three demo relationships</p>
+<p>Recommend the cleanest option.</p>
+<p>Don&#x27;t modify any files yet.</p></div></div></div>
+<div class="message tool-reply"><div class="message-header"><span class="role-label">Tool activity</span></div><div class="message-content"><p>5 tool calls elided — Read ×4, Grep ×1</p></div></div>
+<div class="message assistant"><div class="message-header"><span class="role-label">Assistant</span></div><div class="message-content"><p>I’ll read the seed concepts, mappings, and how comparison is derived so any new fact and mapping stay semantically honest.</p></div></div>
+<div class="message assistant"><div class="message-header"><span class="role-label">Assistant</span></div><div class="message-content"><p>The seed is three isolated clusters. The only honest <code>SAME_MEANING</code> bridge is a <strong>physical logistics event</strong> that return/refund eligibility can actually include. Country cannot join without stuffing country-shaped meaning onto a concept that is not about country, or adding a fact on BuyerCountry/BillingCountry and breaking complete equivalence.</p>
+<p>Adding a fact on <strong>Shipped</strong>, <strong>BuyerCountry</strong>, or <strong>BillingCountry</strong> would change one of the three derived relationships. Adding on <strong>Returnable</strong>, <strong>Refundable</strong>, or <strong>Delivered</strong> would not.</p>
+<p>There is no valid “new fact on Delivered mapped to an existing Returnable/Refundable fact”: none of those existing facts mean “left the FC” or “arrived.” So the new fact has to live on Returns or Payments and map onto an existing delivery/ship fact.</p>
+<p>---</p>
+<h5>Option 1 (recommended) — Returnable includes receipt</h5>
+<p><strong>New fact</strong> on <code>returns.returnable</code>:</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;returns.returnable.item_received&quot;,
+  &quot;label&quot;: &quot;Item has been received&quot;,
+  &quot;description&quot;: &quot;The item has arrived at the destination and is in the customer&#x27;s possession.&quot;
+}</code></pre>
+<p><strong>Maps to:</strong> <code>delivery.delivered.reached_destination</code> (“Reached the destination” — <em>The package arrived at the destination address.</em>)</p>
+<p><strong>Why <code>SAME_MEANING</code> is valid:</strong> Both statements are the same event: the package arrived at the destination. Returns cares because a return is initiated against an item the customer actually has; Delivery cares because that event ends the delivery leg. Same pattern as <code>rel_024</code> (Fulfillment vs Delivery observing dispatch).</p>
+<p><strong>Why it belongs on Returnable:</strong> Returnable is <em>whether an item can currently be returned</em>. Path, window, and not-final-sale are incomplete if the item never arrived (that is usually a cancel, not a return). Receipt is a real eligibility conjunct, not a graph hack.</p>
+<p><strong>Related comparisons</strong> (direct neighbors only):</p>
+<table><thead><tr><th>Current pair</th><th>Related chips</th></tr></thead><tbody><tr><td>Returnable ↔ Refundable</td><td><strong>Returnable ↔ Delivered</strong></td></tr><tr><td>Shipped ↔ Delivered</td><td><strong>Delivered ↔ Returnable</strong></td></tr><tr><td>BuyerCountry ↔ BillingCountry</td><td>none (correct)</td></tr></tbody></table>
+<p><strong>Existing three relationships:</strong> Unchanged.</p>
+<table><thead><tr><th>Pair</th><th>Still</th></tr></thead><tbody><tr><td>Returnable ↔ Refundable</td><td><code>NOT_ESTABLISHED</code> (one extra unmatched Returnable fact)</td></tr><tr><td>Shipped ↔ Delivered</td><td><code>RIGHT_INCLUDES_LEFT</code> (<code>reached_destination</code> stays unmatched vs Shipped; the new mapping is to Returnable)</td></tr><tr><td>BuyerCountry ↔ BillingCountry</td><td><code>SAME_MEANING</code></td></tr></tbody></table>
+<p>Returnable vs Delivered would become a <em>new</em> partial pair (<code>NOT_ESTABLISHED</code>, one shared fact). That is consistent, not one of the three demos.</p>
+<p>---</p>
+<h5>Option 2 — Returnable includes dispatch</h5>
+<p><strong>New fact</strong> on <code>returns.returnable</code>:</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;returns.returnable.item_dispatched&quot;,
+  &quot;label&quot;: &quot;Item has left fulfillment&quot;,
+  &quot;description&quot;: &quot;The item has physically left the fulfillment center that dispatched it.&quot;
+}</code></pre>
+<p><strong>Maps to:</strong> <code>fulfillment.shipped.left_fulfillment_center</code> (same event as <code>delivery.delivered.left_fulfillment_center</code> via <code>rel_024</code>; map to Shipped’s fact so the edge is explicit).</p>
+<p><strong>Why <code>SAME_MEANING</code> is valid:</strong> Same physical dispatch already equated across Fulfillment and Delivery.</p>
+<p><strong>Why it is weaker:</strong> Unshipped orders are usually cancelled, not returned, so “has shipped” can be a precondition. It is still not what Returnable <em>means</em> as strongly as receipt. An item in transit is often not returnable yet; Option 1 matches the moment return typically becomes possible.</p>
+<p><strong>Related comparisons:</strong></p>
+<table><thead><tr><th>Current pair</th><th>Related chips</th></tr></thead><tbody><tr><td>Returnable ↔ Refundable</td><td><strong>Returnable ↔ Shipped</strong></td></tr><tr><td>Shipped ↔ Delivered</td><td><strong>Shipped ↔ Returnable</strong></td></tr><tr><td>BuyerCountry ↔ BillingCountry</td><td>none</td></tr></tbody></table>
+<p><strong>Existing three relationships:</strong> Unchanged (<code>NOT_ESTABLISHED</code> / containment / <code>SAME_MEANING</code>).</p>
+<p>Side effect: Returnable vs Shipped would derive <strong>Returnable includes Shipped</strong> (<code>LEFT_INCLUDES_RIGHT</code>), because Shipped’s only fact would be a subset of Returnable. That overclaims: return eligibility is not a broader logistics concept than Shipped.</p>
+<p>---</p>
+<h5>Option 3 — Refundable includes receipt</h5>
+<p><strong>New fact</strong> on <code>payments.refundable</code>:</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;payments.refundable.item_received&quot;,
+  &quot;label&quot;: &quot;Order has been received&quot;,
+  &quot;description&quot;: &quot;The order has arrived at the destination address.&quot;
+}</code></pre>
+<p><strong>Maps to:</strong> <code>delivery.delivered.reached_destination</code></p>
+<p><strong>Why <code>SAME_MEANING</code> is valid:</strong> Same arrival event as Option 1.</p>
+<p><strong>Why it is weaker:</strong> Refundable is <em>whether money can currently be refunded</em>, already composed of refund path, return approved, and payment captured. You can refund a cancelled undelivered order; you can fail to refund a delivered one. Arrival is not constitutive of refundability the way it is of returnability. Refundable already carries a Returns-shaped fact (<code>return_approved</code>); another cross-domain observation makes it a junk drawer.</p>
+<p><strong>Related comparisons:</strong></p>
+<table><thead><tr><th>Current pair</th><th>Related chips</th></tr></thead><tbody><tr><td>Returnable ↔ Refundable</td><td><strong>Refundable ↔ Delivered</strong></td></tr><tr><td>Shipped ↔ Delivered</td><td><strong>Delivered ↔ Refundable</strong></td></tr><tr><td>BuyerCountry ↔ BillingCountry</td><td>none</td></tr></tbody></table>
+<p><strong>Existing three relationships:</strong> Unchanged.</p>
+<p>---</p>
+<h5>What not to do</h5>
+<ul><li><strong>New fact on Shipped</strong> mapped outward: Shipped would no longer be fully matched vs Delivered → containment becomes <code>NOT_ESTABLISHED</code>.</li><li><strong>New fact on BuyerCountry or BillingCountry:</strong> complete equivalence becomes containment.</li><li><strong>Map anything to country facts:</strong> payment-instrument country, ISO normalization, and null-defaulting are not what Returnable, Refundable, Shipped, or Delivered mean.</li><li><strong>Map <code>within_return_window</code> to <code>reached_destination</code>:</strong> window vs event, not <code>SAME_MEANING</code>.</li><li><strong>Map <code>return_approved</code> across clusters:</strong> that stays inside Returns/Payments, and approval ≠ delivery.</li></ul>
+<p>---</p>
+<h5>Recommendation</h5>
+<p><strong>Option 1.</strong> Smallest honest seed change: one Returns-owned receipt fact, one mapping to the existing Delivered fact that already makes Delivered broader than Shipped. All three demo relationship <em>types</em> stay as in <code>demo/README.md</code>. Related Concepts lights up on the two logistics-adjacent suggested pairs and stays empty on country.</p>
+<p><code>ComparisonEngineTest</code> (and any test that lists Returnable’s unmatched facts) would need to include <code>returns.returnable.item_received</code>; the derived enum for that pair would not change.</p>
+<p>Suggested mapping:</p>
+<pre><code class="language-json">{
+  &quot;id&quot;: &quot;rel_034&quot;,
+  &quot;leftFactId&quot;: &quot;returns.returnable.item_received&quot;,
+  &quot;rightFactId&quot;: &quot;delivery.delivered.reached_destination&quot;,
+  &quot;type&quot;: &quot;SAME_MEANING&quot;,
+  &quot;status&quot;: &quot;CONFIRMED&quot;,
+  &quot;rationale&quot;: &quot;Both facts record that the package has arrived at the destination. Returns observes it as the item being in the customer&#x27;s possession; Delivery observes it as the end of the delivery leg.&quot;,
+  &quot;reviewedBy&quot;: &quot;Domain reviewer&quot;
+}</code></pre></div></div>
+<div class="message user" id="turn-9"><div class="message-header"><span class="role-label">User</span><a href="#turn-9" class="timestamp-link"><time>Sunday, Sep 6, 2026, 1:35 PM (UTC-7)</time></a></div><div class="message-content"><div class="user-content"><p>option 1 works, but I don&#x27;t think item_received / customer possession is exactly SAME_MEANING with reached_destination since a package can reach a porch/locker/mailroom without the customer actually receiving it.</p>
+<p>change the Returns-owned fact to something like:</p>
+<p>returns.returnable.item_delivered label: Item has been delivered description: The item&#x27;s delivery has reached its destination.</p>
+<p>map that to delivery.delivered.reached_destination.</p>
+<p>rationale can be: Both facts represent that delivery of the item has reached its destination. Returns uses this state as part of determining return eligibility; Delivery uses it to represent completion of the delivery leg.</p>
+<p>before changing anything, confirm this still leaves the 3 existing demo relationship enums unchanged and tell me exactly what Related Concepts would show for each suggested pair. and doesnt break tests</p></div></div></div>
+<div class="message tool-reply"><div class="message-header"><span class="role-label">Tool activity</span></div><div class="message-content"><p>3 tool calls elided — Read ×2, Grep ×1</p></div></div>
+<div class="message assistant"><div class="message-header"><span class="role-label">Assistant</span></div><div class="message-content"><p>Yes on the three <strong>suggested-pair enums</strong>. No on “doesn’t break tests” unless those tests are updated — several of them pin fact counts and assume Returnable vs Delivered has <strong>zero</strong> mappings.</p>
+<h5>The three demo relationship enums stay the same</h5>
+<p>Derivation only looks at mappings <strong>between the two concepts being compared</strong>.</p>
+<table><thead><tr><th>Pair</th><th>Why the enum is unchanged</th></tr></thead><tbody><tr><td>Returnable ↔ Refundable</td><td>Still one match (<code>rel_018</code>). New fact is unmatched on the left. Both sides still have unmatched facts → <strong><code>NOT_ESTABLISHED</code></strong>.</td></tr><tr><td>Shipped ↔ Delivered</td><td>Still one match (<code>rel_024</code>). <code>reached_destination</code> is still unmatched vs Shipped (the new mapping is to Returnable, not Shipped). Shipped still fully matched → <strong><code>RIGHT_INCLUDES_LEFT</code></strong>. Reverse still <strong><code>LEFT_INCLUDES_RIGHT</code></strong>.</td></tr><tr><td>BuyerCountry ↔ BillingCountry</td><td>Untouched → <strong><code>SAME_MEANING</code></strong>.</td></tr></tbody></table>
+<p>So the table in <code>demo/README.md</code> stays true on the <strong>relationship</strong> column. Returnable’s fact count becomes 4, not 3; that is detail, not a new enum.</p>
+<p>Returnable vs Delivered is <strong>not</strong> one of those three demos. Today it is <code>NOT_ESTABLISHED</code> with no matches. After this seed it is still <code>NOT_ESTABLISHED</code>, but with <strong>one</strong> confirmed match (<code>item_delivered</code> ↔ <code>reached_destination</code>). Same enum, different evidence.</p>
+<p>---</p>
+<h5>Related Concepts (direct neighbors, proposed UI)</h5>
+<p>Suggested chips stay Returnable↔Refundable, Shipped↔Delivered, BuyerCountry↔BillingCountry.</p>
+<table><thead><tr><th>Current pair</th><th>Chips</th></tr></thead><tbody><tr><td>Returnable ↔ Refundable</td><td><strong>Returnable ↔ Delivered</strong></td></tr><tr><td>Shipped ↔ Delivered</td><td><strong>Delivered ↔ Returnable</strong></td></tr><tr><td>BuyerCountry ↔ BillingCountry</td><td>none (empty copy)</td></tr></tbody></table>
+<p>Those two chips are the same undirected pair; label order follows the anchor (left concept of the current pair first, then the neighbor). Country stays empty, which is correct.</p>
+<p>Refundable does not grow a new neighbor. Shipped does not get a direct edge to Returnable.</p>
+<p>---</p>
+<h5>Tests: the enums they assert for those three pairs still pass; other assertions do not</h5>
+<p><strong>Would still pass</strong> (same enums / same matches among the three pairs):</p>
+<ul><li><code>shippedIsFullyContainedInDelivered</code> / reverse — still containment, unmatched right still only <code>reached_destination</code></li><li><code>buyerCountryAndBillingCountryMatchCompletely</code></li><li><code>returnableToRefundable…</code> <strong>relationship</strong> and <strong>matched</strong> <code>rel_018</code> — but not the unmatched-left list (see below)</li><li>Frontend Vitest against <code>apiStub</code> — stub is not seed JSON</li></ul>
+<p><strong>Would fail</strong> if seed is added without editing tests:</p>
+<table><thead><tr><th>Test</th><th>Why</th></tr></thead><tbody><tr><td><code>ComparisonEngineTest.returnableToRefundableLeavesFactsUnmatchedOnBothSides</code></td><td><code>unmatchedLeftFacts</code> is <code>containsExactly</code> window + not_final_sale; <code>item_delivered</code> would appear too</td></tr><tr><td><code>ComparisonEngineTest.conceptsWithNoMappingsBetweenThemEstablishNothing</code></td><td>Compares Returnable vs Delivered; expects <strong>no</strong> matches and left size <strong>3</strong></td></tr><tr><td><code>ComparisonEngineTest.similarlyWordedFactsAreNotTreatedAsEvidence</code></td><td>Same pair; expects <code>matchedFacts</code> empty</td></tr><tr><td><code>ComparisonControllerTest</code> Returnable/Refundable</td><td><code>unmatchedLeftFacts</code> size <strong>2</strong> → <strong>3</strong></td></tr><tr><td><code>ConceptControllerTest</code></td><td>Returnable <code>facts</code> size <strong>3</strong> → <strong>4</strong></td></tr><tr><td><code>SeedDataLoaderTest</code></td><td>Returnable facts size 3; mappings size <strong>5</strong> → <strong>6</strong></td></tr><tr><td><code>MappingControllerTest</code> / <code>DemoControllerTest</code></td><td>Seed mapping count <strong>5</strong> baked into <code>hasSize(5)</code> / add→6 / delete→4</td></tr></tbody></table>
+<p><code>DemoSeedDataTest</code> only checks shape and that mappings resolve; it would <strong>pass</strong>.</p>
+<p>So: <strong>do not ship the seed change alone.</strong> Update those Java tests (and the README “3 facts each” line) in the same change. Related Concepts tests are not in the repo yet, so they are not a breakage risk.</p>
+<p>The revised fact text (<code>item_delivered</code> / destination, not customer possession) does not change any of this mechanics — only the wording of the fact and rationale.</p></div></div>
+<div class="message user" id="turn-10"><div class="message-header"><span class="role-label">User</span><a href="#turn-10" class="timestamp-link"><time>Sunday, Sep 6, 2026, 1:37 PM (UTC-7)</time></a></div><div class="message-content"><div class="user-content"><p>go ahead with this seed change.</p>
+<p>use:</p>
+<p>returns.returnable.item_delivered label: Item has been delivered description: The item&#x27;s delivery has reached its destination.</p>
+<p>map it to delivery.delivered.reached_destination as confirmed SAME_MEANING.</p>
+<p>rationale: Both facts represent that delivery of the item has reached its destination. Returns uses this state as part of determining return eligibility; Delivery uses it to represent completion of the delivery leg.</p>
+<p>update only the backend tests/docs that break because of the new fact/mapping counts or unmatched-fact assumptions. keep the 3 headline demo enums unchanged.</p>
+<p>don&#x27;t touch frontend or Related Concepts yet.</p>
+<p>run the relevant backend tests and tell me the exact files changed + final counts.</p></div></div></div>
+<div class="message tool-reply"><div class="message-header"><span class="role-label">Tool activity</span></div><div class="message-content"><p>38 tool calls elided — StrReplace ×18, Read ×15, Grep ×2, Shell ×2, AwaitShell ×1</p></div></div>
+<div class="message assistant"><div class="message-header"><span class="role-label">Assistant</span></div><div class="message-content"><p>I&#x27;ll add the seed fact and mapping, then update only the backend tests and docs that pin counts or unmatched facts.</p></div></div>
+<div class="message assistant"><div class="message-header"><span class="role-label">Assistant</span></div><div class="message-content"><p>Seed mapping will be <code>rel_034</code>, so tests that assume the next runtime id is <code>rel_034</code> or that seed size is 5 need to move up by one.</p></div></div>
+<div class="message assistant"><div class="message-header"><span class="role-label">Assistant</span></div><div class="message-content"><p>Seed change is in. Relevant backend tests passed (<code>DemoSeedDataTest</code>, <code>SeedDataLoaderTest</code>, <code>ComparisonEngineTest</code>, <code>ComparisonControllerTest</code>, <code>ConceptControllerTest</code>, <code>MappingControllerTest</code>, <code>DemoControllerTest</code>). Startup log: <strong>Loaded 6 seed concepts and 6 seed mappings</strong>.</p>
+<h5>Seed</h5>
+<ul><li><strong>Returnable</strong> now has 4 facts. New: <code>returns.returnable.item_delivered</code> (“Item has been delivered”).</li><li>New mapping <strong><code>rel_034</code></strong>: that fact ↔ <code>delivery.delivered.reached_destination</code>, confirmed <code>SAME_MEANING</code>.</li></ul>
+<h5>Headline enums (unchanged)</h5>
+<table><thead><tr><th>Pair</th><th>Enum</th></tr></thead><tbody><tr><td>Returnable ↔ Refundable</td><td><code>NOT_ESTABLISHED</code> (1 match; unmatched left is now 3, including <code>item_delivered</code>)</td></tr><tr><td>Shipped ↔ Delivered</td><td><code>RIGHT_INCLUDES_LEFT</code></td></tr><tr><td>BuyerCountry ↔ BillingCountry</td><td><code>SAME_MEANING</code></td></tr></tbody></table>
+<p>Next runtime-assigned mapping id is <strong><code>rel_035</code></strong>.</p>
+<h5>Files changed</h5>
+<p><strong>Data / docs</strong></p>
+<ul><li><code>src/main/resources/demo/concepts.json</code></li><li><code>src/main/resources/demo/mappings.json</code></li><li><code>src/main/resources/demo/README.md</code> (Returnable shape: 4 vs 3 facts)</li></ul>
+<p><strong>Tests</strong></p>
+<ul><li><code>src/test/java/com/conceptlens/comparison/ComparisonEngineTest.java</code> — unmatched Returnable facts; “no mapping” pair is now Returnable vs <strong>Shipped</strong> (Delivered is no longer unmapped)</li><li><code>src/test/java/com/conceptlens/api/ComparisonControllerTest.java</code> — unmatched left size 3</li><li><code>src/test/java/com/conceptlens/api/ConceptControllerTest.java</code> — Returnable facts size 4</li><li><code>src/test/java/com/conceptlens/seed/SeedDataLoaderTest.java</code> — 6 mappings; Returnable 4 facts</li><li><code>src/test/java/com/conceptlens/api/MappingControllerTest.java</code> — seed 6; create → <code>rel_035</code> / size 7; delete → 5</li><li><code>src/test/java/com/conceptlens/api/DemoControllerTest.java</code> — reset size 6; added mapping <code>rel_035</code></li></ul>
+<p>Frontend and Related Concepts were not touched.</p>
+<h5>Final counts</h5>
+<table><thead><tr><th></th><th>Before</th><th>After</th></tr></thead><tbody><tr><td>Concepts</td><td>6</td><td><strong>6</strong></td></tr><tr><td>Seed mappings</td><td>5</td><td><strong>6</strong></td></tr><tr><td>Returnable facts</td><td>3</td><td><strong>4</strong></td></tr><tr><td>Total facts across concepts</td><td>15</td><td><strong>16</strong></td></tr></tbody></table></div></div>
+<div class="message user" id="turn-11"><div class="message-header"><span class="role-label">User</span><a href="#turn-11" class="timestamp-link"><time>Sunday, Sep 6, 2026, 1:42 PM (UTC-7)</time></a></div><div class="message-content"><div class="user-content"><p>now add the Related concepts section to Compare. keep this small and consistent with the existing UI.</p>
+<p>put it below How they relate.</p>
+<p>heading: Related concepts</p>
+<p>small description: Explore other concept comparisons connected by confirmed mappings.</p>
+<p>derive these from the existing concepts + confirmed mappings. don&#x27;t hardcode recommendations and don&#x27;t add a backend endpoint.</p>
+<p>for the current comparison, look at both selected concepts and find concepts connected to either one through a confirmed mapping. exclude the two concepts already being compared. show each result as an explicit comparison-pair chip, not a single concept, so it&#x27;s clear what will be compared.</p>
+<p>with the new seed data I expect:</p>
+<p>Returnable ↔ Refundable → Returnable ↔ Delivered Shipped ↔ Delivered → Delivered ↔ Returnable BuyerCountry ↔ BillingCountry → no related comparison</p>
+<p>clicking a related chip should update the Compare page to that pair exactly like selecting concepts normally does. don&#x27;t navigate to a new page.</p>
+<p>if there are no related concepts, either don&#x27;t render the section at all or show a very subtle empty state. I prefer not rendering the section since this is secondary discovery.</p>
+<p>visually reuse the suggested comparison chip treatment as much as possible. don&#x27;t create a new visual pattern.</p>
+<p>important: these are direct neighbors only. don&#x27;t do transitive graph traversal. e.g. don&#x27;t infer Refundable → Returnable → Delivered and recommend Refundable ↔ Delivered. only show a pair when one of the currently selected concepts has a direct confirmed mapping to the related concept.</p>
+<p>avoid duplicates and treat mappings as bidirectional for discovery.</p>
+<p>add focused frontend tests for:</p>
+<p>Returnable/Refundable shows Returnable ↔ Delivered Shipped/Delivered shows Delivered ↔ Returnable country pair doesn&#x27;t render Related concepts clicking the chip changes the selected comparison no duplicate chips if multiple fact mappings connect the same two concepts</p>
+<p>don&#x27;t change seed data, backend, semantic derivation, Venn, or the existing How they relate UI. run frontend tests/lint/build when done and tell me exactly what files changed.</p>
+<p>One subtle thing I like about this version: Related concepts is discovery, not another derived relationship type. You&#x27;re simply saying “there is a confirmed semantic connection worth exploring,” and then the normal Compare engine tells the user what the overall relationship actually is after they click it. That&#x27;s consistent with the product model.</p></div></div></div>
+<div class="message tool-reply"><div class="message-header"><span class="role-label">Tool activity</span></div><div class="message-content"><p>23 tool calls elided — StrReplace ×9, Read ×8, Write ×3, Shell ×2, Glob ×1</p></div></div>
+<div class="message assistant"><div class="message-header"><span class="role-label">Assistant</span></div><div class="message-content"><p>I’ll inspect the current Compare page and chip styles so Related concepts can sit under “How they relate” without changing derivation or the rest of the UI.</p></div></div>
+<div class="message assistant"><div class="message-header"><span class="role-label">Assistant</span></div><div class="message-content"><p>I&#x27;ll add a small derived-pairs helper and a chip section under “How they relate”, reusing the suggested-comparison styles.</p></div></div>
+<div class="message assistant"><div class="message-header"><span class="role-label">Assistant</span></div><div class="message-content"><p>Related concepts is on Compare, under <strong>How they relate</strong>. Frontend tests (44), lint, and build all passed.</p>
+<p>It is discovery only: chips come from confirmed mappings already loaded for the page. Clicking one sets the same pair state as the pickers. The comparison engine is unchanged.</p>
+<h5>Behavior</h5>
+<table><thead><tr><th>Current pair</th><th>Related chip</th></tr></thead><tbody><tr><td>Returnable ↔ Refundable</td><td><strong>Returnable ↔ Delivered</strong></td></tr><tr><td>Shipped ↔ Delivered</td><td><strong>Delivered ↔ Returnable</strong></td></tr><tr><td>BuyerCountry ↔ BillingCountry</td><td>section not rendered</td></tr></tbody></table>
+<p>Direct neighbors only, mappings treated as bidirectional, one chip per concept pair even if several facts map. Empty → no section. No new route.</p>
+<p>Chips reuse the suggested-comparison classes from <code>ConceptPicker.module.css</code>. Heading/description use the existing <code>section-title</code> / <code>section-sub</code>.</p>
+<h5>Files changed</h5>
+<p><strong>New</strong></p>
+<ul><li><code>frontend/src/compare/relatedComparisons.ts</code></li><li><code>frontend/src/compare/RelatedComparisons.tsx</code></li><li><code>frontend/src/compare/relatedComparisons.test.ts</code></li></ul>
+<p><strong>Updated</strong></p>
+<ul><li><code>frontend/src/compare/ComparePage.tsx</code> — <code>GET /api/mappings</code> + section after the implication table</li><li><code>frontend/src/compare/ComparePage.test.tsx</code> — the five cases you asked for</li></ul>
+<p>Seed, backend, Venn, and How they relate were not touched.</p></div></div>
+<div class="message user" id="turn-12"><div class="message-header"><span class="role-label">User</span><a href="#turn-12" class="timestamp-link"><time>Sunday, Sep 6, 2026, 1:49 PM (UTC-7)</time></a></div><div class="message-content"><div class="user-content"><p>I&#x27;m not seeing the related concepts section</p></div></div></div>
+<div class="message tool-reply"><div class="message-header"><span class="role-label">Tool activity</span></div><div class="message-content"><p>10 tool calls elided — Read ×4, GetDynamicTools ×2, Glob ×1, Grep ×1, CallDynamicTool ×1, Shell ×1</p></div></div>
+<div class="message assistant"><div class="message-header"><span class="role-label">Assistant</span></div><div class="message-content"><p>I’ll check the live Compare page and the mappings/concepts the UI is actually loading — the section only appears when a direct neighbor exists.</p></div></div>
+<div class="message user" id="turn-13"><div class="message-header"><span class="role-label">User</span><a href="#turn-13" class="timestamp-link"><time>Sunday, Sep 6, 2026, 1:55 PM (UTC-7)</time></a></div><div class="message-content"><div class="user-content"><p>I want related concepts to show up even when no related concept. which concept it should be showing up for iam snot seeing it. also related concept should have description Related concepts Other comparisons connected by confirmed semantic mappings. No other related comparisons in this demo data. dont make any changes</p></div></div></div>
+<div class="message assistant"><div class="message-header"><span class="role-label">Assistant</span></div><div class="message-content"><p>You are not seeing it because the current UI <strong>hides the whole section when there are no related pairs</strong>. That was the earlier choice. It is not a separate “related concepts” relationship type, and it does not appear in the Venn or takeaway.</p>
+<h5>When it should appear today</h5>
+<p>Only if <code>GET /api/mappings</code> includes <strong><code>rel_034</code></strong> (Returnable <code>item_delivered</code> ↔ Delivered <code>reached_destination</code>) <strong>and</strong> you are on a pair that has a <strong>direct</strong> neighbor besides the other selected concept. Then it sits <strong>below How they relate</strong> (the fact table), same card.</p>
+<table><thead><tr><th>Pair on screen</th><th>Should show now?</th><th>Chip</th></tr></thead><tbody><tr><td><strong>Returnable ↔ Refundable</strong> (default)</td><td>Yes</td><td><strong>Returnable ↔ Delivered</strong></td></tr><tr><td><strong>Shipped ↔ Delivered</strong></td><td>Yes</td><td><strong>Delivered ↔ Returnable</strong></td></tr><tr><td><strong>BuyerCountry ↔ BillingCountry</strong></td><td>No — section omitted</td><td>—</td></tr></tbody></table>
+<p>Refundable is not listed as its own related concept. The chip is always a <strong>pair</strong>. There is no Refundable ↔ Delivered chip (that would be transitive).</p>
+<p>If you are on Returnable ↔ Refundable and still see nothing, typical causes:</p>
+<ol><li>Backend was not restarted after the seed change — mappings still stop at <code>rel_033</code>, so the graph has no neighbor and the section stays hidden.</li><li>You have not scrolled past the Venn / How they relate table.</li><li>You are on the country suggested pair.</li></ol>
+<h5>What you want instead (not implemented)</h5>
+<p>Always render <strong>Related concepts</strong>, even when the list is empty:</p>
+<ul><li>Heading: <strong>Related concepts</strong></li><li>Description: <strong>Other comparisons connected by confirmed semantic mappings.</strong></li><li>Empty: <strong>No other related comparisons in this demo data.</strong></li></ul>
+<p>Then BuyerCountry ↔ BillingCountry would still show the heading and that empty line. Returnable ↔ Refundable and Shipped ↔ Delivered would still show the chips above.</p>
+<p>No files were changed.</p></div></div>
+</div>
+</body>
+</html>

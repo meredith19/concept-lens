@@ -1,29 +1,15 @@
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { createContext, useContext } from 'react'
 
-const VISIBLE_MS = 2600
-
-interface ToastState {
-  text: string
-  /** Bumped on every call so re-showing the same text restarts the timer. */
-  nonce: number
+interface ToastApi {
+  showToast: (text: string) => void
 }
 
+export const ToastContext = createContext<ToastApi | null>(null)
+
 export function useToast() {
-  const [toast, setToast] = useState<ToastState | null>(null)
-  const nonce = useRef(0)
-
-  const showToast = useCallback((text: string) => {
-    nonce.current += 1
-    setToast({ text, nonce: nonce.current })
-  }, [])
-
-  useEffect(() => {
-    if (!toast) {
-      return
-    }
-    const timer = setTimeout(() => setToast(null), VISIBLE_MS)
-    return () => clearTimeout(timer)
-  }, [toast])
-
-  return { message: toast?.text ?? null, showToast }
+  const ctx = useContext(ToastContext)
+  if (!ctx) {
+    throw new Error('useToast must be used within ToastProvider')
+  }
+  return ctx
 }

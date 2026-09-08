@@ -39,11 +39,21 @@ public class ComparisonEngine {
      * <p>The result is computed fresh from the mappings held at the moment of the call, so
      * adding or removing a mapping changes the next comparison.
      *
+     * <p>The match search is deliberately naive: every left fact is tested against every right
+     * fact, and each test scans the mappings currently held — O(left × right × mappings) per
+     * comparison, a few hundred operations against the demo catalog. Indexing mappings by fact
+     * id would remove the scan at the cost of an index to keep in step with runtime edits. That
+     * trade is not worth making until the catalog is large enough to notice.
+     *
      * @throws com.conceptlens.service.ConceptNotFoundException if either id is unknown
+     * @throws InvalidComparisonException if both ids name the same published concept
      */
     public ComparisonResult compare(String leftConceptId, String rightConceptId) {
         Concept left = conceptService.getConcept(leftConceptId);
         Concept right = conceptService.getConcept(rightConceptId);
+        if (left.id().equals(right.id())) {
+            throw new InvalidComparisonException(left.id());
+        }
 
         List<FactMatch> matchedFacts = new ArrayList<>();
         List<Fact> unmatchedLeftFacts = new ArrayList<>();

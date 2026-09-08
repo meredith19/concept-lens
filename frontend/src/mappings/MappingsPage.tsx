@@ -5,10 +5,9 @@ import type { Concept, Fact, MappingDraft, SemanticMapping } from '../api/types.
 import { useAsync } from '../api/useAsync.ts'
 import Hero from '../components/Hero.tsx'
 import StatusMessage from '../components/StatusMessage.tsx'
-import Toast from '../components/Toast.tsx'
 import { useToast } from '../components/useToast.ts'
 import AddMappingDrawer from './AddMappingDrawer.tsx'
-import MappingDetailDrawer from './MappingDetailDrawer.tsx'
+import MappingDetailDrawer, { REMOVE_MAPPING_PROMPT } from './MappingDetailDrawer.tsx'
 import MappingRow from './MappingRow.tsx'
 import styles from './MappingsPage.module.css'
 
@@ -54,7 +53,7 @@ export default function MappingsPage() {
   const [filter, setFilter] = useState('')
   const [inspected, setInspected] = useState<SemanticMapping>()
   const [adding, setAdding] = useState(false)
-  const { message, showToast } = useToast()
+  const { showToast } = useToast()
 
   const facts = indexFacts(concepts.data ?? [])
   const query = filter.trim().toLowerCase()
@@ -63,7 +62,7 @@ export default function MappingsPage() {
   )
 
   const remove = async (mapping: SemanticMapping) => {
-    if (!window.confirm('Remove this mapping? Comparisons will no longer use it.')) {
+    if (!window.confirm(REMOVE_MAPPING_PROMPT)) {
       return
     }
     try {
@@ -145,6 +144,11 @@ export default function MappingsPage() {
             }}
             leftConcept={inspectedMatch.leftConcept}
             rightConcept={inspectedMatch.rightConcept}
+            onRemove={() => {
+              const target = inspected
+              setInspected(undefined)
+              void remove(target)
+            }}
           />
         )}
 
@@ -156,8 +160,6 @@ export default function MappingsPage() {
           onSave={add}
         />
       )}
-
-      <Toast message={message} />
     </main>
   )
 }

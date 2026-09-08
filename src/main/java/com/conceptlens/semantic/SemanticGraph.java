@@ -54,14 +54,7 @@ public class SemanticGraph {
         return mappingRepository.findAll().stream()
                 .filter(mapping -> mapping.type() == MappingType.SAME_MEANING)
                 .filter(mapping -> mapping.status() == MappingStatus.CONFIRMED)
-                .filter(mapping -> relates(mapping, leftFactId, rightFactId))
+                .filter(mapping -> mapping.relates(leftFactId, rightFactId))
                 .findFirst();
-    }
-
-    /** True if this mapping joins the two facts, in either direction. */
-    private static boolean relates(SemanticMapping mapping, String oneFactId, String otherFactId) {
-        return (mapping.leftFactId().equals(oneFactId) && mapping.rightFactId().equals(otherFactId))
-                || (mapping.leftFactId().equals(otherFactId)
-                        && mapping.rightFactId().equals(oneFactId));
     }
 }

@@ -1,4 +1,4 @@
-import type { MappingDraft, SemanticMapping } from './types.ts'
+import type { ComparisonResult, Concept, MappingDraft, SemanticMapping } from './types.ts'
 
 /**
  * Thin wrapper over fetch for the Concept Lens API.
@@ -45,10 +45,10 @@ async function getJson<T>(path: string): Promise<T> {
 }
 
 export const api = {
-  concepts: () => getJson<import('./types.ts').Concept[]>('/concepts'),
+  concepts: () => getJson<Concept[]>('/concepts'),
 
   compare: (leftConceptId: string, rightConceptId: string) =>
-    getJson<import('./types.ts').ComparisonResult>(
+    getJson<ComparisonResult>(
       `/compare?left=${encodeURIComponent(leftConceptId)}&right=${encodeURIComponent(rightConceptId)}`,
     ),
 
@@ -66,5 +66,10 @@ export const api = {
 
   deleteMapping: async (mappingId: string): Promise<void> => {
     await request(`/mappings/${encodeURIComponent(mappingId)}`, { method: 'DELETE' })
+  },
+
+  /** Restores the seeded mappings, discarding anything added or removed at runtime. */
+  resetDemoData: async (): Promise<void> => {
+    await request('/demo/reset', { method: 'POST' })
   },
 }

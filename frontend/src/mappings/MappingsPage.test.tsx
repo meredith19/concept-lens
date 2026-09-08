@@ -2,6 +2,7 @@ import { render, screen, waitFor, within } from '@testing-library/react'
 import userEvent from '@testing-library/user-event'
 import { afterEach, describe, expect, it, vi } from 'vitest'
 
+import ToastProvider from '../components/ToastProvider.tsx'
 import { MAPPING, installApiStub } from '../test/apiStub.ts'
 import MappingsPage from './MappingsPage.tsx'
 
@@ -9,14 +10,35 @@ afterEach(() => {
   vi.unstubAllGlobals()
 })
 
+function renderPage() {
+  return render(
+    <ToastProvider>
+      <MappingsPage />
+    </ToastProvider>,
+  )
+}
+
 describe('MappingsPage', () => {
   it('lists the mappings the API returns', async () => {
     installApiStub()
-    render(<MappingsPage />)
+    renderPage()
 
     expect(await screen.findByText(/returns\.returnable\.valid_return_path/)).toBeInTheDocument()
     expect(screen.getByText('rel_018')).toBeInTheDocument()
-    expect(screen.getByText('SAME MEANING')).toBeInTheDocument()
+    expect(screen.getByText('Same meaning')).toBeInTheDocument()
+  })
+
+  it('does not offer the other selected concept in each mapping picker', async () => {
+    const user = userEvent.setup()
+    installApiStub()
+    renderPage()
+
+    await user.click(await screen.findByRole('button', { name: '+ Add mapping' }))
+
+    const source = screen.getByLabelText('SOURCE CONCEPT')
+    const target = screen.getByLabelText('TARGET CONCEPT')
+    expect(within(source).queryByRole('option', { name: /Refundable/ })).not.toBeInTheDocument()
+    expect(within(target).queryByRole('option', { name: /Returnable/ })).not.toBeInTheDocument()
   })
 
   it('filters on fact labels resolved from the concepts', async () => {
@@ -27,7 +49,7 @@ describe('MappingsPage', () => {
         { ...MAPPING, id: 'rel_099', leftFactId: 'returns.returnable.within_return_window' },
       ],
     })
-    render(<MappingsPage />)
+    renderPage()
 
     await screen.findByText('rel_018')
     await user.type(screen.getByLabelText('Filter mappings'), 'return window')
@@ -40,7 +62,7 @@ describe('MappingsPage', () => {
     const user = userEvent.setup()
     vi.spyOn(window, 'confirm').mockReturnValue(true)
     const stub = installApiStub()
-    render(<MappingsPage />)
+    renderPage()
 
     await screen.findByText('rel_018')
     await user.click(screen.getByRole('button', { name: 'Remove' }))
@@ -56,7 +78,7 @@ describe('MappingsPage', () => {
     const user = userEvent.setup()
     vi.spyOn(window, 'confirm').mockReturnValue(false)
     const stub = installApiStub()
-    render(<MappingsPage />)
+    renderPage()
 
     await screen.findByText('rel_018')
     await user.click(screen.getByRole('button', { name: 'Remove' }))
@@ -68,7 +90,7 @@ describe('MappingsPage', () => {
   it('creates a mapping from the add drawer', async () => {
     const user = userEvent.setup()
     const stub = installApiStub()
-    render(<MappingsPage />)
+    renderPage()
 
     await screen.findByText('rel_018')
     await user.click(screen.getByRole('button', { name: '+ Add mapping' }))
@@ -104,7 +126,7 @@ describe('MappingsPage', () => {
         },
       },
     })
-    render(<MappingsPage />)
+    renderPage()
 
     await user.click(await screen.findByRole('button', { name: '+ Add mapping' }))
     await user.click(screen.getByRole('button', { name: 'Save mapping' }))
@@ -116,7 +138,7 @@ describe('MappingsPage', () => {
   it('opens the detail drawer with the mapping provenance', async () => {
     const user = userEvent.setup()
     installApiStub()
-    render(<MappingsPage />)
+    renderPage()
 
     await user.click(await screen.findByRole('button', { name: 'View' }))
 

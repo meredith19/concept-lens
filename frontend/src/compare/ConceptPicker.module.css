@@ -69,3 +69,10 @@
     justify-self: start;
   }
 }
+
+.suggested button.active {
+  border-color: var(--accent);
+  background: #edf2ef;
+  color: var(--accent);
+  font-weight: 800;
+}

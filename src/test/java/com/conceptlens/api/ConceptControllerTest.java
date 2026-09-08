@@ -23,7 +23,7 @@ class ConceptControllerTest extends ApiTestSupport {
         assertThat(response.status()).isEqualTo(200);
         assertThat(response.body().get("name").asString()).isEqualTo("Returnable");
         assertThat(response.body().get("publishedAt").asString()).isEqualTo("2026-01-14T09:12:00Z");
-        assertThat(response.body().get("facts")).hasSize(3);
+        assertThat(response.body().get("facts")).hasSize(4);
         assertThat(response.body().get("facts").get(0).get("id").asString())
                 .isEqualTo("returns.returnable.valid_return_path");
     }

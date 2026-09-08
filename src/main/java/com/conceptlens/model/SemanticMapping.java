@@ -29,4 +29,11 @@ public record SemanticMapping(
         MappingType type,
         MappingStatus status,
         String rationale,
-        String reviewedBy) {}
+        String reviewedBy) {
+
+    /** True if this mapping joins the two facts, in either direction. */
+    public boolean relates(String oneFactId, String otherFactId) {
+        return (leftFactId.equals(oneFactId) && rightFactId.equals(otherFactId))
+                || (leftFactId.equals(otherFactId) && rightFactId.equals(oneFactId));
+    }
+}

@@ -43,5 +43,14 @@
     "status": "CONFIRMED",
     "rationale": "Both systems record a missing country as null rather than substituting a default.",
     "reviewedBy": "Domain reviewer"
+  },
+  {
+    "id": "rel_034",
+    "leftFactId": "returns.returnable.item_delivered",
+    "rightFactId": "delivery.delivered.reached_destination",
+    "type": "SAME_MEANING",
+    "status": "CONFIRMED",
+    "rationale": "Both facts represent that delivery of the item has reached its destination. Returns uses this state as part of determining return eligibility; Delivery uses it to represent completion of the delivery leg.",
+    "reviewedBy": "Domain reviewer"
   }
 ]

@@ -84,7 +84,8 @@ export interface ApiStub {
 
 /** Installs a fetch stub covering every endpoint the UI uses. */
 export function installApiStub(options: StubOptions = {}): ApiStub {
-  const stub: ApiStub = { calls: [], mappings: [...(options.mappings ?? [MAPPING])] }
+  const seeded = options.mappings ?? [MAPPING]
+  const stub: ApiStub = { calls: [], mappings: [...seeded] }
   const concepts = options.concepts ?? CONCEPTS
   const comparison = options.comparison ?? NOT_ESTABLISHED
 
@@ -118,6 +119,10 @@ export function installApiStub(options: StubOptions = {}): ApiStub {
       const created = { ...(body as object), id: `rel_${stub.mappings.length + 1}` }
       stub.mappings = [...stub.mappings, created as SemanticMapping]
       return reply(created, 201)
+    }
+    if (method === 'POST' && url === '/api/demo/reset') {
+      stub.mappings = [...seeded]
+      return reply(undefined, 204)
     }
     if (method === 'DELETE' && url.startsWith('/api/mappings/')) {
       const id = decodeURIComponent(url.replace('/api/mappings/', ''))

@@ -48,7 +48,7 @@ concept-level outcome.
 
 | Scenario | Shape | Fact mappings | Derived result |
 | --- | --- | --- | --- |
-| `Returnable` ↔ `Refundable` | partial overlap — 3 facts each, 1 matched | `rel_018` | `NOT_ESTABLISHED` |
+| `Returnable` ↔ `Refundable` | partial overlap — 4 facts vs 3, 1 matched | `rel_018` | `NOT_ESTABLISHED` |
 | `Shipped` → `Delivered` | containment — all of Shipped's 1 fact matched, Delivered has 1 more | `rel_024` | `RIGHT_INCLUDES_LEFT` |
 | `BuyerCountry` ↔ `BillingCountry` | complete equivalence — 3 facts each, all matched | `rel_031`, `rel_032`, `rel_033` | `SAME_MEANING` |
 

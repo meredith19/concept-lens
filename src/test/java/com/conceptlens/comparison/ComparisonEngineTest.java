@@ -2,6 +2,7 @@ package com.conceptlens.comparison;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.assertj.core.api.Assertions.assertThatExceptionOfType;
+import static org.assertj.core.api.Assertions.tuple;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,7 +48,8 @@ class ComparisonEngineTest {
                 .extracting(Fact::id)
                 .containsExactly(
                         "returns.returnable.within_return_window",
-                        "returns.returnable.not_final_sale");
+                        "returns.returnable.not_final_sale",
+                        "returns.returnable.item_delivered");
         assertThat(result.unmatchedRightFacts())
                 .extracting(Fact::id)
                 .containsExactly(
@@ -94,21 +96,43 @@ class ComparisonEngineTest {
 
     @Test
     void conceptsWithNoMappingsBetweenThemEstablishNothing() {
-        ComparisonResult result = comparisonEngine.compare(RETURNABLE, DELIVERED);
+        ComparisonResult result = comparisonEngine.compare(RETURNABLE, SHIPPED);
 
         assertThat(result.relationship()).isEqualTo(ConceptRelationship.NOT_ESTABLISHED);
         assertThat(result.matchedFacts()).isEmpty();
-        assertThat(result.unmatchedLeftFacts()).hasSize(3);
-        assertThat(result.unmatchedRightFacts()).hasSize(2);
+        assertThat(result.unmatchedLeftFacts()).hasSize(4);
+        assertThat(result.unmatchedRightFacts()).hasSize(1);
     }
 
     @Test
+    @DirtiesContext(methodMode = DirtiesContext.MethodMode.AFTER_METHOD)
     void similarlyWordedFactsAreNotTreatedAsEvidence() {
-        // Both concepts model a country with identically worded normalization and null-behaviour
-        // facts, but only the mapped pairs count; Returnable and Delivered share no wording at all.
-        ComparisonResult result = comparisonEngine.compare(RETURNABLE, DELIVERED);
+        mappingService.removeMapping("rel_032");
+        mappingService.removeMapping("rel_033");
 
-        assertThat(result.matchedFacts()).isEmpty();
+        ComparisonResult result = comparisonEngine.compare(BUYER_COUNTRY, BILLING_COUNTRY);
+
+        assertThat(result.unmatchedLeftFacts())
+                .extracting(Fact::id, Fact::description)
+                .containsExactly(
+                        tuple(
+                                "orders.buyercountry.country_normalization",
+                                "The country code is normalized to ISO 3166-1 alpha-2."),
+                        tuple(
+                                "orders.buyercountry.missing_country_behavior",
+                                "A missing country is recorded as null rather than defaulted."));
+        assertThat(result.unmatchedRightFacts())
+                .extracting(Fact::id, Fact::description)
+                .containsExactly(
+                        tuple(
+                                "payments.billingcountry.country_normalization",
+                                "The country code is normalized to ISO 3166-1 alpha-2."),
+                        tuple(
+                                "payments.billingcountry.missing_country_behavior",
+                                "A missing country is recorded as null rather than defaulted."));
+        assertThat(result.matchedFacts())
+                .extracting(match -> match.mapping().id())
+                .containsExactly("rel_031");
     }
 
     @Test
@@ -117,6 +141,13 @@ class ComparisonEngineTest {
                 .isThrownBy(() -> comparisonEngine.compare("nope.missing", REFUNDABLE));
         assertThatExceptionOfType(ConceptNotFoundException.class)
                 .isThrownBy(() -> comparisonEngine.compare(RETURNABLE, "nope.missing"));
+    }
+
+    @Test
+    void comparingAConceptWithItselfFailsExplicitly() {
+        assertThatExceptionOfType(InvalidComparisonException.class)
+                .isThrownBy(() -> comparisonEngine.compare(RETURNABLE, RETURNABLE))
+                .withMessageContaining(RETURNABLE);
     }
 
     @Test

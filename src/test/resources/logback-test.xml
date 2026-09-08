@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+  <include resource="org/springframework/boot/logging/logback/base.xml"/>
+  <!-- RANDOM_PORT + DirtiesContext closes the listen socket while accept() is blocked. -->
+  <logger name="org.apache.tomcat.util.net.Acceptor" level="OFF"/>
+</configuration>

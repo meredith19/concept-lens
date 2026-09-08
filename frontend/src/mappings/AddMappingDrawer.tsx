@@ -1,5 +1,6 @@
 import { useState } from 'react'
 
+import { mappingTypeLabel } from '../api/labels.ts'
 import type { Concept, MappingDraft } from '../api/types.ts'
 import Drawer from '../components/Drawer.tsx'
 import styles from './AddMappingDrawer.module.css'
@@ -13,6 +14,21 @@ interface AddMappingDrawerProps {
 
 function firstFactId(concept: Concept | undefined): string {
   return concept?.facts[0]?.id ?? ''
+}
+
+function optionLabel(concept: Concept): string {
+  return `${concept.name} · ${concept.sourceSystem}`
+}
+
+/** A mapping must relate two different concepts — the same rule as the compare picker. */
+function optionsExcluding(concepts: Concept[], excludedId: string) {
+  return concepts
+    .filter((concept) => concept.id !== excludedId)
+    .map((concept) => (
+      <option key={concept.id} value={concept.id}>
+        {optionLabel(concept)}
+      </option>
+    ))
 }
 
 export default function AddMappingDrawer({
@@ -77,11 +93,7 @@ export default function AddMappingDrawer({
           value={sourceConceptId}
           onChange={(event) => changeSource(event.target.value)}
         >
-          {concepts.map((concept) => (
-            <option key={concept.id} value={concept.id}>
-              {concept.name} · {concept.sourceSystem}
-            </option>
-          ))}
+          {optionsExcluding(concepts, targetConceptId)}
         </select>
       </div>
 
@@ -103,7 +115,7 @@ export default function AddMappingDrawer({
       <div className={styles.group}>
         <label htmlFor="relationship">RELATIONSHIP</label>
         <select id="relationship" value="SAME_MEANING" disabled>
-          <option value="SAME_MEANING">Same meaning</option>
+          <option value="SAME_MEANING">{mappingTypeLabel('SAME_MEANING')}</option>
         </select>
       </div>
 
@@ -114,11 +126,7 @@ export default function AddMappingDrawer({
           value={targetConceptId}
           onChange={(event) => changeTarget(event.target.value)}
         >
-          {concepts.map((concept) => (
-            <option key={concept.id} value={concept.id}>
-              {concept.name} · {concept.sourceSystem}
-            </option>
-          ))}
+          {optionsExcluding(concepts, sourceConceptId)}
         </select>
       </div>
 

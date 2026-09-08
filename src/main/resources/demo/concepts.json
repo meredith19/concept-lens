@@ -21,6 +21,11 @@
         "id": "returns.returnable.not_final_sale",
         "label": "Is not final sale",
         "description": "The item was not sold under final-sale terms that exclude returns."
+      },
+      {
+        "id": "returns.returnable.item_delivered",
+        "label": "Item has been delivered",
+        "description": "The item's delivery has reached its destination."
       }
     ]
   },

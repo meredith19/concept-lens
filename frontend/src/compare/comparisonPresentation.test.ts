@@ -2,7 +2,7 @@ import { describe, expect, it } from 'vitest'
 
 import type { ComparisonResult } from '../api/types.ts'
 import { NOT_ESTABLISHED, REFUNDABLE, RETURNABLE } from '../test/apiStub.ts'
-import { evidence, headline, implicationRows, takeaway, vennShape } from './comparisonPresentation.ts'
+import { headline, implicationRows, takeaway, vennShape } from './comparisonPresentation.ts'
 
 function withRelationship(
   relationship: ComparisonResult['relationship'],
@@ -51,12 +51,13 @@ describe('headline', () => {
 })
 
 describe('takeaway', () => {
-  it('acknowledges confirmed shared meaning while withholding a verdict', () => {
+  it('states the partial case in one line, with no duplicate explanation', () => {
     const result = takeaway(NOT_ESTABLISHED)
 
-    expect(result.title).toBe('They share meaning, but the relationship is not established.')
-    expect(result.copy).toContain('1 confirmed shared meaning')
-    expect(result.copy).toContain('unknown, not different')
+    expect(result.title).toBe(
+      'They share some meaning, but the overall relationship is not established.',
+    )
+    expect(result.copy).toBeUndefined()
   })
 
   it('treats an absent mapping as unknown rather than different', () => {
@@ -75,26 +76,9 @@ describe('implicationRows', () => {
     expect(rows[0].left).toEqual(RETURNABLE.facts[0])
     expect(rows[0].right).toEqual(REFUNDABLE.facts[0])
     expect(rows[0].relationship).toBe('Same meaning')
+    expect(rows[0].match?.mapping.id).toBe('rel_018')
     expect(rows[1].right).toBeNull()
+    expect(rows[1].match).toBeUndefined()
     expect(rows[2].left).toBeNull()
-  })
-})
-
-describe('evidence', () => {
-  it('cites the mapping behind the first confirmed match', () => {
-    const result = evidence(NOT_ESTABLISHED)
-
-    expect(result.path).toBe(
-      'returns.returnable.valid_return_path ↔ payments.refundable.refund_path_available',
-    )
-    expect(result.meta).toBe('Same meaning · Confirmed · Domain reviewer')
-    expect(result.mappingId).toBe('rel_018')
-  })
-
-  it('offers nothing to inspect when no mapping relates the pair', () => {
-    const result = evidence(withRelationship('NOT_ESTABLISHED', { matchedFacts: [] }))
-
-    expect(result.mappingId).toBeUndefined()
-    expect(result.path).toContain('No confirmed mapping')
   })
 })

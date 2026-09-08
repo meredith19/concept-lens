@@ -7,7 +7,11 @@ const LINKS = [
   { to: '/mappings', label: 'Mappings' },
 ]
 
-export default function AppHeader() {
+interface AppHeaderProps {
+  onReset: () => void
+}
+
+export default function AppHeader({ onReset }: AppHeaderProps) {
   return (
     <header className={styles.header}>
       <div className={styles.brand}>Concept Lens</div>
@@ -23,6 +27,9 @@ export default function AppHeader() {
             {link.label}
           </NavLink>
         ))}
+        <button className={styles.reset} onClick={onReset}>
+          Reset demo data
+        </button>
       </nav>
     </header>
   )

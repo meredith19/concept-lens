@@ -15,6 +15,17 @@ function optionLabel(concept: Concept): string {
   return `${concept.name} · ${concept.sourceSystem}`
 }
 
+/** Omits the other side's current id: comparing a concept with itself is not a comparison. */
+function optionsExcluding(concepts: Concept[], excludedId: string) {
+  return concepts
+    .filter((concept) => concept.id !== excludedId)
+    .map((concept) => (
+      <option key={concept.id} value={concept.id}>
+        {optionLabel(concept)}
+      </option>
+    ))
+}
+
 interface ConceptPickerProps {
   concepts: Concept[]
   leftConceptId: string
@@ -29,16 +40,17 @@ export default function ConceptPicker({
   onChange,
 }: ConceptPickerProps) {
   const byId = new Map(concepts.map((concept) => [concept.id, concept]))
-  const options = concepts.map((concept) => (
-    <option key={concept.id} value={concept.id}>
-      {optionLabel(concept)}
-    </option>
-  ))
 
+  // A suggestion matches the current pair in either direction: A↔B and B↔A are the same pair.
+  const selected = new Set([leftConceptId, rightConceptId])
   const suggestions = SUGGESTED.flatMap((pair) => {
     const left = byId.get(pair.left)
     const right = byId.get(pair.right)
-    return left && right ? [{ ...pair, label: `${left.name} ↔ ${right.name}` }] : []
+    if (!left || !right) {
+      return []
+    }
+    const active = selected.has(pair.left) && selected.has(pair.right)
+    return [{ ...pair, active, label: `${left.name} ↔ ${right.name}` }]
   })
 
   return (
@@ -52,7 +64,7 @@ export default function ConceptPicker({
             value={leftConceptId}
             onChange={(event) => onChange(event.target.value, rightConceptId)}
           >
-            {options}
+            {optionsExcluding(concepts, rightConceptId)}
           </select>
         </div>
 
@@ -71,7 +83,7 @@ export default function ConceptPicker({
             value={rightConceptId}
             onChange={(event) => onChange(leftConceptId, event.target.value)}
           >
-            {options}
+            {optionsExcluding(concepts, leftConceptId)}
           </select>
         </div>
       </div>
@@ -83,6 +95,8 @@ export default function ConceptPicker({
             {suggestions.map((suggestion) => (
               <button
                 key={suggestion.label}
+                className={suggestion.active ? styles.active : undefined}
+                aria-pressed={suggestion.active}
                 onClick={() => onChange(suggestion.left, suggestion.right)}
               >
                 {suggestion.label}

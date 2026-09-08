@@ -1,16 +1,17 @@
-import type { ComparisonResult, Fact } from '../api/types.ts'
+import { mappingTypeLabel } from '../api/labels.ts'
+import type { ComparisonResult, Fact, FactMatch } from '../api/types.ts'
 
 /**
  * Turns a comparison into the wording and shapes the UI shows.
  *
- * The mock carried hand-written copy for each demo pair. Nothing equivalent exists in the API —
- * and shouldn't, since the copy is a reading of the result — so it is derived here instead.
+ * Nothing equivalent exists in the API — and shouldn't, since the copy is a reading of the
+ * result — so it is derived here instead.
  */
 
-export const SAME_MEANING = 'Same meaning'
+export const SAME_MEANING = mappingTypeLabel('SAME_MEANING')
 export const NO_MATCH = 'No confirmed match'
 
-/** Which of the mock's five diagrams a result should be drawn as. */
+/** Which of the five diagrams a result should be drawn as. */
 export type VennShape =
   | 'SAME_MEANING'
   | 'LEFT_INSIDE_RIGHT'
@@ -77,13 +78,13 @@ export function headline(result: ComparisonResult): Headline {
 
 export interface Takeaway {
   title: string
-  copy: string
+  /** Omitted where the title says everything; the count lives in the derivation link. */
+  copy?: string
 }
 
 export function takeaway(result: ComparisonResult): Takeaway {
   const left = result.leftConcept.name
   const right = result.rightConcept.name
-  const shared = result.matchedFacts.length
 
   switch (result.relationship) {
     case 'SAME_MEANING':
@@ -108,8 +109,7 @@ export function takeaway(result: ComparisonResult): Takeaway {
             copy: 'No confirmed mapping relates these concepts. That is an absence of evidence, not evidence that they differ.',
           }
         : {
-            title: 'They share meaning, but the relationship is not established.',
-            copy: `${left} and ${right} have ${shared} confirmed shared ${shared === 1 ? 'meaning' : 'meanings'}. Their other facts have no confirmed match — unknown, not different — so no overall relationship is established.`,
+            title: 'They share some meaning, but the overall relationship is not established.',
           }
   }
 }
@@ -118,6 +118,8 @@ export interface ImplicationRow {
   left: Fact | null
   relationship: string
   right: Fact | null
+  /** Present on matched rows: the confirmed mapping behind the match. */
+  match?: FactMatch
 }
 
 /** Matched pairs first, then what each side is left holding on its own. */
@@ -127,6 +129,7 @@ export function implicationRows(result: ComparisonResult): ImplicationRow[] {
       left: match.leftFact,
       relationship: SAME_MEANING,
       right: match.rightFact,
+      match,
     })),
     ...result.unmatchedLeftFacts.map((fact) => ({
       left: fact,
@@ -141,35 +144,3 @@ export function implicationRows(result: ComparisonResult): ImplicationRow[] {
   ]
 }
 
-export interface Evidence {
-  path: string
-  meta: string
-  note: string
-  /** The mapping behind the first confirmed match, if there is one. */
-  mappingId: string | undefined
-}
-
-export function evidence(result: ComparisonResult): Evidence {
-  const first = result.matchedFacts[0]
-
-  if (!first) {
-    return {
-      path: 'No confirmed mapping for this pair',
-      meta: 'Unknown',
-      note: 'Concept Lens does not infer semantic relationships merely from similar names.',
-      mappingId: undefined,
-    }
-  }
-
-  const unmatched =
-    result.unmatchedLeftFacts.length + result.unmatchedRightFacts.length > 0
-      ? 'Unmatched facts are not automatically treated as different. Concept Lens only claims relationships supported by explicit mappings.'
-      : 'Every fact on both sides is backed by an explicit mapping.'
-
-  return {
-    path: `${first.leftFact.id} ↔ ${first.rightFact.id}`,
-    meta: `${SAME_MEANING} · Confirmed · ${first.mapping.reviewedBy}`,
-    note: unmatched,
-    mappingId: first.mapping.id,
-  }
-}

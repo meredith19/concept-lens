@@ -10,9 +10,9 @@
 }
 
 .nodes {
-  font-family: var(--font-mono);
-  font-size: 12px;
-  line-height: 1.55;
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.5;
 }
 
 .relation {
@@ -40,9 +40,11 @@
   cursor: pointer;
 }
 
-.labels {
-  font-size: 12px;
-  color: #666;
+.factIds {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #999;
   line-height: 1.45;
   margin-bottom: 7px;
+  overflow-wrap: anywhere;
 }

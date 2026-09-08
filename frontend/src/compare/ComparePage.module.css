@@ -28,3 +28,52 @@
     flex-direction: column;
   }
 }
+
+.derivation {
+  margin: -14px 0 22px;
+}
+
+.derivedFrom {
+  display: block;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent);
+  cursor: pointer;
+  text-align: left;
+}
+
+.derivedFrom:hover {
+  text-decoration: underline;
+}
+
+.unknownNote {
+  display: block;
+  font-size: 12px;
+  color: var(--muted);
+  margin-top: 6px;
+}
+
+.evidenceHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.manageLink {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.manageLink:hover {
+  text-decoration: underline;
+}

@@ -37,3 +37,19 @@
   background: #ecece6;
   color: var(--ink);
 }
+
+.reset {
+  margin-left: 4px;
+  border: 1px solid var(--line);
+  background: #fff;
+  color: var(--muted);
+  font-size: 12px;
+  font-weight: 800;
+  padding: 7px 10px;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
+.reset:hover {
+  background: var(--soft);
+}

@@ -34,4 +34,9 @@ public interface MappingRepository {
      * @return {@code true} if a mapping was removed, {@code false} if none had that id
      */
     boolean deleteById(String id);
+
+    /**
+     * Replaces the entire held set in one step, so a reader never sees a half-cleared store.
+     */
+    void replaceAll(List<SemanticMapping> mappings);
 }

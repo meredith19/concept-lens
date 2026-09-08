@@ -99,10 +99,41 @@ class MappingServiceTest {
                 mappingService.addMapping(mapping("rel_100", RETURN_WINDOW, RETURN_APPROVED));
 
         assertThat(created.id()).isEqualTo("rel_100");
+        assertThat(created.rationale()).isEqualTo("Both facts describe the same thing.");
         assertThat(mappingService.getAllMappings())
                 .extracting(SemanticMapping::id)
                 .containsExactly("rel_018", "rel_100");
         assertThat(mappingService.getMapping("rel_100")).isEqualTo(created);
+    }
+
+    @Test
+    void addMappingRejectsABlankRationale() {
+        assertThatExceptionOfType(InvalidMappingException.class)
+                .isThrownBy(() -> mappingService.addMapping(withRationale(null)))
+                .withMessageContaining("Rationale must not be blank");
+        assertThatExceptionOfType(InvalidMappingException.class)
+                .isThrownBy(() -> mappingService.addMapping(withRationale("")))
+                .withMessageContaining("Rationale must not be blank");
+        assertThatExceptionOfType(InvalidMappingException.class)
+                .isThrownBy(() -> mappingService.addMapping(withRationale("   ")))
+                .withMessageContaining("Rationale must not be blank");
+        assertThat(mappings.findAll()).hasSize(1);
+    }
+
+    @Test
+    void addMappingRejectsADraftWithBlankRationale() {
+        MappingDraft blankRationale = new MappingDraft(
+                RETURN_WINDOW,
+                RETURN_APPROVED,
+                MappingType.SAME_MEANING,
+                MappingStatus.CONFIRMED,
+                " ",
+                "Domain reviewer");
+
+        assertThatExceptionOfType(InvalidMappingException.class)
+                .isThrownBy(() -> mappingService.addMapping(blankRationale))
+                .withMessageContaining("Rationale must not be blank");
+        assertThat(mappings.findAll()).hasSize(1);
     }
 
     @Test
@@ -153,6 +184,15 @@ class MappingServiceTest {
                 .withMessageContaining("already mapped");
 
         assertThat(mappings.findAll()).hasSize(1);
+    }
+
+    @Test
+    void replaceAllSwapsTheEntireHeldSet() {
+        mappingService.replaceAll(List.of(mapping("rel_200", RETURN_WINDOW, RETURN_APPROVED)));
+
+        assertThat(mappingService.getAllMappings())
+                .extracting(SemanticMapping::id)
+                .containsExactly("rel_200");
     }
 
     @Test
@@ -215,5 +255,16 @@ class MappingServiceTest {
                 mappingService.addMapping(mapping("rel_018", RETURN_PATH, REFUND_PATH));
 
         assertThat(mappingService.getAllMappings()).containsExactly(recreated);
+    }
+
+    private static SemanticMapping withRationale(String rationale) {
+        return new SemanticMapping(
+                "rel_100",
+                RETURN_WINDOW,
+                RETURN_APPROVED,
+                MappingType.SAME_MEANING,
+                MappingStatus.CONFIRMED,
+                rationale,
+                "Domain reviewer");
     }
 }

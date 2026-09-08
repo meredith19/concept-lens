@@ -37,7 +37,7 @@ class ComparisonControllerTest extends ApiTestSupport {
 
         assertThat(response.body().get("relationship").asString()).isEqualTo("NOT_ESTABLISHED");
         assertThat(response.body().get("matchedFacts")).hasSize(1);
-        assertThat(response.body().get("unmatchedLeftFacts")).hasSize(2);
+        assertThat(response.body().get("unmatchedLeftFacts")).hasSize(3);
         assertThat(response.body().get("unmatchedRightFacts")).hasSize(2);
     }
 
@@ -47,6 +47,16 @@ class ComparisonControllerTest extends ApiTestSupport {
 
         assertThat(response.status()).isEqualTo(404);
         assertThat(response.body().get("code").asString()).isEqualTo("CONCEPT_NOT_FOUND");
+    }
+
+    @Test
+    void theSameConceptOnBothSidesIsABadRequest() {
+        Response response =
+                get("/api/compare?left=returns.returnable&right=returns.returnable");
+
+        assertThat(response.status()).isEqualTo(400);
+        assertThat(response.body().get("code").asString()).isEqualTo("INVALID_COMPARISON");
+        assertThat(response.body().get("message").asString()).contains("returns.returnable");
     }
 
     @Test

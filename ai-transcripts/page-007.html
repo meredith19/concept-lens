@@ -1,0 +1,2415 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Claude Code transcript - page 7</title>
+    <style>
+:root { --bg-color: #f5f5f5; --card-bg: #ffffff; --user-bg: #e3f2fd; --user-border: #1976d2; --assistant-bg: #f5f5f5; --assistant-border: #9e9e9e; --thinking-bg: #fff8e1; --thinking-border: #ffc107; --thinking-text: #666; --tool-bg: #f3e5f5; --tool-border: #9c27b0; --tool-result-bg: #e8f5e9; --tool-error-bg: #ffebee; --text-color: #212121; --text-muted: #757575; --code-bg: #263238; --code-text: #aed581; }
+* { box-sizing: border-box; }
+body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: var(--bg-color); color: var(--text-color); margin: 0; padding: 16px; line-height: 1.6; }
+.container { max-width: 800px; margin: 0 auto; }
+h1 { font-size: 1.5rem; margin-bottom: 24px; padding-bottom: 8px; border-bottom: 2px solid var(--user-border); }
+.header-row { display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; border-bottom: 2px solid var(--user-border); padding-bottom: 8px; margin-bottom: 24px; }
+.header-row h1 { border-bottom: none; padding-bottom: 0; margin-bottom: 0; flex: 1; min-width: 200px; }
+.message { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.message.user { background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.message.assistant { background: var(--card-bg); border-left: 4px solid var(--assistant-border); }
+.message.tool-reply { background: #fff8e1; border-left: 4px solid #ff9800; }
+.tool-reply .role-label { color: #e65100; }
+.tool-reply .tool-result { background: transparent; padding: 0; margin: 0; }
+.tool-reply .tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.message-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.role-label { font-weight: 600; text-transform: uppercase; letter-spacing: 0.5px; }
+.user .role-label { color: var(--user-border); }
+time { color: var(--text-muted); font-size: 0.8rem; }
+.timestamp-link { color: inherit; text-decoration: none; }
+.timestamp-link:hover { text-decoration: underline; }
+.message:target { animation: highlight 2s ease-out; }
+@keyframes highlight { 0% { background-color: rgba(25, 118, 210, 0.2); } 100% { background-color: transparent; } }
+.message-content { padding: 16px; }
+.message-content p { margin: 0 0 12px 0; }
+.message-content p:last-child { margin-bottom: 0; }
+.thinking { background: var(--thinking-bg); border: 1px solid var(--thinking-border); border-radius: 8px; padding: 12px; margin: 12px 0; font-size: 0.9rem; color: var(--thinking-text); }
+.thinking-label { font-size: 0.75rem; font-weight: 600; text-transform: uppercase; color: #f57c00; margin-bottom: 8px; }
+.thinking p { margin: 8px 0; }
+.assistant-text { margin: 8px 0; }
+.tool-use { background: var(--tool-bg); border: 1px solid var(--tool-border); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-header { font-weight: 600; color: var(--tool-border); margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+.tool-icon { font-size: 1.1rem; }
+.tool-description { font-size: 0.9rem; color: var(--text-muted); margin-bottom: 8px; font-style: italic; }
+.tool-result { background: var(--tool-result-bg); border-radius: 8px; padding: 12px; margin: 12px 0; }
+.tool-result.tool-error { background: var(--tool-error-bg); }
+.file-tool { border-radius: 8px; padding: 12px; margin: 12px 0; }
+.write-tool { background: linear-gradient(135deg, #e3f2fd 0%, #e8f5e9 100%); border: 1px solid #4caf50; }
+.edit-tool { background: linear-gradient(135deg, #fff3e0 0%, #fce4ec 100%); border: 1px solid #ff9800; }
+.file-tool-header { font-weight: 600; margin-bottom: 4px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.write-header { color: #2e7d32; }
+.edit-header { color: #e65100; }
+.file-tool-icon { font-size: 1rem; }
+.file-tool-path { font-family: monospace; background: rgba(0,0,0,0.08); padding: 2px 8px; border-radius: 4px; }
+.file-tool-fullpath { font-family: monospace; font-size: 0.8rem; color: var(--text-muted); margin-bottom: 8px; word-break: break-all; }
+.file-content { margin: 0; }
+.edit-section { display: flex; margin: 4px 0; border-radius: 4px; overflow: hidden; }
+.edit-label { padding: 8px 12px; font-weight: bold; font-family: monospace; display: flex; align-items: flex-start; }
+.edit-old { background: #fce4ec; }
+.edit-old .edit-label { color: #b71c1c; background: #f8bbd9; }
+.edit-old .edit-content { color: #880e4f; }
+.edit-new { background: #e8f5e9; }
+.edit-new .edit-label { color: #1b5e20; background: #a5d6a7; }
+.edit-new .edit-content { color: #1b5e20; }
+.edit-content { margin: 0; flex: 1; background: transparent; font-size: 0.85rem; }
+.edit-replace-all { font-size: 0.75rem; font-weight: normal; color: var(--text-muted); }
+.write-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #e6f4ea); }
+.edit-tool .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff0e5); }
+.todo-list { background: linear-gradient(135deg, #e8f5e9 0%, #f1f8e9 100%); border: 1px solid #81c784; border-radius: 8px; padding: 12px; margin: 12px 0; }
+.todo-header { font-weight: 600; color: #2e7d32; margin-bottom: 10px; display: flex; align-items: center; gap: 8px; font-size: 0.95rem; }
+.todo-items { list-style: none; margin: 0; padding: 0; }
+.todo-item { display: flex; align-items: flex-start; gap: 10px; padding: 6px 0; border-bottom: 1px solid rgba(0,0,0,0.06); font-size: 0.9rem; }
+.todo-item:last-child { border-bottom: none; }
+.todo-icon { flex-shrink: 0; width: 20px; height: 20px; display: flex; align-items: center; justify-content: center; font-weight: bold; border-radius: 50%; }
+.todo-completed .todo-icon { color: #2e7d32; background: rgba(46, 125, 50, 0.15); }
+.todo-completed .todo-content { color: #558b2f; text-decoration: line-through; }
+.todo-in-progress .todo-icon { color: #f57c00; background: rgba(245, 124, 0, 0.15); }
+.todo-in-progress .todo-content { color: #e65100; font-weight: 500; }
+.todo-pending .todo-icon { color: #757575; background: rgba(0,0,0,0.05); }
+.todo-pending .todo-content { color: #616161; }
+pre { background: var(--code-bg); color: var(--code-text); padding: 12px; border-radius: 6px; overflow-x: auto; font-size: 0.85rem; line-height: 1.5; margin: 8px 0; white-space: pre-wrap; word-wrap: break-word; }
+pre.json { color: #e0e0e0; }
+code { background: rgba(0,0,0,0.08); padding: 2px 6px; border-radius: 4px; font-size: 0.9em; }
+pre code { background: none; padding: 0; }
+.user-content { margin: 0; }
+.truncatable { position: relative; }
+.truncatable.truncated .truncatable-content { max-height: 200px; overflow: hidden; }
+.truncatable.truncated::after { content: ''; position: absolute; bottom: 32px; left: 0; right: 0; height: 60px; background: linear-gradient(to bottom, transparent, var(--card-bg)); pointer-events: none; }
+.message.user .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--user-bg)); }
+.message.tool-reply .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, #fff8e1); }
+.tool-use .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-bg)); }
+.tool-result .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--tool-result-bg)); }
+.expand-btn { display: none; width: 100%; padding: 8px 16px; margin-top: 4px; background: rgba(0,0,0,0.05); border: 1px solid rgba(0,0,0,0.1); border-radius: 6px; cursor: pointer; font-size: 0.85rem; color: var(--text-muted); }
+.expand-btn:hover { background: rgba(0,0,0,0.1); }
+.truncatable.truncated .expand-btn, .truncatable.expanded .expand-btn { display: block; }
+.pagination { display: flex; justify-content: center; gap: 8px; margin: 24px 0; flex-wrap: wrap; }
+.pagination a, .pagination span { padding: 5px 10px; border-radius: 6px; text-decoration: none; font-size: 0.85rem; }
+.pagination a { background: var(--card-bg); color: var(--user-border); border: 1px solid var(--user-border); }
+.pagination a:hover { background: var(--user-bg); }
+.pagination .current { background: var(--user-border); color: white; }
+.pagination .disabled { color: var(--text-muted); border: 1px solid #ddd; }
+.pagination .index-link { background: var(--user-border); color: white; }
+details.continuation { margin-bottom: 16px; }
+details.continuation summary { cursor: pointer; padding: 12px 16px; background: var(--user-bg); border-left: 4px solid var(--user-border); border-radius: 12px; font-weight: 500; color: var(--text-muted); }
+details.continuation summary:hover { background: rgba(25, 118, 210, 0.15); }
+details.continuation[open] summary { border-radius: 12px 12px 0 0; margin-bottom: 0; }
+.index-item { margin-bottom: 16px; border-radius: 12px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); background: var(--user-bg); border-left: 4px solid var(--user-border); }
+.index-item a { display: block; text-decoration: none; color: inherit; }
+.index-item a:hover { background: rgba(25, 118, 210, 0.1); }
+.index-item-header { display: flex; justify-content: space-between; align-items: center; padding: 8px 16px; background: rgba(0,0,0,0.03); font-size: 0.85rem; }
+.index-item-number { font-weight: 600; color: var(--user-border); }
+.index-item-content { padding: 16px; }
+.index-item-stats { padding: 8px 16px 12px 32px; font-size: 0.85rem; color: var(--text-muted); border-top: 1px solid rgba(0,0,0,0.06); }
+.index-item-commit { margin-top: 6px; padding: 4px 8px; background: #fff3e0; border-radius: 4px; font-size: 0.85rem; color: #e65100; }
+.index-item-commit code { background: rgba(0,0,0,0.08); padding: 1px 4px; border-radius: 3px; font-size: 0.8rem; margin-right: 6px; }
+.commit-card { margin: 8px 0; padding: 10px 14px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 6px; }
+.commit-card a { text-decoration: none; color: #5d4037; display: block; }
+.commit-card a:hover { color: #e65100; }
+.commit-card-hash { font-family: monospace; color: #e65100; font-weight: 600; margin-right: 8px; }
+.index-commit { margin-bottom: 12px; padding: 10px 16px; background: #fff3e0; border-left: 4px solid #ff9800; border-radius: 8px; box-shadow: 0 1px 2px rgba(0,0,0,0.05); }
+.index-commit a { display: block; text-decoration: none; color: inherit; }
+.index-commit a:hover { background: rgba(255, 152, 0, 0.1); margin: -10px -16px; padding: 10px 16px; border-radius: 8px; }
+.index-commit-header { display: flex; justify-content: space-between; align-items: center; font-size: 0.85rem; margin-bottom: 4px; }
+.index-commit-hash { font-family: monospace; color: #e65100; font-weight: 600; }
+.index-commit-msg { color: #5d4037; }
+.index-item-long-text { margin-top: 8px; padding: 12px; background: var(--card-bg); border-radius: 8px; border-left: 3px solid var(--assistant-border); }
+.index-item-long-text .truncatable.truncated::after { background: linear-gradient(to bottom, transparent, var(--card-bg)); }
+.index-item-long-text-content { color: var(--text-color); }
+#search-box { display: none; align-items: center; gap: 8px; }
+#search-box input { padding: 6px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; width: 180px; }
+#search-box button, #modal-search-btn, #modal-close-btn { background: var(--user-border); color: white; border: none; border-radius: 6px; padding: 6px 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+#search-box button:hover, #modal-search-btn:hover { background: #1565c0; }
+#modal-close-btn { background: var(--text-muted); margin-left: 8px; }
+#modal-close-btn:hover { background: #616161; }
+#search-modal[open] { border: none; border-radius: 12px; box-shadow: 0 4px 24px rgba(0,0,0,0.2); padding: 0; width: 90vw; max-width: 900px; height: 80vh; max-height: 80vh; display: flex; flex-direction: column; }
+#search-modal::backdrop { background: rgba(0,0,0,0.5); }
+.search-modal-header { display: flex; align-items: center; gap: 8px; padding: 16px; border-bottom: 1px solid var(--assistant-border); background: var(--bg-color); border-radius: 12px 12px 0 0; }
+.search-modal-header input { flex: 1; padding: 8px 12px; border: 1px solid var(--assistant-border); border-radius: 6px; font-size: 16px; }
+#search-status { padding: 8px 16px; font-size: 0.85rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+#search-results { flex: 1; overflow-y: auto; padding: 16px; }
+.search-result { margin-bottom: 16px; border-radius: 8px; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
+.search-result a { display: block; text-decoration: none; color: inherit; }
+.search-result a:hover { background: rgba(25, 118, 210, 0.05); }
+.search-result-page { padding: 6px 12px; background: rgba(0,0,0,0.03); font-size: 0.8rem; color: var(--text-muted); border-bottom: 1px solid rgba(0,0,0,0.06); }
+.search-result-content { padding: 12px; }
+.search-result mark { background: #fff59d; padding: 1px 2px; border-radius: 2px; }
+@media (max-width: 600px) { body { padding: 8px; } .message, .index-item { border-radius: 8px; } .message-content, .index-item-content { padding: 12px; } pre { font-size: 0.8rem; padding: 8px; } #search-box input { width: 120px; } #search-modal[open] { width: 95vw; height: 90vh; } }
+</style>
+</head>
+<body>
+    <div class="container">
+        <h1><a href="index.html" style="color: inherit; text-decoration: none;">Claude Code transcript</a> - page 7/7</h1>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-006.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<span class="current">7</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+        
+<div class="message user" id="msg-2026-09-06T20-12-16-617Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-06T20-12-16-617Z" class="timestamp-link"><time datetime="2026-09-06T20:12:16.617Z" data-timestamp="2026-09-06T20:12:16.617Z">2026-09-06T20:12:16.617Z</time></a></div><div class="message-content">
+<div class="user-content"><p>or partial overlap, use only They share some meaning, but the overall relationship is not established. and remove the body paragraph entirely. Keep the count only in Derived from N confirmed mappings.
+for the drawer, use eyebrow MAPPING EVIDENCE and title Confirmed mapping. Do not add RelatedConcepts right now. Since it will be empty for all three suggested/demo pairs, it isn't worth adding new files/tests for this submission. Leave Related Concepts out of this pass.</p>
+<p>Also avoid changing the shared Drawer API if you can. If lead can stay required and we can just change the content passed by MappingDetailDrawer, do that instead. Keep the rest. Keep this as small as possible. Before coding, give me the revised file count after removing Related Concepts and avoiding the shared Drawer change if possible.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-12-47-172Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-12-47-172Z" class="timestamp-link"><time datetime="2026-09-06T20:12:47.172Z" data-timestamp="2026-09-06T20:12:47.172Z">2026-09-06T20:12:47.172Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-12-55-835Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-12-55-835Z" class="timestamp-link"><time datetime="2026-09-06T20:12:55.835Z" data-timestamp="2026-09-06T20:12:55.835Z">2026-09-06T20:12:55.835Z</time></a></div><div class="message-content">
+<div class="assistant-text"><h2>Revised count: 18 files — 0 new, 2 deleted, 16 modified</h2>
+<p><strong>Deleted (2)</strong> — <code>MappingEvidence.tsx</code>, <code>MappingEvidence.module.css</code></p>
+<p><strong>Compare (7)</strong> — <code>ComparePage.tsx</code> + <code>.module.css</code>, <code>ImplicationTable.tsx</code> + <code>.module.css</code>, <code>comparisonPresentation.ts</code>, <code>ConceptPicker.tsx</code> + <code>.module.css</code></p>
+<p><strong>Mappings (5)</strong> — <code>MappingDetailDrawer.tsx</code> + <code>.module.css</code>, <code>MappingRow.tsx</code> + <code>.module.css</code>, <code>MappingsPage.tsx</code></p>
+<p><strong>Shared (1)</strong> — <code>Takeaway.tsx</code></p>
+<p><strong>Tests (3)</strong> — <code>ComparePage.test.tsx</code>, <code>MappingsPage.test.tsx</code>, <code>comparisonPresentation.test.ts</code></p>
+<p><strong>Not touched:</strong> <code>Drawer.tsx</code>, <code>apiStub.ts</code>, and the entire backend.</p>
+<h2>How the two constraints worked out</h2>
+<p><strong>Drawer API stays as-is.</strong> <code>lead</code> can remain required by passing <strong>the mapping's own rationale</strong> as the lead. That's better than a workaround — you wanted the provenance explanation to live in the rationale rather than in fixed UX copy, and this puts it in the drawer's most prominent slot. It also lets me delete the current ad-hoc rationale block further down, which carries an inline <code>style={{marginTop: 14}}</code> wart. Falls back to "No rationale recorded." if one is ever blank.</p>
+<p><strong>Dropping Related Concepts removed more than one component.</strong> ComparePage no longer needs a mappings fetch at all, and <code>apiStub.ts</code> needs no third concept, so that's 4 files avoided rather than 2.</p>
+<p><strong>Two files I didn't list last time:</strong>
+- <code>Takeaway.tsx</code> — with the partial-overlap body gone, <code>copy</code> becomes optional so it doesn't render an empty div.
+- <code>comparisonPresentation.ts</code> also gains <code>match?: FactMatch</code> on <code>ImplicationRow</code>, which is how a row knows which mapping its Inspect button opens.</p>
+<p><strong>Estimate: ~1.5–2 h</strong>, down from 2–2.5.</p>
+<p>Ready to implement on your go.</p></div></div></div>
+<div class="message user" id="msg-2026-09-06T20-14-58-825Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-06T20-14-58-825Z" class="timestamp-link"><time datetime="2026-09-06T20:14:58.825Z" data-timestamp="2026-09-06T20:14:58.825Z">2026-09-06T20:14:58.825Z</time></a></div><div class="message-content">
+<div class="user-content"><p>go ahead with this plan. just one thing - make sure putting the rationale in Drawer.lead doesn't make it more prominent than the actual mapping. the main thing in the drawer should still be the two fact labels and that this is a confirmed mapping. if the lead styling makes the rationale stand out too much, just keep a short neutral lead and show rationale normally. don't change the shared Drawer API for this.</p>
+<p>otherwise go ahead. no related concepts, backend/seed/model changes or other refactoring. run all tests/build/lint when done and let me know what changed and anything I should manually check.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-15-30-549Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-15-30-549Z" class="timestamp-link"><time datetime="2026-09-06T20:15:30.549Z" data-timestamp="2026-09-06T20:15:30.549Z">2026-09-06T20:15:30.549Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-15-31-204Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-15-31-204Z" class="timestamp-link"><time datetime="2026-09-06T20:15:31.204Z" data-timestamp="2026-09-06T20:15:31.204Z">2026-09-06T20:15:31.204Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Good catch — <code>.lead</code> renders <em>above</em> the fact cards, so a rationale there would be the first thing read. I'll use a short neutral lead and give the rationale its own labelled block below the facts. Let me start.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-15-31-856Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-15-31-856Z" class="timestamp-link"><time datetime="2026-09-06T20:15:31.856Z" data-timestamp="2026-09-06T20:15:31.856Z">2026-09-06T20:15:31.856Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Y6KRDa6hYnU3nBi9u9k1hu">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Read current ComparePage render block</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd frontend &amp;&amp; sed -n &#39;55,125p&#39; src/compare/ComparePage.tsx</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-15-32-008Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-15-32-008Z" class="timestamp-link"><time datetime="2026-09-06T20:15:32.008Z" data-timestamp="2026-09-06T20:15:32.008Z">2026-09-06T20:15:32.008Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  return (
+    &lt;main&gt;
+      &lt;Hero {...HERO} meta={catalog} /&gt;
+
+      {available.length &gt; 0 &amp;&amp; left &amp;&amp; right &amp;&amp; (
+        &lt;ConceptPicker
+          concepts={available}
+          leftConceptId={left}
+          rightConceptId={right}
+          onChange={(nextLeft, nextRight) =&gt; setPair({ left: nextLeft, right: nextRight })}
+        /&gt;
+      )}
+
+      {comparison.error &amp;&amp; (
+        &lt;StatusMessage tone=&quot;error&quot;&gt;{`Could not compare these concepts. ${comparison.error}`}&lt;/StatusMessage&gt;
+      )}
+
+      {!result &amp;&amp; !comparison.error &amp;&amp; &lt;StatusMessage&gt;Loading comparison…&lt;/StatusMessage&gt;}
+
+      {result &amp;&amp; (
+        &lt;section className=&quot;card&quot;&gt;
+          &lt;div className={styles.top}&gt;
+            &lt;div&gt;
+              &lt;div className=&quot;eyebrow&quot;&gt;CONCEPT COMPARISON&lt;/div&gt;
+              &lt;div className={styles.title}&gt;
+                {result.leftConcept.name} vs {result.rightConcept.name}
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;div className={styles.badge}&gt;{headline(result).badge}&lt;/div&gt;
+          &lt;/div&gt;
+
+          &lt;ConceptDefinitions conceptA={result.leftConcept} conceptB={result.rightConcept} /&gt;
+
+          &lt;Takeaway takeaway={takeaway(result)} /&gt;
+
+          &lt;div className={styles.derivation}&gt;
+            &lt;span className={styles.derivedFrom}&gt;
+              Derived from {result.matchedFacts.length} confirmed{&#x27; &#x27;}
+              {result.matchedFacts.length === 1 ? &#x27;mapping&#x27; : &#x27;mappings&#x27;}
+            &lt;/span&gt;
+            &lt;span className={styles.unknownNote}&gt;Unmapped means unknown, not different.&lt;/span&gt;
+          &lt;/div&gt;
+
+          &lt;div className=&quot;section-title&quot;&gt;How are these concepts related?&lt;/div&gt;
+          &lt;div className=&quot;section-sub&quot;&gt;{headline(result).summary}&lt;/div&gt;
+
+          &lt;RelationshipVenn result={result} /&gt;
+
+          &lt;div className=&quot;section-title&quot;&gt;How does the right concept relate to the left?&lt;/div&gt;
+          &lt;div className=&quot;section-sub&quot;&gt;
+            Use the left concept as the anchor. See which of its meanings match something in the
+            right concept, and what the right concept adds.
+          &lt;/div&gt;
+
+          &lt;ImplicationTable
+            leftConcept={result.leftConcept}
+            rightConcept={result.rightConcept}
+            rows={implicationRows(result)}
+          /&gt;
+
+          &lt;MappingEvidence evidence={evidence(result)} onInspect={() =&gt; setInspecting(true)} /&gt;
+
+          {result.matchedFacts[0] &amp;&amp; (
+            &lt;MappingDetailDrawer
+              open={inspecting}
+              onClose={() =&gt; setInspecting(false)}
+              match={result.matchedFacts[0]}
+              leftConcept={result.leftConcept}
+              rightConcept={result.rightConcept}
+            /&gt;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-15-43-095Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-15-43-095Z" class="timestamp-link"><time datetime="2026-09-06T20:15:43.095Z" data-timestamp="2026-09-06T20:15:43.095Z">2026-09-06T20:15:43.095Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01YbDKmSYxJeifCozD4gUZFk">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Update presentation: row matches, simplified takeaway, drop evidence()</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/compare/comparisonPresentation.ts&#39;
+s=open(p).read()
+
+# Takeaway body becomes optional.
+s = s.replace(&#34;&#34;&#34;export interface Takeaway {
+  title: string
+  copy: string
+}&#34;&#34;&#34;,&#34;&#34;&#34;export interface Takeaway {
+  title: string
+  /** Omitted where the title says everything; the count lives in the derivation link. */
+  copy?: string
+}&#34;&#34;&#34;)
+
+# Partial overlap: title only.
+s = s.replace(&#34;&#34;&#34;        : {
+            title: &#39;They share meaning, but the relationship is not established.&#39;,
+            copy: `${left} and ${right} have ${shared} confirmed shared ${shared === 1 ? &#39;meaning&#39; : &#39;meanings&#39;}. Their other facts have no confirmed match — unknown, not different — so no overall relationship is established.`,
+          }&#34;&#34;&#34;,&#34;&#34;&#34;        : {
+            title: &#39;They share some meaning, but the overall relationship is not established.&#39;,
+          }&#34;&#34;&#34;)
+
+# `shared` is now unused.
+s = s.replace(&#34;  const shared = result.matchedFacts.length\n&#34;, &#34;&#34;)
+
+# Rows carry the mapping that justifies them, so a row can be inspected.
+s = s.replace(&#34;&#34;&#34;import type { ComparisonResult, Fact } from &#39;../api/types.ts&#39;&#34;&#34;&#34;,
+&#34;&#34;&#34;import type { ComparisonResult, Fact, FactMatch } from &#39;../api/types.ts&#39;&#34;&#34;&#34;)
+s = s.replace(&#34;&#34;&#34;export interface ImplicationRow {
+  left: Fact | null
+  relationship: string
+  right: Fact | null
+}&#34;&#34;&#34;,&#34;&#34;&#34;export interface ImplicationRow {
+  left: Fact | null
+  relationship: string
+  right: Fact | null
+  /** Present on matched rows: the confirmed mapping behind the match. */
+  match?: FactMatch
+}&#34;&#34;&#34;)
+s = s.replace(&#34;&#34;&#34;    ...result.matchedFacts.map((match) =&gt; ({
+      left: match.leftFact,
+      relationship: SAME_MEANING,
+      right: match.rightFact,
+    })),&#34;&#34;&#34;,&#34;&#34;&#34;    ...result.matchedFacts.map((match) =&gt; ({
+      left: match.leftFact,
+      relationship: SAME_MEANING,
+      right: match.rightFact,
+      match,
+    })),&#34;&#34;&#34;)
+
+# The standalone proof panel is gone; so is the copy that fed it.
+start = s.index(&#39;export interface Evidence {&#39;)
+end = s.index(&#39;export function evidence(&#39;)
+end = s.index(&#39;\n}\n&#39;, end) + 3
+s = s[:start] + s[end:]
+open(p,&#39;w&#39;).write(s)
+PY
+grep -n &#39;Evidence\|shared\b&#39; src/compare/comparisonPresentation.ts | sed &#39;s/^/  /&#39;; echo &#34;  (no Evidence refs = removed)&#34;
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx tsc -b 2&gt;&amp;1 | head -6</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-15-49-971Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-15-49-971Z" class="timestamp-link"><time datetime="2026-09-06T20:15:49.971Z" data-timestamp="2026-09-06T20:15:49.971Z">2026-09-06T20:15:49.971Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  49:        summary: &#x27;Every fact on both sides is confirmed as shared.&#x27;,
+  63:      // and does not establish. Confirmed shared meaning is a fact worth stating even when it is
+  73:              &#x27;Some facts are confirmed as shared, but both concepts keep facts with no confirmed match.&#x27;,
+  (no Evidence refs = removed)
+src/compare/ComparePage.tsx(14,10): error TS2305: Module &#x27;&quot;./comparisonPresentation.ts&quot;&#x27; has no exported member &#x27;evidence&#x27;.
+src/compare/comparisonPresentation.test.ts(5,10): error TS2305: Module &#x27;&quot;./comparisonPresentation.ts&quot;&#x27; has no exported member &#x27;evidence&#x27;.
+src/compare/MappingEvidence.tsx(1,15): error TS2305: Module &#x27;&quot;./comparisonPresentation.ts&quot;&#x27; has no exported member &#x27;Evidence&#x27;.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-15-59-969Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-15-59-969Z" class="timestamp-link"><time datetime="2026-09-06T20:15:59.969Z" data-timestamp="2026-09-06T20:15:59.969Z">2026-09-06T20:15:59.969Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01YD8Q3jhL4AT4w552P1ZtpP">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Delete MappingEvidence, add Inspect column to the table</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">rm -f src/compare/MappingEvidence.tsx src/compare/MappingEvidence.module.css
+python3 - &lt;&lt;&#39;PY&#39;
+# Takeaway: skip an absent body.
+p=&#39;src/compare/Takeaway.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;      &lt;div className={styles.copy}&gt;{takeaway.copy}&lt;/div&gt;&#34;,
+              &#34;      {takeaway.copy &amp;&amp; &lt;div className={styles.copy}&gt;{takeaway.copy}&lt;/div&gt;}&#34;)
+open(p,&#39;w&#39;).write(s)
+
+# ImplicationTable: an Inspect action on matched rows.
+p=&#39;src/compare/ImplicationTable.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;interface ImplicationTableProps {
+  leftConcept: Concept
+  rightConcept: Concept
+  rows: ImplicationRow[]
+}
+
+export default function ImplicationTable({
+  leftConcept,
+  rightConcept,
+  rows,
+}: ImplicationTableProps) {&#34;&#34;&#34;,&#34;&#34;&#34;interface ImplicationTableProps {
+  leftConcept: Concept
+  rightConcept: Concept
+  rows: ImplicationRow[]
+  onInspect: (match: NonNullable&lt;ImplicationRow[&#39;match&#39;]&gt;) =&gt; void
+}
+
+export default function ImplicationTable({
+  leftConcept,
+  rightConcept,
+  rows,
+  onInspect,
+}: ImplicationTableProps) {&#34;&#34;&#34;)
+s = s.replace(&#34;&#34;&#34;        &lt;div&gt;{rightConcept.name} means…&lt;/div&gt;
+      &lt;/div&gt;&#34;&#34;&#34;,&#34;&#34;&#34;        &lt;div&gt;{rightConcept.name} means…&lt;/div&gt;
+        &lt;div /&gt;
+      &lt;/div&gt;&#34;&#34;&#34;)
+s = s.replace(&#34;&#34;&#34;          &lt;FactCell fact={row.right} /&gt;
+        &lt;/div&gt;
+      ))}&#34;&#34;&#34;,&#34;&#34;&#34;          &lt;FactCell fact={row.right} /&gt;
+          &lt;div className={styles.center}&gt;
+            {row.match &amp;&amp; (
+              &lt;button
+                className={styles.inspect}
+                onClick={() =&gt; onInspect(row.match!)}
+                aria-label={`Inspect mapping ${row.match.mapping.id}`}
+              &gt;
+                Inspect
+              &lt;/button&gt;
+            )}
+          &lt;/div&gt;
+        &lt;/div&gt;
+      ))}&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+
+p=&#39;src/compare/ImplicationTable.module.css&#39;
+s=open(p).read()
+s = s.replace(&#34;  grid-template-columns: 1.5fr 0.7fr 0.7fr;&#34;,
+              &#34;  grid-template-columns: 1.5fr 0.7fr 0.7fr auto;&#34;)
+s += &#34;&#34;&#34;
+.inspect {
+  border: 1px solid #d7d7d0;
+  background: #fafaf7;
+  padding: 5px 9px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.inspect:hover {
+  background: var(--soft);
+}
+&#34;&#34;&#34;
+open(p,&#39;w&#39;).write(s)
+PY
+echo ok</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-16-02-055Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-16-02-055Z" class="timestamp-link"><time datetime="2026-09-06T20:16:02.055Z" data-timestamp="2026-09-06T20:16:02.055Z">2026-09-06T20:16:02.055Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>ok</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-16-03-826Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-16-03-826Z" class="timestamp-link"><time datetime="2026-09-06T20:16:03.826Z" data-timestamp="2026-09-06T20:16:03.826Z">2026-09-06T20:16:03.826Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now ComparePage — the section restructure, derived link, and drawer removal flow.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-16-21-125Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-16-21-125Z" class="timestamp-link"><time datetime="2026-09-06T20:16:21.125Z" data-timestamp="2026-09-06T20:16:21.125Z">2026-09-06T20:16:21.125Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01QeFKgDWMxkyDqu3P5k43BU">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Restructure ComparePage: evidence header, derived link, drawer removal</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/compare/ComparePage.tsx&#39;
+s=open(p).read()
+
+s = s.replace(&#34;&#34;&#34;import { useCallback, useState } from &#39;react&#39;
+&#34;&#34;&#34;,&#34;&#34;&#34;import { useCallback, useRef, useState } from &#39;react&#39;
+import { useNavigate } from &#39;react-router&#39;
+&#34;&#34;&#34;)
+s = s.replace(&#34;import MappingEvidence from &#39;./MappingEvidence.tsx&#39;\n&#34;, &#34;&#34;)
+s = s.replace(&#34;import { evidence, headline, implicationRows, takeaway } from &#39;./comparisonPresentation.ts&#39;&#34;,
+              &#34;import { headline, implicationRows, takeaway } from &#39;./comparisonPresentation.ts&#39;&#34;)
+s = s.replace(&#34;import type { Concept } from &#39;../api/types.ts&#39;\n&#34;, &#34;&#34;)
+s = s.replace(&#34;&#34;&#34;import { api } from &#39;../api/client.ts&#39;&#34;&#34;&#34;,
+              &#34;&#34;&#34;import { api } from &#39;../api/client.ts&#39;\nimport type { FactMatch } from &#39;../api/types.ts&#39;&#34;&#34;&#34;)
+
+s = s.replace(&#34;&#34;&#34;  const [pair, setPair] = useState&lt;{ left: string; right: string }&gt;()
+  const [inspecting, setInspecting] = useState(false)&#34;&#34;&#34;,
+&#34;&#34;&#34;  const [pair, setPair] = useState&lt;{ left: string; right: string }&gt;()
+  const [inspected, setInspected] = useState&lt;FactMatch&gt;()
+  const evidenceRef = useRef&lt;HTMLDivElement&gt;(null)
+  const navigate = useNavigate()&#34;&#34;&#34;)
+
+old = &#34;&#34;&#34;          &lt;div className={styles.derivation}&gt;
+            &lt;span className={styles.derivedFrom}&gt;
+              Derived from {result.matchedFacts.length} confirmed{&#39; &#39;}
+              {result.matchedFacts.length === 1 ? &#39;mapping&#39; : &#39;mappings&#39;}
+            &lt;/span&gt;
+            &lt;span className={styles.unknownNote}&gt;Unmapped means unknown, not different.&lt;/span&gt;
+          &lt;/div&gt;&#34;&#34;&#34;
+new = &#34;&#34;&#34;          &lt;div className={styles.derivation}&gt;
+            &lt;button
+              className={styles.derivedFrom}
+              onClick={() =&gt;
+                evidenceRef.current?.scrollIntoView({ behavior: &#39;smooth&#39;, block: &#39;start&#39; })
+              }
+            &gt;
+              Derived from {result.matchedFacts.length} confirmed{&#39; &#39;}
+              {result.matchedFacts.length === 1 ? &#39;mapping&#39; : &#39;mappings&#39;} ↓
+            &lt;/button&gt;
+            &lt;span className={styles.unknownNote}&gt;Unmapped means unknown, not different.&lt;/span&gt;
+          &lt;/div&gt;&#34;&#34;&#34;
+assert old in s
+s = s.replace(old, new)
+
+old = &#34;&#34;&#34;          &lt;div className=&#34;section-title&#34;&gt;How does the right concept relate to the left?&lt;/div&gt;
+          &lt;div className=&#34;section-sub&#34;&gt;
+            Use the left concept as the anchor. See which of its meanings match something in the
+            right concept, and what the right concept adds.
+          &lt;/div&gt;
+
+          &lt;ImplicationTable
+            leftConcept={result.leftConcept}
+            rightConcept={result.rightConcept}
+            rows={implicationRows(result)}
+          /&gt;
+
+          &lt;MappingEvidence evidence={evidence(result)} onInspect={() =&gt; setInspecting(true)} /&gt;
+
+          {result.matchedFacts[0] &amp;&amp; (
+            &lt;MappingDetailDrawer
+              open={inspecting}
+              onClose={() =&gt; setInspecting(false)}
+              match={result.matchedFacts[0]}
+              leftConcept={result.leftConcept}
+              rightConcept={result.rightConcept}
+            /&gt;
+          )}&#34;&#34;&#34;
+new = &#34;&#34;&#34;          &lt;div className={styles.evidenceHeader} ref={evidenceRef}&gt;
+            &lt;div className=&#34;section-title&#34;&gt;Mapping evidence&lt;/div&gt;
+            &lt;button className={styles.manageLink} onClick={() =&gt; navigate(&#39;/mappings&#39;)}&gt;
+              Manage mappings →
+            &lt;/button&gt;
+          &lt;/div&gt;
+
+          &lt;ImplicationTable
+            leftConcept={result.leftConcept}
+            rightConcept={result.rightConcept}
+            rows={implicationRows(result)}
+            onInspect={setInspected}
+          /&gt;
+
+          {inspected &amp;&amp; (
+            &lt;MappingDetailDrawer
+              open
+              onClose={() =&gt; setInspected(undefined)}
+              match={inspected}
+              leftConcept={result.leftConcept}
+              rightConcept={result.rightConcept}
+              onRemove={() =&gt; void removeMapping(inspected)}
+            /&gt;
+          )}&#34;&#34;&#34;
+assert old in s
+s = s.replace(old, new)
+
+# Removing a mapping from the drawer must refresh what the page derived from it.
+s = s.replace(&#34;&#34;&#34;  if (concepts.error) {&#34;&#34;&#34;,
+&#34;&#34;&#34;  const removeMapping = async (match: FactMatch) =&gt; {
+    if (!window.confirm(&#39;Remove this mapping? Comparisons will no longer use it.&#39;)) {
+      return
+    }
+    await api.deleteMapping(match.mapping.id)
+    setInspected(undefined)
+    comparison.reload()
+  }
+
+  if (concepts.error) {&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+
+p=&#39;src/compare/ComparePage.module.css&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;.derivedFrom {
+  display: block;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent);
+}&#34;&#34;&#34;,&#34;&#34;&#34;.derivedFrom {
+  display: block;
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 13px;
+  font-weight: 800;
+  color: var(--accent);
+  cursor: pointer;
+  text-align: left;
+}
+
+.derivedFrom:hover {
+  text-decoration: underline;
+}&#34;&#34;&#34;)
+s += &#34;&#34;&#34;
+.evidenceHeader {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 14px;
+}
+
+.manageLink {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  color: var(--accent);
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.manageLink:hover {
+  text-decoration: underline;
+}
+&#34;&#34;&#34;
+open(p,&#39;w&#39;).write(s)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx tsc -b 2&gt;&amp;1 | head -6</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-16-24-294Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-16-24-294Z" class="timestamp-link"><time datetime="2026-09-06T20:16:24.294Z" data-timestamp="2026-09-06T20:16:24.294Z">2026-09-06T20:16:24.294Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>src/compare/ComparePage.tsx(142,15): error TS2322: Type &#x27;{ open: true; onClose: () =&gt; void; match: FactMatch; leftConcept: Concept; rightConcept: Concept; onRemove: () =&gt; undefined; }&#x27; is not assignable to type &#x27;IntrinsicAttributes &amp; MappingDetailDrawerProps&#x27;.
+  Property &#x27;onRemove&#x27; does not exist on type &#x27;IntrinsicAttributes &amp; MappingDetailDrawerProps&#x27;.
+src/compare/comparisonPresentation.test.ts(5,10): error TS2305: Module &#x27;&quot;./comparisonPresentation.ts&quot;&#x27; has no exported member &#x27;evidence&#x27;.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-16-26-958Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-16-26-958Z" class="timestamp-link"><time datetime="2026-09-06T20:16:26.958Z" data-timestamp="2026-09-06T20:16:26.958Z">2026-09-06T20:16:26.958Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Expected — now the drawer itself: labels leading, id as metadata, rationale below, and Remove.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-16-40-961Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-16-40-961Z" class="timestamp-link"><time datetime="2026-09-06T20:16:40.961Z" data-timestamp="2026-09-06T20:16:40.961Z">2026-09-06T20:16:40.961Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01ENVVKAndVFF6nT5BqKQp5d">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Rewrite the detail drawer: labels lead, id metadata, rationale, Remove</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cat &gt; src/mappings/MappingDetailDrawer.tsx &lt;&lt;&#39;EOF&#39;
+import Drawer from &#39;../components/Drawer.tsx&#39;
+import type { Concept, FactMatch } from &#39;../api/types.ts&#39;
+import styles from &#39;./MappingDetailDrawer.module.css&#39;
+
+interface MappingDetailDrawerProps {
+  open: boolean
+  onClose: () =&gt; void
+  match: FactMatch
+  leftConcept: Concept
+  rightConcept: Concept
+  /** Optional: removing the mapping this drawer is showing. */
+  onRemove?: () =&gt; void
+}
+
+/**
+ * Shows the two facts a mapping relates, and the provenance Concept Lens holds for the claim.
+ *
+ * &lt;p&gt;The facts lead. Their ids are kept as quiet metadata rather than headline text, and the
+ * rationale sits below them so it explains the mapping instead of introducing it.
+ */
+export default function MappingDetailDrawer({
+  open,
+  onClose,
+  match,
+  leftConcept,
+  rightConcept,
+  onRemove,
+}: MappingDetailDrawerProps) {
+  const sides = [
+    { concept: leftConcept, fact: match.leftFact },
+    { concept: rightConcept, fact: match.rightFact },
+  ]
+
+  const details = [
+    { label: &#39;RELATIONSHIP&#39;, value: &#39;Same meaning&#39; },
+    {
+      label: &#39;STATUS&#39;,
+      value: match.mapping.status === &#39;CONFIRMED&#39; ? &#39;Confirmed&#39; : match.mapping.status,
+    },
+    { label: &#39;REVIEWED BY&#39;, value: match.mapping.reviewedBy },
+    { label: &#39;RELATION ID&#39;, value: match.mapping.id },
+  ]
+
+  return (
+    &lt;Drawer
+      open={open}
+      onClose={onClose}
+      eyebrow=&#34;MAPPING EVIDENCE&#34;
+      title=&#34;Confirmed mapping&#34;
+      lead=&#34;These two facts are confirmed as stating the same thing.&#34;
+    &gt;
+      {sides.map((side, index) =&gt; (
+        &lt;div key={side.fact.id}&gt;
+          {index &gt; 0 &amp;&amp; &lt;div className={styles.equals}&gt;≡&lt;/div&gt;}
+          &lt;div className={styles.factCard}&gt;
+            &lt;div className={styles.owner}&gt;
+              {side.concept.sourceSystem.toUpperCase()} · {side.concept.name.toUpperCase()}
+            &lt;/div&gt;
+            &lt;div className={styles.label}&gt;{side.fact.label}&lt;/div&gt;
+            &lt;div className={styles.description}&gt;{side.fact.description}&lt;/div&gt;
+            &lt;div className={styles.factId}&gt;{side.fact.id}&lt;/div&gt;
+          &lt;/div&gt;
+        &lt;/div&gt;
+      ))}
+
+      &lt;div className={styles.rationale}&gt;
+        &lt;small&gt;RATIONALE&lt;/small&gt;
+        &lt;div&gt;{match.mapping.rationale || &#39;No rationale recorded.&#39;}&lt;/div&gt;
+      &lt;/div&gt;
+
+      &lt;div className={styles.details}&gt;
+        {details.map((detail) =&gt; (
+          &lt;div key={detail.label}&gt;
+            &lt;small&gt;{detail.label}&lt;/small&gt;
+            &lt;b&gt;{detail.value}&lt;/b&gt;
+          &lt;/div&gt;
+        ))}
+      &lt;/div&gt;
+
+      {onRemove &amp;&amp; (
+        &lt;div className={styles.actions}&gt;
+          &lt;button className={styles.remove} onClick={onRemove}&gt;
+            Remove mapping
+          &lt;/button&gt;
+        &lt;/div&gt;
+      )}
+    &lt;/Drawer&gt;
+  )
+}
+EOF
+python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/mappings/MappingDetailDrawer.module.css&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;.native {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  margin-top: 5px;
+}&#34;&#34;&#34;,&#34;&#34;&#34;.label {
+  font-size: 15px;
+  font-weight: 850;
+  margin-top: 5px;
+}
+
+.factId {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #999;
+  margin-top: 7px;
+  overflow-wrap: anywhere;
+}&#34;&#34;&#34;)
+s += &#34;&#34;&#34;
+.rationale {
+  border-top: 1px solid var(--line);
+  padding-top: 15px;
+  margin-top: 17px;
+  font-size: 12px;
+  color: #666;
+  line-height: 1.5;
+}
+
+.rationale small {
+  display: block;
+  font-size: 9px;
+  letter-spacing: 0.08em;
+  color: #888;
+  margin-bottom: 4px;
+}
+
+.actions {
+  display: flex;
+  justify-content: flex-end;
+  margin-top: 20px;
+}
+
+.remove {
+  border: 1px solid #d9c3bf;
+  background: #fbefed;
+  color: #7a4a3d;
+  padding: 9px 12px;
+  border-radius: 9px;
+  font-size: 12px;
+  font-weight: 800;
+  cursor: pointer;
+}
+&#34;&#34;&#34;
+open(p,&#39;w&#39;).write(s)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx tsc -b 2&gt;&amp;1 | head -4</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-16-44-488Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-16-44-488Z" class="timestamp-link"><time datetime="2026-09-06T20:16:44.488Z" data-timestamp="2026-09-06T20:16:44.488Z">2026-09-06T20:16:44.488Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>src/compare/comparisonPresentation.test.ts(5,10): error TS2305: Module &#x27;&quot;./comparisonPresentation.ts&quot;&#x27; has no exported member &#x27;evidence&#x27;.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-16-46-722Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-16-46-722Z" class="timestamp-link"><time datetime="2026-09-06T20:16:46.722Z" data-timestamp="2026-09-06T20:16:46.722Z">2026-09-06T20:16:46.722Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now the mappings list, the suggested-chip highlight, and the tests.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-16-59-835Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-16-59-835Z" class="timestamp-link"><time datetime="2026-09-06T20:16:59.835Z" data-timestamp="2026-09-06T20:16:59.835Z">2026-09-06T20:16:59.835Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_014L2JwHYq3s5pZbnLj66xBb">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Labels lead in mappings list, drawer remove, active suggestion chip</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+# MappingRow: labels lead, ids become quiet metadata.
+p=&#39;src/mappings/MappingRow.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;        &lt;div className={styles.nodes}&gt;
+          {mapping.leftFactId}
+          &lt;br /&gt;↕&lt;br /&gt;
+          {mapping.rightFactId}
+        &lt;/div&gt;
+        &lt;div className={styles.relation}&gt;{mapping.type.replace(&#39;_&#39;, &#39; &#39;)}&lt;/div&gt;
+        {leftFact &amp;&amp; rightFact &amp;&amp; (
+          &lt;div className={styles.labels}&gt;
+            {leftFact.label} ↔ {rightFact.label}
+          &lt;/div&gt;
+        )}&#34;&#34;&#34;,
+&#34;&#34;&#34;        &lt;div className={styles.nodes}&gt;
+          {leftFact?.label ?? mapping.leftFactId}
+          &lt;br /&gt;↕&lt;br /&gt;
+          {rightFact?.label ?? mapping.rightFactId}
+        &lt;/div&gt;
+        &lt;div className={styles.relation}&gt;{mapping.type.replace(&#39;_&#39;, &#39; &#39;)}&lt;/div&gt;
+        &lt;div className={styles.factIds}&gt;
+          {mapping.leftFactId} ↔ {mapping.rightFactId}
+        &lt;/div&gt;&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+
+p=&#39;src/mappings/MappingRow.module.css&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;.nodes {
+  font-family: var(--font-mono);
+  font-size: 12px;
+  line-height: 1.55;
+}&#34;&#34;&#34;,&#34;&#34;&#34;.nodes {
+  font-size: 14px;
+  font-weight: 750;
+  line-height: 1.5;
+}&#34;&#34;&#34;)
+s = s.replace(&#34;&#34;&#34;.labels {
+  font-size: 12px;
+  color: #666;
+  line-height: 1.45;
+  margin-bottom: 7px;
+}&#34;&#34;&#34;,&#34;&#34;&#34;.factIds {
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #999;
+  line-height: 1.45;
+  margin-bottom: 7px;
+  overflow-wrap: anywhere;
+}&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+
+# MappingsPage: let the drawer remove the mapping it is showing.
+p=&#39;src/mappings/MappingsPage.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;            leftConcept={inspectedMatch.leftConcept}
+            rightConcept={inspectedMatch.rightConcept}
+          /&gt;&#34;&#34;&#34;,&#34;&#34;&#34;            leftConcept={inspectedMatch.leftConcept}
+            rightConcept={inspectedMatch.rightConcept}
+            onRemove={() =&gt; {
+              const target = inspected
+              setInspected(undefined)
+              void remove(target)
+            }}
+          /&gt;&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+
+# ConceptPicker: highlight the chip matching the current pair, either way round.
+p=&#39;src/compare/ConceptPicker.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;  const suggestions = SUGGESTED.flatMap((pair) =&gt; {
+    const left = byId.get(pair.left)
+    const right = byId.get(pair.right)
+    return left &amp;&amp; right ? [{ ...pair, label: `${left.name} ↔ ${right.name}` }] : []
+  })&#34;&#34;&#34;,&#34;&#34;&#34;  // A suggestion matches the current pair in either direction: A↔B and B↔A are the same pair.
+  const selected = new Set([leftConceptId, rightConceptId])
+  const suggestions = SUGGESTED.flatMap((pair) =&gt; {
+    const left = byId.get(pair.left)
+    const right = byId.get(pair.right)
+    if (!left || !right) {
+      return []
+    }
+    const active = selected.has(pair.left) &amp;&amp; selected.has(pair.right)
+    return [{ ...pair, active, label: `${left.name} ↔ ${right.name}` }]
+  })&#34;&#34;&#34;)
+s = s.replace(&#34;&#34;&#34;              &lt;button
+                key={suggestion.label}
+                onClick={() =&gt; onChange(suggestion.left, suggestion.right)}
+              &gt;&#34;&#34;&#34;,&#34;&#34;&#34;              &lt;button
+                key={suggestion.label}
+                className={suggestion.active ? styles.active : undefined}
+                aria-pressed={suggestion.active}
+                onClick={() =&gt; onChange(suggestion.left, suggestion.right)}
+              &gt;&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+
+open(&#39;src/compare/ConceptPicker.module.css&#39;,&#39;a&#39;).write(&#34;&#34;&#34;
+.suggested button.active {
+  border-color: var(--accent);
+  background: #edf2ef;
+  color: var(--accent);
+  font-weight: 800;
+}
+&#34;&#34;&#34;)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx tsc -b 2&gt;&amp;1 | head -4</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-17-03-315Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-17-03-315Z" class="timestamp-link"><time datetime="2026-09-06T20:17:03.315Z" data-timestamp="2026-09-06T20:17:03.315Z">2026-09-06T20:17:03.315Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>src/compare/comparisonPresentation.test.ts(5,10): error TS2305: Module &#x27;&quot;./comparisonPresentation.ts&quot;&#x27; has no exported member &#x27;evidence&#x27;.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-17-11-881Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-17-11-881Z" class="timestamp-link"><time datetime="2026-09-06T20:17:11.881Z" data-timestamp="2026-09-06T20:17:11.881Z">2026-09-06T20:17:11.881Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_013qoGH2PRReTbVujcBVzg1z">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Update presentation tests and run the suite</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+import re
+p=&#39;src/compare/comparisonPresentation.test.ts&#39;
+s=open(p).read()
+s = s.replace(&#34;import { evidence, headline, implicationRows, takeaway, vennShape } from &#39;./comparisonPresentation.ts&#39;&#34;,
+              &#34;import { headline, implicationRows, takeaway, vennShape } from &#39;./comparisonPresentation.ts&#39;&#34;)
+# The proof panel is gone, so its tests go with it.
+start = s.index(&#34;describe(&#39;evidence&#39;, () =&gt; {&#34;)
+s = s[:start].rstrip() + &#39;\n&#39;
+# Partial-overlap interpretation is now the title alone.
+s = s.replace(&#34;&#34;&#34;  it(&#39;acknowledges confirmed shared meaning while withholding a verdict&#39;, () =&gt; {
+    const result = takeaway(NOT_ESTABLISHED)
+
+    expect(result.title).toBe(&#39;They share meaning, but the relationship is not established.&#39;)
+    expect(result.copy).toContain(&#39;1 confirmed shared meaning&#39;)
+    expect(result.copy).toContain(&#39;unknown, not different&#39;)
+  })&#34;&#34;&#34;,&#34;&#34;&#34;  it(&#39;states the partial case in one line, with no duplicate explanation&#39;, () =&gt; {
+    const result = takeaway(NOT_ESTABLISHED)
+
+    expect(result.title).toBe(
+      &#39;They share some meaning, but the overall relationship is not established.&#39;,
+    )
+    expect(result.copy).toBeUndefined()
+  })&#34;&#34;&#34;)
+# Rows now carry the mapping behind a match.
+s = s.replace(&#34;&#34;&#34;    expect(rows[1].right).toBeNull()
+    expect(rows[2].left).toBeNull()&#34;&#34;&#34;,&#34;&#34;&#34;    expect(rows[0].match?.mapping.id).toBe(&#39;rel_018&#39;)
+    expect(rows[1].right).toBeNull()
+    expect(rows[1].match).toBeUndefined()
+    expect(rows[2].left).toBeNull()&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx tsc -b 2&gt;&amp;1 | head -4; echo &#34;--- tests ---&#34;; npx vitest run 2&gt;&amp;1 | grep -aE &#39;Tests |Files |FAIL|×|Unable to find&#39; | head -12</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-17-16-941Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-17-16-941Z" class="timestamp-link"><time datetime="2026-09-06T20:17:16.941Z" data-timestamp="2026-09-06T20:17:16.941Z">2026-09-06T20:17:16.941Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>--- tests ---
+     × compares the first two published concepts on load 8ms
+     × says what the demo catalog contains and that the result is derived 1ms
+     × labels unmatched facts as unconfirmed rather than exclusive 1ms
+     × renders the matched and unmatched facts from the comparison 1ms
+     × requests a new comparison when the concepts are swapped 2ms
+     × opens the mapping drawer with the real evidence 1ms
+     × reports a failure to load concepts 0ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 7 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/compare/ComparePage.test.tsx &gt; ComparePage &gt; compares the first two published concepts on load
+ FAIL  src/compare/ComparePage.test.tsx &gt; ComparePage &gt; says what the demo catalog contains and that the result is derived
+ FAIL  src/compare/ComparePage.test.tsx &gt; ComparePage &gt; labels unmatched facts as unconfirmed rather than exclusive
+ FAIL  src/compare/ComparePage.test.tsx &gt; ComparePage &gt; renders the matched and unmatched facts from the comparison</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-17-19-745Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-17-19-745Z" class="timestamp-link"><time datetime="2026-09-06T20:17:19.745Z" data-timestamp="2026-09-06T20:17:19.745Z">2026-09-06T20:17:19.745Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-17-20-217Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-17-20-217Z" class="timestamp-link"><time datetime="2026-09-06T20:17:20.217Z" data-timestamp="2026-09-06T20:17:20.217Z">2026-09-06T20:17:20.217Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>All ComparePage tests — <code>useNavigate</code> now needs a Router context that the bare render doesn't provide.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-17-21-427Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-17-21-427Z" class="timestamp-link"><time datetime="2026-09-06T20:17:21.427Z" data-timestamp="2026-09-06T20:17:21.427Z">2026-09-06T20:17:21.427Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_011sYyBzv4e31kopWAiE4CiS">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Confirm the cause</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx vitest run src/compare/ComparePage.test.tsx 2&gt;&amp;1 | grep -aE &#39;Error|useNavigate|Router&#39; | head -4</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-17-24-503Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-17-24-503Z" class="timestamp-link"><time datetime="2026-09-06T20:17:24.503Z" data-timestamp="2026-09-06T20:17:24.503Z">2026-09-06T20:17:24.503Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Error: useNavigate() may be used only in the context of a &lt;Router&gt; component.
+ ❯ useNavigateUnstable node_modules/react-router/dist/development/lib/hooks.js:276:2
+ ❯ useNavigate node_modules/react-router/dist/development/lib/hooks.js:273:45
+     28|   const navigate = useNavigate()</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-17-30-332Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-17-30-332Z" class="timestamp-link"><time datetime="2026-09-06T20:17:30.332Z" data-timestamp="2026-09-06T20:17:30.332Z">2026-09-06T20:17:30.332Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_015US1eCwm6vminEhY8WqmgU">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Wrap ComparePage tests in a router and rerun</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/compare/ComparePage.test.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;import { afterEach, describe, expect, it, vi } from &#39;vitest&#39;
+
+import { installApiStub } from &#39;../test/apiStub.ts&#39;
+import ComparePage from &#39;./ComparePage.tsx&#39;&#34;&#34;&#34;,
+&#34;&#34;&#34;import { MemoryRouter } from &#39;react-router&#39;
+import { afterEach, describe, expect, it, vi } from &#39;vitest&#39;
+
+import { installApiStub } from &#39;../test/apiStub.ts&#39;
+import ComparePage from &#39;./ComparePage.tsx&#39;
+
+/** ComparePage navigates to the Mappings page, so it needs a router around it. */
+function renderPage() {
+  return render(
+    &lt;MemoryRouter&gt;
+      &lt;ComparePage /&gt;
+    &lt;/MemoryRouter&gt;,
+  )
+}&#34;&#34;&#34;)
+s = s.replace(&#34;render(&lt;ComparePage /&gt;)&#34;, &#34;renderPage()&#34;)
+open(p,&#39;w&#39;).write(s)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx vitest run 2&gt;&amp;1 | grep -aE &#39;Tests |Files |FAIL|×|Unable to find|expected&#39; | head -12</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-17-33-269Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-17-33-269Z" class="timestamp-link"><time datetime="2026-09-06T20:17:33.269Z" data-timestamp="2026-09-06T20:17:33.269Z">2026-09-06T20:17:33.269Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     × says what the demo catalog contains and that the result is derived 16ms
+     × opens the mapping drawer with the real evidence 49ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 2 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/compare/ComparePage.test.tsx &gt; ComparePage &gt; says what the demo catalog contains and that the result is derived
+TestingLibraryElementError: Unable to find an element with the text: /Derived from 1 confirmed mapping$/. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+ FAIL  src/compare/ComparePage.test.tsx &gt; ComparePage &gt; opens the mapping drawer with the real evidence
+TestingLibraryElementError: Unable to find an accessible element with the role &quot;button&quot; and name &quot;Inspect mapping&quot;
+ Test Files  1 failed | 3 passed (4)
+      Tests  2 failed | 26 passed (28)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-17-53-860Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-17-53-860Z" class="timestamp-link"><time datetime="2026-09-06T20:17:53.860Z" data-timestamp="2026-09-06T20:17:53.860Z">2026-09-06T20:17:53.860Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-17-54-561Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-17-54-561Z" class="timestamp-link"><time datetime="2026-09-06T20:17:54.561Z" data-timestamp="2026-09-06T20:17:54.561Z">2026-09-06T20:17:54.561Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Both are correctly stale. Updating them and adding coverage for the new behaviour.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-18-13-034Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-18-13-034Z" class="timestamp-link"><time datetime="2026-09-06T20:18:13.034Z" data-timestamp="2026-09-06T20:18:13.034Z">2026-09-06T20:18:13.034Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01W4WwbDM7CijfUwdX7rhRf4">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Update and extend ComparePage tests</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/compare/ComparePage.test.tsx&#39;
+s=open(p).read()
+
+s = s.replace(&#34;&#34;&#34;import { MemoryRouter } from &#39;react-router&#39;&#34;&#34;&#34;,
+              &#34;&#34;&#34;import { MemoryRouter, Route, Routes } from &#39;react-router&#39;&#34;&#34;&#34;)
+s = s.replace(&#34;&#34;&#34;/** ComparePage navigates to the Mappings page, so it needs a router around it. */
+function renderPage() {
+  return render(
+    &lt;MemoryRouter&gt;
+      &lt;ComparePage /&gt;
+    &lt;/MemoryRouter&gt;,
+  )
+}&#34;&#34;&#34;,&#34;&#34;&#34;/** ComparePage navigates to the Mappings page, so it needs a router around it. */
+function renderPage() {
+  return render(
+    &lt;MemoryRouter initialEntries={[&#39;/compare&#39;]}&gt;
+      &lt;Routes&gt;
+        &lt;Route path=&#34;/compare&#34; element={&lt;ComparePage /&gt;} /&gt;
+        &lt;Route path=&#34;/mappings&#34; element={&lt;div&gt;Mappings page&lt;/div&gt;} /&gt;
+      &lt;/Routes&gt;
+    &lt;/MemoryRouter&gt;,
+  )
+}&#34;&#34;&#34;)
+
+s = s.replace(&#34;    expect(screen.getByText(/Derived from 1 confirmed mapping$/)).toBeInTheDocument()&#34;,
+              &#34;    expect(screen.getByRole(&#39;button&#39;, { name: /Derived from 1 confirmed mapping/ })).toBeInTheDocument()&#34;)
+
+s = s.replace(&#34;&#34;&#34;  it(&#39;opens the mapping drawer with the real evidence&#39;, async () =&gt; {
+    const user = userEvent.setup()
+    installApiStub()
+    renderPage()
+
+    await screen.findByText(&#39;Returnable vs Refundable&#39;)
+    await user.click(screen.getByRole(&#39;button&#39;, { name: &#39;Inspect mapping&#39; }))
+
+    const drawer = screen.getByRole(&#39;complementary&#39;)
+    expect(within(drawer).getByText(&#39;rel_018&#39;)).toBeInTheDocument()
+    expect(within(drawer).getByText(&#39;Domain reviewer&#39;)).toBeInTheDocument()
+  })&#34;&#34;&#34;,
+&#34;&#34;&#34;  it(&#39;inspects the mapping on the row that was clicked, not the first one&#39;, async () =&gt; {
+    const user = userEvent.setup()
+    const second = {
+      ...MAPPING,
+      id: &#39;rel_099&#39;,
+      leftFactId: RETURNABLE.facts[1].id,
+      rightFactId: REFUNDABLE.facts[1].id,
+      rationale: &#39;Second confirmed match.&#39;,
+    }
+    installApiStub({
+      comparison: {
+        ...NOT_ESTABLISHED,
+        matchedFacts: [
+          ...NOT_ESTABLISHED.matchedFacts,
+          { leftFact: RETURNABLE.facts[1], rightFact: REFUNDABLE.facts[1], mapping: second },
+        ],
+        unmatchedLeftFacts: [],
+        unmatchedRightFacts: [],
+      },
+    })
+    renderPage()
+
+    await screen.findByText(&#39;Returnable vs Refundable&#39;)
+    await user.click(screen.getByRole(&#39;button&#39;, { name: &#39;Inspect mapping rel_099&#39; }))
+
+    const drawer = screen.getByRole(&#39;complementary&#39;)
+    expect(within(drawer).getByText(&#39;rel_099&#39;)).toBeInTheDocument()
+    expect(within(drawer).getByText(&#39;Second confirmed match.&#39;)).toBeInTheDocument()
+    expect(within(drawer).queryByText(&#39;rel_018&#39;)).not.toBeInTheDocument()
+  })
+
+  it(&#39;leads with fact labels and keeps ids as metadata in the drawer&#39;, async () =&gt; {
+    const user = userEvent.setup()
+    installApiStub()
+    renderPage()
+
+    await screen.findByText(&#39;Returnable vs Refundable&#39;)
+    await user.click(screen.getByRole(&#39;button&#39;, { name: &#39;Inspect mapping rel_018&#39; }))
+
+    const drawer = screen.getByRole(&#39;complementary&#39;)
+    expect(within(drawer).getByText(&#39;Has a valid return path&#39;)).toBeInTheDocument()
+    expect(within(drawer).getByText(&#39;Confirmed mapping&#39;)).toBeInTheDocument()
+    expect(within(drawer).getByText(MAPPING.rationale)).toBeInTheDocument()
+  })
+
+  it(&#39;removes a mapping from the drawer and refreshes the comparison&#39;, async () =&gt; {
+    const user = userEvent.setup()
+    vi.spyOn(window, &#39;confirm&#39;).mockReturnValue(true)
+    const stub = installApiStub()
+    renderPage()
+
+    await screen.findByText(&#39;Returnable vs Refundable&#39;)
+    await user.click(screen.getByRole(&#39;button&#39;, { name: &#39;Inspect mapping rel_018&#39; }))
+    await user.click(screen.getByRole(&#39;button&#39;, { name: &#39;Remove mapping&#39; }))
+
+    await waitFor(() =&gt;
+      expect(stub.calls).toContainEqual(
+        expect.objectContaining({ method: &#39;DELETE&#39;, url: &#39;/api/mappings/rel_018&#39; }),
+      ),
+    )
+    expect(screen.queryByRole(&#39;complementary&#39;)).not.toBeInTheDocument()
+    // The comparison is refetched so the derived result and Venn reflect the removal.
+    expect(stub.calls.filter((call) =&gt; call.url.startsWith(&#39;/api/compare&#39;)).length).toBeGreaterThan(1)
+  })
+
+  it(&#39;navigates to the Mappings page from the evidence header&#39;, async () =&gt; {
+    const user = userEvent.setup()
+    installApiStub()
+    renderPage()
+
+    await screen.findByText(&#39;Returnable vs Refundable&#39;)
+    await user.click(screen.getByRole(&#39;button&#39;, { name: &#39;Manage mappings →&#39; }))
+
+    expect(screen.getByText(&#39;Mappings page&#39;)).toBeInTheDocument()
+  })
+
+  it(&#39;highlights the suggested chip for the current pair, in either direction&#39;, async () =&gt; {
+    const user = userEvent.setup()
+    installApiStub()
+    renderPage()
+
+    await screen.findByText(&#39;Returnable vs Refundable&#39;)
+    const chip = screen.getByRole(&#39;button&#39;, { name: &#39;Returnable ↔ Refundable&#39; })
+    expect(chip).toHaveAttribute(&#39;aria-pressed&#39;, &#39;true&#39;)
+
+    await user.click(screen.getByRole(&#39;button&#39;, { name: &#39;Swap concepts&#39; }))
+
+    await screen.findByText(&#39;Refundable vs Returnable&#39;)
+    expect(screen.getByRole(&#39;button&#39;, { name: &#39;Returnable ↔ Refundable&#39; })).toHaveAttribute(
+      &#39;aria-pressed&#39;,
+      &#39;true&#39;,
+    )
+  })&#34;&#34;&#34;)
+
+s = s.replace(&#34;import { installApiStub } from &#39;../test/apiStub.ts&#39;&#34;,
+              &#34;import { MAPPING, NOT_ESTABLISHED, REFUNDABLE, RETURNABLE, installApiStub } from &#39;../test/apiStub.ts&#39;&#34;)
+open(p,&#39;w&#39;).write(s)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx vitest run 2&gt;&amp;1 | grep -aE &#39;Tests |Files |FAIL|×|Unable to find|expected&#39; | head -12</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-18-18-578Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-18-18-578Z" class="timestamp-link"><time datetime="2026-09-06T20:18:18.578Z" data-timestamp="2026-09-06T20:18:18.578Z">2026-09-06T20:18:18.578Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     × highlights the suggested chip for the current pair, in either direction 1029ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/compare/ComparePage.test.tsx &gt; ComparePage &gt; highlights the suggested chip for the current pair, in either direction
+TestingLibraryElementError: Unable to find an element with the text: Refundable vs Returnable. This could be because the text is broken up by multiple elements. In this case, you can provide a function for your text matcher to make your matcher more flexible.
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 31 passed (32)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-18-23-707Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-18-23-707Z" class="timestamp-link"><time datetime="2026-09-06T20:18:23.707Z" data-timestamp="2026-09-06T20:18:23.707Z">2026-09-06T20:18:23.707Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-18-24-377Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-18-24-377Z" class="timestamp-link"><time datetime="2026-09-06T20:18:24.377Z" data-timestamp="2026-09-06T20:18:24.377Z">2026-09-06T20:18:24.377Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Stub limitation, not a product bug — it returns a canned comparison, so the title doesn't change on swap. Fixing the test to assert on the request instead.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-18-30-043Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-18-30-043Z" class="timestamp-link"><time datetime="2026-09-06T20:18:30.043Z" data-timestamp="2026-09-06T20:18:30.043Z">2026-09-06T20:18:30.043Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Sjzf9krpmKhqTPE6gQDAB3">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Fix the chip test and rerun with lint</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/compare/ComparePage.test.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;    await user.click(screen.getByRole(&#39;button&#39;, { name: &#39;Swap concepts&#39; }))
+
+    await screen.findByText(&#39;Refundable vs Returnable&#39;)
+    expect(screen.getByRole(&#39;button&#39;, { name: &#39;Returnable ↔ Refundable&#39; })).toHaveAttribute(
+      &#39;aria-pressed&#39;,
+      &#39;true&#39;,
+    )&#34;&#34;&#34;,&#34;&#34;&#34;    await user.click(screen.getByRole(&#39;button&#39;, { name: &#39;Swap concepts&#39; }))
+
+    // The stub returns a canned comparison, so assert on the request the swap triggered.
+    await waitFor(() =&gt;
+      expect(stub.calls.map((call) =&gt; call.url)).toContain(
+        &#39;/api/compare?left=payments.refundable&amp;right=returns.returnable&#39;,
+      ),
+    )
+    expect(screen.getByRole(&#39;button&#39;, { name: &#39;Returnable ↔ Refundable&#39; })).toHaveAttribute(
+      &#39;aria-pressed&#39;,
+      &#39;true&#39;,
+    )&#34;&#34;&#34;)
+s = s.replace(&#34;&#34;&#34;    const user = userEvent.setup()
+    installApiStub()
+    renderPage()
+
+    await screen.findByText(&#39;Returnable vs Refundable&#39;)
+    const chip = screen.getByRole(&#39;button&#39;, { name: &#39;Returnable ↔ Refundable&#39; })&#34;&#34;&#34;,&#34;&#34;&#34;    const user = userEvent.setup()
+    const stub = installApiStub()
+    renderPage()
+
+    await screen.findByText(&#39;Returnable vs Refundable&#39;)
+    const chip = screen.getByRole(&#39;button&#39;, { name: &#39;Returnable ↔ Refundable&#39; })&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx vitest run 2&gt;&amp;1 | grep -aE &#39;Tests |Files |FAIL|×&#39; | head -6
+echo &#34;--- lint ---&#34;; npm run lint 2&gt;&amp;1 | tail -4</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-18-35-495Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-18-35-495Z" class="timestamp-link"><time datetime="2026-09-06T20:18:35.495Z" data-timestamp="2026-09-06T20:18:35.495Z">2026-09-06T20:18:35.495Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre> Test Files  4 passed (4)
+      Tests  32 passed (32)
+--- lint ---
+
+&gt; concept-lens-frontend@0.0.1 lint
+&gt; eslint .</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-18-41-613Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-18-41-613Z" class="timestamp-link"><time datetime="2026-09-06T20:18:41.613Z" data-timestamp="2026-09-06T20:18:41.613Z">2026-09-06T20:18:41.613Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01F9FaXdRKRj97nGtR8DuTr4">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Full build and confirm out-of-scope areas untouched</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd /Users/shimantikas/Experiments/concept-lens &amp;&amp; export JAVA_HOME=$(/usr/libexec/java_home -v 21) &amp;&amp; ./mvnw -B clean package 2&gt;&amp;1 | grep -aE &#39;Tests run: [0-9]+, Fail.*Skipped: [0-9]+$|Results:|BUILD|Total time|Tests  &#39; | tail -6
+echo
+echo &#34;--- seed/model/engine untouched? ---&#34;
+git status --porcelain -- src/main/java/com/conceptlens/model src/main/java/com/conceptlens/comparison src/main/java/com/conceptlens/semantic src/main/resources/demo | sed &#39;s/^/  /&#39;; echo &#34;  (empty = untouched)&#34;
+echo &#34;--- shared Drawer untouched? ---&#34;
+git status --porcelain -- frontend/src/components/Drawer.tsx | sed &#39;s/^/  /&#39;; echo &#34;  (empty = untouched)&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-19-10-334Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-19-10-334Z" class="timestamp-link"><time datetime="2026-09-06T20:19:10.334Z" data-timestamp="2026-09-06T20:19:10.334Z">2026-09-06T20:19:10.334Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>[INFO] Results:
+[INFO] Tests run: 92, Failures: 0, Errors: 0, Skipped: 0
+[INFO]       Tests  32 passed (32)
+[INFO] BUILD SUCCESS
+[INFO] Total time:  25.479 s
+
+--- seed/model/engine untouched? ---
+  (empty = untouched)
+--- shared Drawer untouched? ---
+  (empty = untouched)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-19-28-349Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-19-28-349Z" class="timestamp-link"><time datetime="2026-09-06T20:19:28.349Z" data-timestamp="2026-09-06T20:19:28.349Z">2026-09-06T20:19:28.349Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Done. <strong>124 tests</strong> (92 backend, 32 frontend), build green, lint clean.</p>
+<h2>What changed</h2>
+<p><strong>Compare page structure</strong>
+- The section under the Venn is now <strong>Mapping evidence</strong>; "How does the right concept relate to the left?" and its subtitle are gone.
+- The standalone <strong>WHY DOES LENS SHOW THIS AS SHARED?</strong> proof block is deleted — <code>MappingEvidence.tsx</code> and its CSS removed, and <code>evidence()</code> deleted from the presentation layer.
+- <strong>Derived from N confirmed mappings ↓</strong> is now a button that smooth-scrolls to the Mapping evidence header.
+- <strong>Manage mappings →</strong> in that header navigates to <code>/mappings</code>. No filtering infrastructure.
+- The table gained a fourth column with <strong>Inspect</strong> on matched rows only. Each row carries its own <code>FactMatch</code>, so it opens <em>that</em> mapping — <code>matchedFacts[0]</code> is no longer hardcoded anywhere.</p>
+<p><strong>Drawer</strong>
+- Eyebrow <code>MAPPING EVIDENCE</code>, title <code>Confirmed mapping</code>. The source-systems provenance copy is gone.
+- On your note about prominence: I did <strong>not</strong> put the rationale in <code>lead</code>. It renders <em>above</em> the fact cards, so it would have been read first. The lead is one neutral line — "These two facts are confirmed as stating the same thing." — and the rationale sits in its own labelled block below the facts. Shared <code>Drawer</code> API untouched.
+- Facts now lead with <strong>label</strong>, then description, with the fact id as small grey metadata underneath.
+- <strong>Remove mapping</strong> added. From Compare it confirms, deletes, closes, and reloads the comparison so the badge, derived count, table and Venn all update. From Mappings it reuses the existing row-removal path.</p>
+<p><strong>Elsewhere</strong>
+- Mappings list: fact <strong>labels</strong> are now the primary text; the <code>leftFactId ↔ rightFactId</code> pair is small grey metadata.
+- Suggested chips highlight the active pair, order-insensitively, via <code>aria-pressed</code> plus an accent style — works whether the pair came from a chip or the dropdowns.
+- Partial-overlap interpretation is one line: <em>"They share some meaning, but the overall relationship is not established."</em> Body paragraph removed; the count lives only in the derivation link.</p>
+<p><strong>Untouched, as verified by <code>git status</code>:</strong> the model, <code>ComparisonEngine</code>, <code>SemanticGraph</code>, seed data, and the shared <code>Drawer</code>.</p>
+<h2>Worth checking manually</h2>
+<ol>
+<li><strong>Mappings page look changed most.</strong> Inverting label/id prominence altered that page's visual anchor more than anywhere else — worth a glance to confirm it reads well.</li>
+<li><strong>The Inspect column changes table proportions.</strong> Grid went <code>1.5fr .7fr .7fr</code> → <code>1.5fr .7fr .7fr auto</code>. On BuyerCountry ↔ BillingCountry every row has an Inspect button; on Returnable ↔ Refundable only one does, so the column is mostly empty. Check that doesn't look lopsided.</li>
+<li><strong>Smooth scroll</strong> — jsdom can't test it, so I only asserted the button exists and is labelled. Please click it in a browser.</li>
+<li><strong>Remove from the Compare drawer</strong> is the most valuable flow to try by hand: Shipped vs Delivered → Inspect → Remove mapping → the badge should flip to <code>NOT ESTABLISHED</code> and the Venn to two separate circles. Then <strong>Reset demo data</strong> to restore.</li>
+<li><strong>Drawer with an empty rationale</strong> falls back to "No rationale recorded." — only reachable via the add form with a blank note.</li>
+</ol>
+<p>One test-only note: the API stub returns a canned comparison regardless of the requested pair, so the swap test asserts on the outgoing request rather than a changed title. Product behaviour is unaffected, but it's a stub limitation to know about if you extend those tests.</p></div></div></div>
+<div class="message user" id="msg-2026-09-06T20-34-42-211Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-06T20-34-42-211Z" class="timestamp-link"><time datetime="2026-09-06T20:34:42.211Z" data-timestamp="2026-09-06T20:34:42.211Z">2026-09-06T20:34:42.211Z</time></a></div><div class="message-content">
+<div class="user-content"><p>in the hero change "Compare any two concepts." to "Understand how concepts across systems relate.". change "Choose concepts defined by different systems and see what they mean, what they imply, and where they differ." to "Compare independently owned concepts using confirmed semantic mappings." remove "EXPLORE MEANING ACROSS SYSTEMS" replace Mapping Evidence with How they relate. add a small description: See what's confirmed as shared and what has no confirmed match. also fix the table overflow by removing the fourth Inspect column. put Confirmed · Inspect inside the Relationship cell below Same meaning and go back to the 3-column layout.</p>
+<p>remove the raw fact ids from this table too. keep them as metadata in Inspect. keep the existing BuyerCountry means... / Relationship / BillingCountry means... headers and Manage mappings →.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-35-11-786Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-35-11-786Z" class="timestamp-link"><time datetime="2026-09-06T20:35:11.786Z" data-timestamp="2026-09-06T20:35:11.786Z">2026-09-06T20:35:11.786Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-35-12-474Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-35-12-474Z" class="timestamp-link"><time datetime="2026-09-06T20:35:12.474Z" data-timestamp="2026-09-06T20:35:12.474Z">2026-09-06T20:35:12.474Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01QrUn61HicLFJKUcac6hXQ4">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find references to the strings being changed</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd frontend &amp;&amp; grep -rn &#34;Compare any two concepts\|EXPLORE MEANING\|Mapping evidence\|valid_return_path&#39;&#34; src --include=&#39;*.tsx&#39; --include=&#39;*.ts&#39; | sed &#39;s/^/  /&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-35-12-640Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-35-12-640Z" class="timestamp-link"><time datetime="2026-09-06T20:35:12.640Z" data-timestamp="2026-09-06T20:35:12.640Z">2026-09-06T20:35:12.640Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  src/App.test.tsx:22:    expect(screen.getByRole(&#x27;heading&#x27;, { name: &#x27;Compare any two concepts.&#x27; })).toBeInTheDocument()
+  src/test/apiStub.ts:16:      id: &#x27;returns.returnable.valid_return_path&#x27;,
+  src/test/apiStub.ts:53:  leftFactId: &#x27;returns.returnable.valid_return_path&#x27;,
+  src/compare/ComparePage.tsx:19:  eyebrow: &#x27;EXPLORE MEANING ACROSS SYSTEMS&#x27;,
+  src/compare/ComparePage.tsx:20:  title: &#x27;Compare any two concepts.&#x27;,
+  src/compare/ComparePage.tsx:122:            &lt;div className=&quot;section-title&quot;&gt;Mapping evidence&lt;/div&gt;
+  src/compare/ComparePage.test.tsx:66:    expect(screen.getByText(&#x27;returns.returnable.valid_return_path&#x27;)).toBeInTheDocument()</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-35-20-566Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-35-20-566Z" class="timestamp-link"><time datetime="2026-09-06T20:35:20.566Z" data-timestamp="2026-09-06T20:35:20.566Z">2026-09-06T20:35:20.566Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_015PPhfVzwummtJHVRRw9Fru">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Update hero copy and section heading</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+# Hero: eyebrow becomes optional so Compare can drop it.
+p=&#39;src/components/Hero.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;interface HeroProps {
+  eyebrow: string&#34;&#34;&#34;,&#34;&#34;&#34;interface HeroProps {
+  eyebrow?: string&#34;&#34;&#34;)
+s = s.replace(&#34;&#34;&#34;      &lt;div className=&#34;eyebrow&#34;&gt;{eyebrow}&lt;/div&gt;&#34;&#34;&#34;,
+              &#34;&#34;&#34;      {eyebrow &amp;&amp; &lt;div className=&#34;eyebrow&#34;&gt;{eyebrow}&lt;/div&gt;}&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+
+p=&#39;src/compare/ComparePage.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;const HERO = {
+  eyebrow: &#39;EXPLORE MEANING ACROSS SYSTEMS&#39;,
+  title: &#39;Compare any two concepts.&#39;,
+  lead: &#39;Choose concepts defined by different systems and see what they mean, what they imply, and where they differ.&#39;,
+}&#34;&#34;&#34;,&#34;&#34;&#34;const HERO = {
+  title: &#39;Understand how concepts across systems relate.&#39;,
+  lead: &#39;Compare independently owned concepts using confirmed semantic mappings.&#39;,
+}&#34;&#34;&#34;)
+s = s.replace(&#34;&#34;&#34;          &lt;div className={styles.evidenceHeader} ref={evidenceRef}&gt;
+            &lt;div className=&#34;section-title&#34;&gt;Mapping evidence&lt;/div&gt;
+            &lt;button className={styles.manageLink} onClick={() =&gt; navigate(&#39;/mappings&#39;)}&gt;
+              Manage mappings →
+            &lt;/button&gt;
+          &lt;/div&gt;&#34;&#34;&#34;,&#34;&#34;&#34;          &lt;div className={styles.evidenceHeader} ref={evidenceRef}&gt;
+            &lt;div&gt;
+              &lt;div className=&#34;section-title&#34;&gt;How they relate&lt;/div&gt;
+              &lt;div className=&#34;section-sub&#34;&gt;
+                See what’s confirmed as shared and what has no confirmed match.
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;button className={styles.manageLink} onClick={() =&gt; navigate(&#39;/mappings&#39;)}&gt;
+              Manage mappings →
+            &lt;/button&gt;
+          &lt;/div&gt;&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+PY
+grep -n &#39;HERO\|How they relate&#39; src/compare/ComparePage.tsx | head -5 | sed &#39;s/^/  /&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-35-25-757Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-35-25-757Z" class="timestamp-link"><time datetime="2026-09-06T20:35:25.757Z" data-timestamp="2026-09-06T20:35:25.757Z">2026-09-06T20:35:25.757Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  18:const HERO = {
+  59:        &lt;Hero {...HERO} /&gt;
+  69:      &lt;Hero {...HERO} meta={catalog} /&gt;
+  122:              &lt;div className=&quot;section-title&quot;&gt;How they relate&lt;/div&gt;</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-35-28-446Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-35-28-446Z" class="timestamp-link"><time datetime="2026-09-06T20:35:28.446Z" data-timestamp="2026-09-06T20:35:28.446Z">2026-09-06T20:35:28.446Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Now the table: back to three columns, ids out, <code>Confirmed · Inspect</code> inside the relationship cell.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-35-40-139Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-35-40-139Z" class="timestamp-link"><time datetime="2026-09-06T20:35:40.139Z" data-timestamp="2026-09-06T20:35:40.139Z">2026-09-06T20:35:40.139Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01HBATcnHiUuXiYr8TQS3MFN">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Restore 3-column table, drop ids, inline Confirmed · Inspect</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/compare/ImplicationTable.tsx&#39;
+s=open(p).read()
+
+# Fact ids move out of the table; they remain metadata in the Inspect drawer.
+s = s.replace(&#34;&#34;&#34;  return (
+    &lt;div&gt;
+      &lt;span className={styles.factName}&gt;{fact.label}&lt;/span&gt;
+      &lt;span className={styles.factNative}&gt;{fact.id}&lt;/span&gt;
+    &lt;/div&gt;
+  )&#34;&#34;&#34;,&#34;&#34;&#34;  return &lt;div className={styles.factName}&gt;{fact.label}&lt;/div&gt;&#34;&#34;&#34;)
+
+# Back to three columns: the header loses its spacer cell.
+s = s.replace(&#34;&#34;&#34;        &lt;div&gt;{rightConcept.name} means…&lt;/div&gt;
+        &lt;div /&gt;
+      &lt;/div&gt;&#34;&#34;&#34;,&#34;&#34;&#34;        &lt;div&gt;{rightConcept.name} means…&lt;/div&gt;
+      &lt;/div&gt;&#34;&#34;&#34;)
+
+# Confirmed · Inspect sits under the pill rather than in a column of its own.
+s = s.replace(&#34;&#34;&#34;          &lt;div className={styles.center}&gt;
+            &lt;span
+              className={
+                row.relationship === NO_MATCH ? `${styles.pill} ${styles.unknown}` : styles.pill
+              }
+            &gt;
+              {row.relationship}
+            &lt;/span&gt;
+          &lt;/div&gt;
+          &lt;FactCell fact={row.right} /&gt;
+          &lt;div className={styles.center}&gt;
+            {row.match &amp;&amp; (
+              &lt;button
+                className={styles.inspect}
+                onClick={() =&gt; onInspect(row.match!)}
+                aria-label={`Inspect mapping ${row.match.mapping.id}`}
+              &gt;
+                Inspect
+              &lt;/button&gt;
+            )}
+          &lt;/div&gt;
+        &lt;/div&gt;&#34;&#34;&#34;,&#34;&#34;&#34;          &lt;div className={styles.center}&gt;
+            &lt;span
+              className={
+                row.relationship === NO_MATCH ? `${styles.pill} ${styles.unknown}` : styles.pill
+              }
+            &gt;
+              {row.relationship}
+            &lt;/span&gt;
+            {row.match &amp;&amp; (
+              &lt;div className={styles.rowMeta}&gt;
+                Confirmed ·{&#39; &#39;}
+                &lt;button
+                  className={styles.inspect}
+                  onClick={() =&gt; onInspect(row.match!)}
+                  aria-label={`Inspect mapping ${row.match.mapping.id}`}
+                &gt;
+                  Inspect
+                &lt;/button&gt;
+              &lt;/div&gt;
+            )}
+          &lt;/div&gt;
+          &lt;FactCell fact={row.right} /&gt;
+        &lt;/div&gt;&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+
+p=&#39;src/compare/ImplicationTable.module.css&#39;
+s=open(p).read()
+s = s.replace(&#34;  grid-template-columns: 1.5fr 0.7fr 0.7fr auto;&#34;,
+              &#34;  grid-template-columns: 1.5fr 0.7fr 0.7fr;&#34;)
+s = s.replace(&#34;&#34;&#34;.factNative {
+  display: block;
+  margin-top: 3px;
+  font-family: var(--font-mono);
+  font-size: 10px;
+  color: #858585;
+}
+&#34;&#34;&#34;, &#34;&#34;)
+s = s.replace(&#34;&#34;&#34;.inspect {
+  border: 1px solid #d7d7d0;
+  background: #fafaf7;
+  padding: 5px 9px;
+  border-radius: 8px;
+  font-size: 11px;
+  font-weight: 800;
+  cursor: pointer;
+  white-space: nowrap;
+}
+
+.inspect:hover {
+  background: var(--soft);
+}&#34;&#34;&#34;,&#34;&#34;&#34;.rowMeta {
+  margin-top: 5px;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+.inspect {
+  border: 0;
+  background: transparent;
+  padding: 0;
+  font-size: 10px;
+  font-weight: 800;
+  color: var(--accent);
+  cursor: pointer;
+}
+
+.inspect:hover {
+  text-decoration: underline;
+}&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+PY
+grep -n &#39;grid-template-columns\|factNative\|rowMeta&#39; src/compare/ImplicationTable.module.css | sed &#39;s/^/  /&#39;
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx tsc -b 2&gt;&amp;1 | head -4</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-35-43-695Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-35-43-695Z" class="timestamp-link"><time datetime="2026-09-06T20:35:43.695Z" data-timestamp="2026-09-06T20:35:43.695Z">2026-09-06T20:35:43.695Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  3:  grid-template-columns: 1.5fr 0.7fr 0.7fr;
+  56:.rowMeta {</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-35-52-514Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-35-52-514Z" class="timestamp-link"><time datetime="2026-09-06T20:35:52.514Z" data-timestamp="2026-09-06T20:35:52.514Z">2026-09-06T20:35:52.514Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_013QSsJ8i1qarmsGnwz9dptw">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Update tests for new copy and table shape</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/App.test.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;expect(screen.getByRole(&#39;heading&#39;, { name: &#39;Compare any two concepts.&#39; })).toBeInTheDocument()&#34;,
+              &#34;expect(\n      screen.getByRole(&#39;heading&#39;, { name: &#39;Understand how concepts across systems relate.&#39; }),\n    ).toBeInTheDocument()&#34;)
+open(p,&#39;w&#39;).write(s)
+
+p=&#39;src/compare/ComparePage.test.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;    expect(screen.getByText(&#39;returns.returnable.valid_return_path&#39;)).toBeInTheDocument()&#34;,
+              &#34;    expect(screen.getByText(&#39;Has a valid return path&#39;)).toBeInTheDocument()\n    // Raw fact ids stay out of the table; they are metadata in the Inspect drawer.\n    expect(screen.queryByText(&#39;returns.returnable.valid_return_path&#39;)).not.toBeInTheDocument()&#34;)
+s = s.replace(&#34;&#34;&#34;  it(&#39;navigates to the Mappings page from the evidence header&#39;, async () =&gt; {&#34;&#34;&#34;,
+&#34;&#34;&#34;  it(&#39;heads the evidence section with how the concepts relate&#39;, async () =&gt; {
+    installApiStub()
+    renderPage()
+
+    await screen.findByText(&#39;Returnable vs Refundable&#39;)
+
+    expect(screen.getByText(&#39;How they relate&#39;)).toBeInTheDocument()
+    expect(
+      screen.getByText(&#39;See what’s confirmed as shared and what has no confirmed match.&#39;),
+    ).toBeInTheDocument()
+    expect(screen.getByText(/^Confirmed ·/)).toBeInTheDocument()
+  })
+
+  it(&#39;navigates to the Mappings page from the evidence header&#39;, async () =&gt; {&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx vitest run 2&gt;&amp;1 | grep -aE &#39;Tests |Files |FAIL|×|Unable to find&#39; | head -8</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-35-56-278Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-35-56-278Z" class="timestamp-link"><time datetime="2026-09-06T20:35:56.278Z" data-timestamp="2026-09-06T20:35:56.278Z">2026-09-06T20:35:56.278Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     × renders the matched and unmatched facts from the comparison 14ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/compare/ComparePage.test.tsx &gt; ComparePage &gt; renders the matched and unmatched facts from the comparison
+ Test Files  1 failed | 3 passed (4)
+      Tests  1 failed | 32 passed (33)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-35-59-152Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-35-59-152Z" class="timestamp-link"><time datetime="2026-09-06T20:35:59.152Z" data-timestamp="2026-09-06T20:35:59.152Z">2026-09-06T20:35:59.152Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_014uFm9EiuzDrn3HiD6UwCif">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Show the failure detail</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx vitest run src/compare/ComparePage.test.tsx 2&gt;&amp;1 | grep -aE &#39;expected|Expecting|Unable|received|elements&#39; | head -8</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-36-02-774Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-36-02-774Z" class="timestamp-link"><time datetime="2026-09-06T20:36:02.774Z" data-timestamp="2026-09-06T20:36:02.774Z">2026-09-06T20:36:02.774Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>TestingLibraryElementError: Found multiple elements with the text: Has a valid return path
+Here are the matching elements:</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-36-08-524Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-36-08-524Z" class="timestamp-link"><time datetime="2026-09-06T20:36:08.524Z" data-timestamp="2026-09-06T20:36:08.524Z">2026-09-06T20:36:08.524Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-36-08-526Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-36-08-526Z" class="timestamp-link"><time datetime="2026-09-06T20:36:08.526Z" data-timestamp="2026-09-06T20:36:08.526Z">2026-09-06T20:36:08.526Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Label appears in both the Venn's shared region and the table — correct behaviour, over-strict matcher.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-36-11-055Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-36-11-055Z" class="timestamp-link"><time datetime="2026-09-06T20:36:11.055Z" data-timestamp="2026-09-06T20:36:11.055Z">2026-09-06T20:36:11.055Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01BN1JjAXHJ4cdKJH2JQGdpf">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Fix matcher and rerun tests plus lint</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/compare/ComparePage.test.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;    expect(screen.getByText(&#39;Has a valid return path&#39;)).toBeInTheDocument()&#34;&#34;&#34;,
+&#34;&#34;&#34;    // The label appears in both the Venn&#39;s shared region and the table.
+    expect(screen.getAllByText(&#39;Has a valid return path&#39;)).not.toHaveLength(0)&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx vitest run 2&gt;&amp;1 | grep -aE &#39;Tests |Files |FAIL|×&#39; | head -5
+echo &#34;--- lint ---&#34;; npm run lint 2&gt;&amp;1 | tail -3</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-36-16-502Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-36-16-502Z" class="timestamp-link"><time datetime="2026-09-06T20:36:16.502Z" data-timestamp="2026-09-06T20:36:16.502Z">2026-09-06T20:36:16.502Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre> Test Files  4 passed (4)
+      Tests  33 passed (33)
+--- lint ---
+&gt; concept-lens-frontend@0.0.1 lint
+&gt; eslint .</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-36-22-354Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-36-22-354Z" class="timestamp-link"><time datetime="2026-09-06T20:36:22.354Z" data-timestamp="2026-09-06T20:36:22.354Z">2026-09-06T20:36:22.354Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_014KqJiTik24CcyPq39U1J8n">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Full build and verify the changes</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd /Users/shimantikas/Experiments/concept-lens &amp;&amp; export JAVA_HOME=$(/usr/libexec/java_home -v 21) &amp;&amp; ./mvnw -B clean package 2&gt;&amp;1 | grep -aE &#39;Tests run: [0-9]+, Fail.*Skipped: [0-9]+$|Results:|BUILD|Total time|Tests  &#39; | tail -5
+echo
+echo &#34;--- table columns + no ids in table ---&#34;
+grep -n &#39;grid-template-columns&#39; frontend/src/compare/ImplicationTable.module.css | sed &#39;s/^/  /&#39;
+grep -c &#39;fact.id&#39; frontend/src/compare/ImplicationTable.tsx | sed &#39;s/^/  fact.id refs in table: /&#39;
+echo &#34;--- hero ---&#34;; sed -n &#39;18,21p&#39; frontend/src/compare/ComparePage.tsx | sed &#39;s/^/  /&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-36-49-692Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-36-49-692Z" class="timestamp-link"><time datetime="2026-09-06T20:36:49.692Z" data-timestamp="2026-09-06T20:36:49.692Z">2026-09-06T20:36:49.692Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>[INFO] Results:
+[INFO] Tests run: 92, Failures: 0, Errors: 0, Skipped: 0
+[INFO]       Tests  33 passed (33)
+[INFO] BUILD SUCCESS
+[INFO] Total time:  24.544 s
+
+--- table columns + no ids in table ---
+  3:  grid-template-columns: 1.5fr 0.7fr 0.7fr;
+  fact.id refs in table: 0
+--- hero ---
+  const HERO = {
+    title: &#x27;Understand how concepts across systems relate.&#x27;,
+    lead: &#x27;Compare independently owned concepts using confirmed semantic mappings.&#x27;,
+  }</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-37-01-894Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-37-01-894Z" class="timestamp-link"><time datetime="2026-09-06T20:37:01.894Z" data-timestamp="2026-09-06T20:37:01.894Z">2026-09-06T20:37:01.894Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Done. <strong>125 tests</strong> (92 backend, 33 frontend), build green, lint clean.</p>
+<h2>Changes</h2>
+<p><strong>Hero</strong>
+- Title → "Understand how concepts across systems relate."
+- Lead → "Compare independently owned concepts using confirmed semantic mappings."
+- Eyebrow removed. <code>Hero.eyebrow</code> became optional — an additive prop change, so the Mappings page keeps its "RELATIONSHIPS ACROSS SYSTEMS" eyebrow untouched.
+- The demo catalog line is unchanged.</p>
+<p><strong>Section heading</strong>
+- "Mapping evidence" → <strong>"How they relate"</strong>, with a <code>section-sub</code>: <em>"See what's confirmed as shared and what has no confirmed match."</em>
+- "Manage mappings →" stays, now baseline-aligned to the title with the description stacked beneath it.</p>
+<p><strong>Table</strong>
+- Back to three columns: <code>1.5fr 0.7fr 0.7fr</code>. The fourth column and its header spacer are gone.
+- <strong>Confirmed · Inspect</strong> now sits inside the Relationship cell, below the pill. <code>Inspect</code> is a small accent-coloured text button rather than a bordered one, since it's inline in 10px metadata.
+- Raw fact ids removed from the table — <code>fact.id</code> no longer appears in <code>ImplicationTable</code> at all. <code>.factNative</code> CSS deleted rather than left dead.
+- Headers unchanged: <code>BuyerCountry means… / Relationship / BillingCountry means…</code>.</p>
+<p>Fact ids remain visible in the Inspect drawer as small grey metadata under each fact's label and description, and as <code>RELATION ID</code> in the details grid.</p>
+<p>Per-row Inspect still opens the specific mapping — the <code>aria-label="Inspect mapping rel_099"</code> targeting is unchanged, so the test proving it isn't <code>matchedFacts[0]</code> still passes.</p>
+<h2>Worth checking</h2>
+<p><strong>Overflow.</strong> Removing both the fourth column and the mono fact ids should have fixed it, but the middle column is now <code>0.7fr</code> (~183px at the 760px max width) carrying both the <code>No confirmed match</code> pill and <code>Confirmed · Inspect</code>. That's comfortable at 10px, but BuyerCountry ↔ BillingCountry is the case to check — three rows, all with Inspect, and the longest concept names in the headers.</p>
+<p>One test note: <code>Has a valid return path</code> now legitimately appears twice on screen — once in the Venn's shared region, once in the table — so that assertion uses <code>getAllByText</code>. Not a defect, just worth knowing the label is intentionally in both places.</p></div></div></div>
+<div class="message user" id="msg-2026-09-06T20-50-40-507Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-06T20-50-40-507Z" class="timestamp-link"><time datetime="2026-09-06T20:50:40.507Z" data-timestamp="2026-09-06T20:50:40.507Z">2026-09-06T20:50:40.507Z</time></a></div><div class="message-content">
+<div class="user-content"><p>while you were working I also added the small seed bridge for Related Concepts. please first check the current repo state and make sure the related-concepts behavior looks coherent with the rest of the UX before changing anything else. if it looks off, tell me exactly what you’d change before editing.</p>
+<p>after that, I want to do submission cleanup:</p>
+<p>clean up ui-mock/. keep only anything that is still useful as a reference for the final submission. remove stale/intermediate mocks and anything that makes it look like the mock is the source of truth. if the folder is no longer useful, tell me whether you recommend deleting it entirely.
+redo README.md from scratch, product-first. it should explain the problem, the idea, how the demo works, the 3 main scenarios, authored fact-level SAME_MEANING mappings vs derived concept-level relationships, architecture at a useful level, how to run locally, deployed URL placeholder if needed, tests, known limitations/future work, and honest time spent. keep it concise enough that someone evaluating the take-home can skim it quickly.
+create the Claude Code transcript using Simon Willison’s claude-code-transcripts: https://github.com/simonw/claude-code-transcripts?tab=readme-ov-file</p>
+<p>important for transcript discovery: I’m using claude-personal, not the default Claude Code account/config, so the sessions may not be under the normal ~/.claude/projects. I previously set up a separate Claude config directory, likely something like ~/.claude-personal/projects. please inspect the actual local directories instead of assuming the default path.</p>
+<p>use the json command on the relevant JSONL session once you find it, since the tool’s normal local picker defaults to ~/.claude/projects. output the transcript to a local folder outside the repo first, include the original session JSON/JSONL with --json, and do not publish it to a gist yet. I want to review it for secrets/private info before sharing.</p>
+<p>the tool docs say install with uv tool install claude-code-transcripts, and a specific JSONL can be converted with something like:</p>
+<p>claude-code-transcripts json /path/to/session.jsonl -o /path/to/output --json</p>
+<p>find the Concept Lens session based on repo/project path + recency rather than just picking the newest file blindly.</p>
+<p>before deleting files or rewriting README, give me:</p>
+<p>what you found for Related Concepts and whether it looks good,
+what you plan to keep/delete in ui-mock,
+the README outline,
+which Claude session file you think is the right transcript and why.</p>
+<p>then wait for my go before making those cleanup/docs/transcript changes.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-50-44-504Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-50-44-504Z" class="timestamp-link"><time datetime="2026-09-06T20:50:44.504Z" data-timestamp="2026-09-06T20:50:44.504Z">2026-09-06T20:50:44.504Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-50-44-506Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-50-44-506Z" class="timestamp-link"><time datetime="2026-09-06T20:50:44.506Z" data-timestamp="2026-09-06T20:50:44.506Z">2026-09-06T20:50:44.506Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Let me inspect the current state before touching anything.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-50-49-634Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-50-49-634Z" class="timestamp-link"><time datetime="2026-09-06T20:50:49.634Z" data-timestamp="2026-09-06T20:50:49.634Z">2026-09-06T20:50:49.634Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_0178JXfF9YhCvcBz4CGyR8bA">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Inspect repo state and the seed bridge</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd /Users/shimantikas/Experiments/concept-lens
+echo &#34;=== git status ===&#34;; git status --porcelain | sed &#39;s/^/  /&#39;
+echo
+echo &#34;=== seed: concepts/facts/mappings ===&#34;
+python3 -c &#34;
+import json
+c=json.load(open(&#39;src/main/resources/demo/concepts.json&#39;)); m=json.load(open(&#39;src/main/resources/demo/mappings.json&#39;))
+print(&#39;  concepts=%d facts=%d mappings=%d&#39; % (len(c), sum(len(x[&#39;facts&#39;]) for x in c), len(m)))
+for x in c:
+    print(&#39;   &#39;, x[&#39;id&#39;], &#39;-&gt;&#39;, [f[&#39;id&#39;].split(&#39;.&#39;)[-1] for f in x[&#39;facts&#39;]])
+print()
+edges=set()
+for mm in m:
+    l=&#39;.&#39;.join(mm[&#39;leftFactId&#39;].split(&#39;.&#39;)[:2]); r=&#39;.&#39;.join(mm[&#39;rightFactId&#39;].split(&#39;.&#39;)[:2])
+    edges.add(frozenset((l,r)))
+    print(&#39;   &#39;, mm[&#39;id&#39;], l, &#39;&lt;-&gt;&#39;, r)
+print(&#39;  distinct concept pairs:&#39;, len(edges))
+&#34;
+echo
+echo &#34;=== is there a RelatedConcepts component? ===&#34;
+find frontend/src -iname &#39;*elated*&#39; | sed &#39;s/^/  /&#39; || echo &#34;  none&#34;
+grep -rln &#39;Related\|related&#39; frontend/src --include=&#39;*.tsx&#39; --include=&#39;*.ts&#39; | sed &#39;s/^/  /&#39; || echo &#34;  no references&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-50-56-247Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-50-56-247Z" class="timestamp-link"><time datetime="2026-09-06T20:50:56.247Z" data-timestamp="2026-09-06T20:50:56.247Z">2026-09-06T20:50:56.247Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>=== git status ===
+   M frontend/src/App.test.tsx
+   M frontend/src/App.tsx
+   M frontend/src/api/client.ts
+   M frontend/src/compare/ComparePage.module.css
+   M frontend/src/compare/ComparePage.test.tsx
+   M frontend/src/compare/ComparePage.tsx
+   M frontend/src/compare/ConceptPicker.module.css
+   M frontend/src/compare/ConceptPicker.tsx
+   M frontend/src/compare/ImplicationTable.module.css
+   M frontend/src/compare/ImplicationTable.tsx
+   D frontend/src/compare/MappingEvidence.module.css
+   D frontend/src/compare/MappingEvidence.tsx
+   M frontend/src/compare/RelationshipVenn.tsx
+   M frontend/src/compare/Takeaway.tsx
+   M frontend/src/compare/comparisonPresentation.test.ts
+   M frontend/src/compare/comparisonPresentation.ts
+   M frontend/src/components/AppHeader.module.css
+   M frontend/src/components/AppHeader.tsx
+   M frontend/src/components/Hero.module.css
+   M frontend/src/components/Hero.tsx
+   M frontend/src/mappings/MappingDetailDrawer.module.css
+   M frontend/src/mappings/MappingDetailDrawer.tsx
+   M frontend/src/mappings/MappingRow.module.css
+   M frontend/src/mappings/MappingRow.tsx
+   M frontend/src/mappings/MappingsPage.tsx
+   M frontend/src/test/apiStub.ts
+   M src/main/java/com/conceptlens/seed/SeedDataLoader.java
+   M src/main/resources/demo/README.md
+   M src/main/resources/demo/concepts.json
+   M src/main/resources/demo/mappings.json
+   M src/test/java/com/conceptlens/api/ComparisonControllerTest.java
+   M src/test/java/com/conceptlens/api/ConceptControllerTest.java
+   M src/test/java/com/conceptlens/api/MappingControllerTest.java
+   M src/test/java/com/conceptlens/comparison/ComparisonEngineTest.java
+   M src/test/java/com/conceptlens/seed/SeedDataLoaderTest.java
+  A  ui-mock/concept_lens_mock_ui_updated.html
+  ?? frontend/src/compare/RelatedComparisons.tsx
+  ?? frontend/src/compare/relatedComparisons.test.ts
+  ?? frontend/src/compare/relatedComparisons.ts
+  ?? src/main/java/com/conceptlens/api/DemoController.java
+  ?? src/test/java/com/conceptlens/api/DemoControllerTest.java
+
+=== seed: concepts/facts/mappings ===
+  concepts=6 facts=16 mappings=6
+    returns.returnable -&gt; [&#x27;valid_return_path&#x27;, &#x27;within_return_window&#x27;, &#x27;not_final_sale&#x27;, &#x27;item_delivered&#x27;]
+    payments.refundable -&gt; [&#x27;refund_path_available&#x27;, &#x27;return_approved&#x27;, &#x27;payment_captured&#x27;]
+    fulfillment.shipped -&gt; [&#x27;left_fulfillment_center&#x27;]
+    delivery.delivered -&gt; [&#x27;left_fulfillment_center&#x27;, &#x27;reached_destination&#x27;]
+    orders.buyercountry -&gt; [&#x27;payment_instrument_country&#x27;, &#x27;country_normalization&#x27;, &#x27;missing_country_behavior&#x27;]
+    payments.billingcountry -&gt; [&#x27;billing_country&#x27;, &#x27;country_normalization&#x27;, &#x27;missing_country_behavior&#x27;]
+
+    rel_018 returns.returnable &lt;-&gt; payments.refundable
+    rel_024 fulfillment.shipped &lt;-&gt; delivery.delivered
+    rel_031 orders.buyercountry &lt;-&gt; payments.billingcountry
+    rel_032 orders.buyercountry &lt;-&gt; payments.billingcountry
+    rel_033 orders.buyercountry &lt;-&gt; payments.billingcountry
+    rel_034 returns.returnable &lt;-&gt; delivery.delivered
+  distinct concept pairs: 4
+
+=== is there a RelatedConcepts component? ===
+  frontend/src/compare/relatedComparisons.test.ts
+  frontend/src/compare/relatedComparisons.ts
+  frontend/src/compare/RelatedComparisons.tsx
+  frontend/src/compare/ComparePage.tsx
+  frontend/src/compare/ComparePage.test.tsx
+  frontend/src/compare/relatedComparisons.test.ts
+  frontend/src/compare/RelatedComparisons.tsx
+  frontend/src/compare/relatedComparisons.ts</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-51-02-719Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-51-02-719Z" class="timestamp-link"><time datetime="2026-09-06T20:51:02.719Z" data-timestamp="2026-09-06T20:51:02.719Z">2026-09-06T20:51:02.719Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-51-03-419Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-51-03-419Z" class="timestamp-link"><time datetime="2026-09-06T20:51:03.419Z" data-timestamp="2026-09-06T20:51:03.419Z">2026-09-06T20:51:03.419Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>The user added a different bridge than we discussed (<code>item_delivered</code> → Delivered, not <code>order_shipped</code> → Shipped) plus a <code>RelatedComparisons</code> feature. Let me examine it.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-51-06-183Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-51-06-183Z" class="timestamp-link"><time datetime="2026-09-06T20:51:06.183Z" data-timestamp="2026-09-06T20:51:06.183Z">2026-09-06T20:51:06.183Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_015iLdPBJCNs6XwpCkd8PX3A">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Inspect the bridge and related-comparisons logic</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd /Users/shimantikas/Experiments/concept-lens
+echo &#34;=== rel_034 + the new fact ===&#34;
+python3 -c &#34;
+import json
+c=json.load(open(&#39;src/main/resources/demo/concepts.json&#39;)); m=json.load(open(&#39;src/main/resources/demo/mappings.json&#39;))
+for x in c:
+    for f in x[&#39;facts&#39;]:
+        if f[&#39;id&#39;].endswith(&#39;item_delivered&#39;): print(&#39;  FACT:&#39;, json.dumps(f, indent=2)[:400])
+for mm in m:
+    if mm[&#39;id&#39;]==&#39;rel_034&#39;: print(&#39;  MAPPING:&#39;, json.dumps(mm, indent=2))
+&#34;
+echo
+echo &#34;=== relatedComparisons.ts ===&#34;
+cat frontend/src/compare/relatedComparisons.ts</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-51-08-236Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-51-08-236Z" class="timestamp-link"><time datetime="2026-09-06T20:51:08.236Z" data-timestamp="2026-09-06T20:51:08.236Z">2026-09-06T20:51:08.236Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>=== rel_034 + the new fact ===
+  FACT: {
+  &quot;id&quot;: &quot;returns.returnable.item_delivered&quot;,
+  &quot;label&quot;: &quot;Item has been delivered&quot;,
+  &quot;description&quot;: &quot;The item&#x27;s delivery has reached its destination.&quot;
+}
+  MAPPING: {
+  &quot;id&quot;: &quot;rel_034&quot;,
+  &quot;leftFactId&quot;: &quot;returns.returnable.item_delivered&quot;,
+  &quot;rightFactId&quot;: &quot;delivery.delivered.reached_destination&quot;,
+  &quot;type&quot;: &quot;SAME_MEANING&quot;,
+  &quot;status&quot;: &quot;CONFIRMED&quot;,
+  &quot;rationale&quot;: &quot;Both facts represent that delivery of the item has reached its destination. Returns uses this state as part of determining return eligibility; Delivery uses it to represent completion of the delivery leg.&quot;,
+  &quot;reviewedBy&quot;: &quot;Domain reviewer&quot;
+}
+
+=== relatedComparisons.ts ===
+import type { Concept, SemanticMapping } from &#x27;../api/types.ts&#x27;
+
+export interface RelatedPair {
+  left: string
+  right: string
+  label: string
+}
+
+function conceptIdByFactId(concepts: Concept[]): Map&lt;string, string&gt; {
+  const index = new Map&lt;string, string&gt;()
+  for (const concept of concepts) {
+    for (const fact of concept.facts) {
+      index.set(fact.id, concept.id)
+    }
+  }
+  return index
+}
+
+/**
+ * Other comparisons worth opening from the pair on screen.
+ *
+ * A confirmed mapping relates the concepts that own its two facts. This lists
+ * undirected pairs that share a vertex with the current pair, excluding the pair
+ * itself. Only direct neighbors are included — a mapping from A to B and B to C
+ * does not recommend A↔C. The comparison API only returns mappings between the
+ * two selected concepts, so this is computed from the full mapping list instead.
+ */
+export function relatedPairs(
+  concepts: Concept[],
+  mappings: SemanticMapping[],
+  leftConceptId: string,
+  rightConceptId: string,
+): RelatedPair[] {
+  const owner = conceptIdByFactId(concepts)
+  const byId = new Map(concepts.map((concept) =&gt; [concept.id, concept]))
+
+  const neighbors = new Map&lt;string, Set&lt;string&gt;&gt;()
+  const addEdge = (from: string, to: string) =&gt; {
+    const existing = neighbors.get(from) ?? new Set&lt;string&gt;()
+    existing.add(to)
+    neighbors.set(from, existing)
+  }
+
+  for (const mapping of mappings) {
+    if (mapping.status !== &#x27;CONFIRMED&#x27;) {
+      continue
+    }
+    const left = owner.get(mapping.leftFactId)
+    const right = owner.get(mapping.rightFactId)
+    if (!left || !right || left === right) {
+      continue
+    }
+    addEdge(left, right)
+    addEdge(right, left)
+  }
+
+  const seen = new Set&lt;string&gt;()
+  const pairs: RelatedPair[] = []
+  const current = new Set([leftConceptId, rightConceptId])
+
+  const addFrom = (anchor: string) =&gt; {
+    for (const other of neighbors.get(anchor) ?? []) {
+      if (current.has(other)) {
+        continue
+      }
+      const key = [anchor, other].sort().join(&#x27;|&#x27;)
+      if (seen.has(key)) {
+        continue
+      }
+      seen.add(key)
+      const leftConcept = byId.get(anchor)
+      const rightConcept = byId.get(other)
+      if (!leftConcept || !rightConcept) {
+        continue
+      }
+      pairs.push({
+        left: anchor,
+        right: other,
+        label: `${leftConcept.name} ↔ ${rightConcept.name}`,
+      })
+    }
+  }
+
+  addFrom(leftConceptId)
+  addFrom(rightConceptId)
+  return pairs
+}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-51-32-057Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-51-32-057Z" class="timestamp-link"><time datetime="2026-09-06T20:51:32.057Z" data-timestamp="2026-09-06T20:51:32.057Z">2026-09-06T20:51:32.057Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-51-34-310Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-51-34-310Z" class="timestamp-link"><time datetime="2026-09-06T20:51:34.310Z" data-timestamp="2026-09-06T20:51:34.310Z">2026-09-06T20:51:34.310Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01BKs84iYSKjDznaTrWq8Mb5">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Inspect the RelatedComparisons component and its wiring</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd /Users/shimantikas/Experiments/concept-lens
+echo &#34;=== RelatedComparisons.tsx ===&#34;; cat frontend/src/compare/RelatedComparisons.tsx
+echo
+echo &#34;=== how ComparePage wires it ===&#34;
+grep -n -i &#39;related\|mappings&#39; frontend/src/compare/ComparePage.tsx | sed &#39;s/^/  /&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-51-34-391Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-51-34-391Z" class="timestamp-link"><time datetime="2026-09-06T20:51:34.391Z" data-timestamp="2026-09-06T20:51:34.391Z">2026-09-06T20:51:34.391Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>=== RelatedComparisons.tsx ===
+import picker from &#x27;./ConceptPicker.module.css&#x27;
+import type { RelatedPair } from &#x27;./relatedComparisons.ts&#x27;
+
+interface RelatedComparisonsProps {
+  pairs: RelatedPair[]
+  onSelect: (leftConceptId: string, rightConceptId: string) =&gt; void
+}
+
+export default function RelatedComparisons({ pairs, onSelect }: RelatedComparisonsProps) {
+  if (pairs.length === 0) {
+    return null
+  }
+
+  return (
+    &lt;&gt;
+      &lt;div className=&quot;section-title&quot;&gt;Related concepts&lt;/div&gt;
+      &lt;div className=&quot;section-sub&quot;&gt;
+        Explore other concept comparisons connected by confirmed mappings.
+      &lt;/div&gt;
+      &lt;div className={picker.suggested}&gt;
+        {pairs.map((pair) =&gt; (
+          &lt;button key={`${pair.left}|${pair.right}`} onClick={() =&gt; onSelect(pair.left, pair.right)}&gt;
+            {pair.label}
+          &lt;/button&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/&gt;
+  )
+}
+
+=== how ComparePage wires it ===
+  9:import MappingDetailDrawer from &#x27;../mappings/MappingDetailDrawer.tsx&#x27;
+  13:import RelatedComparisons from &#x27;./RelatedComparisons.tsx&#x27;
+  17:import { relatedPairs } from &#x27;./relatedComparisons.ts&#x27;
+  22:  lead: &#x27;Compare independently owned concepts using confirmed semantic mappings.&#x27;,
+  49:  const loadMappings = useCallback(() =&gt; api.mappings(), [])
+  50:  const mappings = useAsync(loadMappings)
+  115:              {result.matchedFacts.length === 1 ? &#x27;mapping&#x27; : &#x27;mappings&#x27;} ↓
+  120:          &lt;div className=&quot;section-title&quot;&gt;How are these concepts related?&lt;/div&gt;
+  132:            &lt;button className={styles.manageLink} onClick={() =&gt; navigate(&#x27;/mappings&#x27;)}&gt;
+  133:              Manage mappings →
+  144:          {mappings.data &amp;&amp; (
+  145:            &lt;RelatedComparisons
+  146:              pairs={relatedPairs(available, mappings.data, left, right)}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-51-46-398Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-51-46-398Z" class="timestamp-link"><time datetime="2026-09-06T20:51:46.398Z" data-timestamp="2026-09-06T20:51:46.398Z">2026-09-06T20:51:46.398Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01GWTFokojfra7bMA4JB2PAu">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Build and verify derived states plus related chips per pair</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">export JAVA_HOME=$(/usr/libexec/java_home -v 21) &amp;&amp; ./mvnw -B clean package 2&gt;&amp;1 | grep -aE &#39;Tests run: [0-9]+, Fail.*Skipped: [0-9]+$|Results:|BUILD|Tests  |ERROR\]&#39; | tail -6
+echo
+echo &#34;=== derived relationships + related chips per pair (live) ===&#34;
+pkill -f &#39;concept-lens-0.0.1-SNAPSHOT.jar&#39; 2&gt;/dev/null; lsof -ti:8080 2&gt;/dev/null | xargs -r kill -9 2&gt;/dev/null; sleep 1
+&#34;$JAVA_HOME/bin/java&#34; -jar target/concept-lens-0.0.1-SNAPSHOT.jar &gt; /tmp/app.log 2&gt;&amp;1 &amp;
+for i in $(seq 1 40); do curl -s -o /dev/null http://localhost:8080/api/mappings 2&gt;/dev/null &amp;&amp; break; perl -e &#39;select(undef,undef,undef,0.5)&#39;; done
+python3 - &lt;&lt;&#39;PY&#39;
+import json,urllib.request,itertools
+B=&#39;http://localhost:8080&#39;
+g=lambda u: json.load(urllib.request.urlopen(B+u))
+concepts=g(&#39;/api/concepts&#39;); mappings=g(&#39;/api/mappings&#39;)
+owner={f[&#39;id&#39;]:c[&#39;id&#39;] for c in concepts for f in c[&#39;facts&#39;]}
+name={c[&#39;id&#39;]:c[&#39;name&#39;] for c in concepts}
+nb={}
+for m in mappings:
+    a,b=owner[m[&#39;leftFactId&#39;]],owner[m[&#39;rightFactId&#39;]]
+    if a!=b: nb.setdefault(a,set()).add(b); nb.setdefault(b,set()).add(a)
+pairs=[(&#39;returns.returnable&#39;,&#39;payments.refundable&#39;),(&#39;fulfillment.shipped&#39;,&#39;delivery.delivered&#39;),
+       (&#39;orders.buyercountry&#39;,&#39;payments.billingcountry&#39;),(&#39;returns.returnable&#39;,&#39;delivery.delivered&#39;)]
+for l,r in pairs:
+    res=g(f&#39;/api/compare?left={l}&amp;right={r}&#39;)
+    cur={l,r}; seen=set(); chips=[]
+    for anchor in (l,r):
+        for o in sorted(nb.get(anchor,())):
+            if o in cur: continue
+            k=tuple(sorted((anchor,o)))
+            if k in seen: continue
+            seen.add(k); chips.append(f&#39;{name[anchor]} ↔ {name[o]}&#39;)
+    print(f&#34;  {name[l]:14} vs {name[r]:16} {res[&#39;relationship&#39;]:20} matched={len(res[&#39;matchedFacts&#39;])} &#34;
+          f&#34;unmatched={len(res[&#39;unmatchedLeftFacts&#39;])}/{len(res[&#39;unmatchedRightFacts&#39;])}  chips={chips or &#39;NONE&#39;}&#34;)
+PY
+pkill -f &#39;concept-lens-0.0.1-SNAPSHOT.jar&#39;; rm -f /tmp/app.log</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-52-16-836Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-52-16-836Z" class="timestamp-link"><time datetime="2026-09-06T20:52:16.836Z" data-timestamp="2026-09-06T20:52:16.836Z">2026-09-06T20:52:16.836Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>[INFO] Results:
+[INFO] Tests run: 92, Failures: 0, Errors: 0, Skipped: 0
+[INFO]       Tests  44 passed (44)
+[INFO] BUILD SUCCESS
+
+=== derived relationships + related chips per pair (live) ===
+  Returnable     vs Refundable       NOT_ESTABLISHED      matched=1 unmatched=3/2  chips=[&#x27;Returnable ↔ Delivered&#x27;]
+  Shipped        vs Delivered        RIGHT_INCLUDES_LEFT  matched=1 unmatched=0/1  chips=[&#x27;Delivered ↔ Returnable&#x27;]
+  BuyerCountry   vs BillingCountry   SAME_MEANING         matched=3 unmatched=0/0  chips=NONE
+  Returnable     vs Delivered        NOT_ESTABLISHED      matched=1 unmatched=3/1  chips=[&#x27;Returnable ↔ Refundable&#x27;, &#x27;Delivered ↔ Shipped&#x27;]</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-52-37-756Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-52-37-756Z" class="timestamp-link"><time datetime="2026-09-06T20:52:37.756Z" data-timestamp="2026-09-06T20:52:37.756Z">2026-09-06T20:52:37.756Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-52-38-514Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-52-38-514Z" class="timestamp-link"><time datetime="2026-09-06T20:52:38.514Z" data-timestamp="2026-09-06T20:52:38.514Z">2026-09-06T20:52:38.514Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Build green — 92 backend + 44 frontend. Let me check render order and section headings.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-52-39-175Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-52-39-175Z" class="timestamp-link"><time datetime="2026-09-06T20:52:39.175Z" data-timestamp="2026-09-06T20:52:39.175Z">2026-09-06T20:52:39.175Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01Pofkhh2246WGijeW1aWN4u">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Read the Compare page render order</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">sed -n &#39;108,155p&#39; frontend/src/compare/ComparePage.tsx</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-52-39-225Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-52-39-225Z" class="timestamp-link"><time datetime="2026-09-06T20:52:39.225Z" data-timestamp="2026-09-06T20:52:39.225Z">2026-09-06T20:52:39.225Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>            &lt;button
+              className={styles.derivedFrom}
+              onClick={() =&gt;
+                evidenceRef.current?.scrollIntoView({ behavior: &#x27;smooth&#x27;, block: &#x27;start&#x27; })
+              }
+            &gt;
+              Derived from {result.matchedFacts.length} confirmed{&#x27; &#x27;}
+              {result.matchedFacts.length === 1 ? &#x27;mapping&#x27; : &#x27;mappings&#x27;} ↓
+            &lt;/button&gt;
+            &lt;span className={styles.unknownNote}&gt;Unmapped means unknown, not different.&lt;/span&gt;
+          &lt;/div&gt;
+
+          &lt;div className=&quot;section-title&quot;&gt;How are these concepts related?&lt;/div&gt;
+          &lt;div className=&quot;section-sub&quot;&gt;{headline(result).summary}&lt;/div&gt;
+
+          &lt;RelationshipVenn result={result} /&gt;
+
+          &lt;div className={styles.evidenceHeader} ref={evidenceRef}&gt;
+            &lt;div&gt;
+              &lt;div className=&quot;section-title&quot;&gt;How they relate&lt;/div&gt;
+              &lt;div className=&quot;section-sub&quot;&gt;
+                See what’s confirmed as shared and what has no confirmed match.
+              &lt;/div&gt;
+            &lt;/div&gt;
+            &lt;button className={styles.manageLink} onClick={() =&gt; navigate(&#x27;/mappings&#x27;)}&gt;
+              Manage mappings →
+            &lt;/button&gt;
+          &lt;/div&gt;
+
+          &lt;ImplicationTable
+            leftConcept={result.leftConcept}
+            rightConcept={result.rightConcept}
+            rows={implicationRows(result)}
+            onInspect={setInspected}
+          /&gt;
+
+          {mappings.data &amp;&amp; (
+            &lt;RelatedComparisons
+              pairs={relatedPairs(available, mappings.data, left, right)}
+              onSelect={(nextLeft, nextRight) =&gt; setPair({ left: nextLeft, right: nextRight })}
+            /&gt;
+          )}
+
+          {inspected &amp;&amp; (
+            &lt;MappingDetailDrawer
+              open
+              onClose={() =&gt; setInspected(undefined)}
+              match={inspected}</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-52-42-556Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-52-42-556Z" class="timestamp-link"><time datetime="2026-09-06T20:52:42.556Z" data-timestamp="2026-09-06T20:52:42.556Z">2026-09-06T20:52:42.556Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-52-42-564Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-52-42-564Z" class="timestamp-link"><time datetime="2026-09-06T20:52:42.564Z" data-timestamp="2026-09-06T20:52:42.564Z">2026-09-06T20:52:42.564Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Related Concepts looks sound. Now locating the transcript session.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-52-46-150Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-52-46-150Z" class="timestamp-link"><time datetime="2026-09-06T20:52:46.150Z" data-timestamp="2026-09-06T20:52:46.150Z">2026-09-06T20:52:46.150Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01VEjAPPc65kptyAQ7ZES3Uy">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Find Claude session files for this project</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">echo &#34;=== candidate config dirs ===&#34;
+for d in ~/.claude ~/.claude-personal; do [ -d &#34;$d&#34; ] &amp;&amp; echo &#34;  $d exists&#34;; done
+echo
+echo &#34;=== projects dirs containing &#39;concept&#39; ===&#34;
+for base in ~/.claude/projects ~/.claude-personal/projects; do
+  [ -d &#34;$base&#34; ] || continue
+  echo &#34;  base: $base&#34;
+  ls -1 &#34;$base&#34; 2&gt;/dev/null | grep -i concept | sed &#39;s/^/    /&#39;
+done
+echo
+echo &#34;=== JSONL sessions under any concept-lens project dir (size, mtime) ===&#34;
+find ~/.claude ~/.claude-personal -path &#39;*concept*&#39; -name &#39;*.jsonl&#39; 2&gt;/dev/null -exec ls -lh {} \; | awk &#39;{print &#34;  &#34;$5&#34;  &#34;$6&#34; &#34;$7&#34; &#34;$8&#34;  &#34;$9}&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-52-48-076Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-52-48-076Z" class="timestamp-link"><time datetime="2026-09-06T20:52:48.076Z" data-timestamp="2026-09-06T20:52:48.076Z">2026-09-06T20:52:48.076Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>=== candidate config dirs ===
+  /Users/shimantikas/.claude exists
+  /Users/shimantikas/.claude-personal exists
+
+=== projects dirs containing &#x27;concept&#x27; ===
+  base: /Users/shimantikas/.claude/projects
+  base: /Users/shimantikas/.claude-personal/projects
+    -Users-shimantikas-Experiments-concept-lens
+
+=== JSONL sessions under any concept-lens project dir (size, mtime) ===
+  3.1M  Sep 6 13:52  /Users/shimantikas/.claude-personal/projects/-Users-shimantikas-Experiments-concept-lens/ad7d85e1-200c-41d1-8ed9-3fd757737a81.jsonl
+  114K  Sep 5 13:54  /Users/shimantikas/.claude-personal/projects/-Users-shimantikas-Experiments-concept-lens/88729c20-4d22-420b-bc89-341988025652.jsonl</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-52-56-312Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-52-56-312Z" class="timestamp-link"><time datetime="2026-09-06T20:52:56.312Z" data-timestamp="2026-09-06T20:52:56.312Z">2026-09-06T20:52:56.312Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_016yVH7uipVUNtWGVDzcdz67">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Compare the two session files</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">D=~/.claude-personal/projects/-Users-shimantikas-Experiments-concept-lens
+for f in &#34;$D&#34;/*.jsonl; do
+  echo &#34;=== $(basename $f) ===&#34;
+  python3 - &#34;$f&#34; &lt;&lt;&#39;PY&#39;
+import json,sys,datetime
+p=sys.argv[1]; first=last=None; n=0; users=0; cwds=set()
+for line in open(p):
+    line=line.strip()
+    if not line: continue
+    try: o=json.loads(line)
+    except: continue
+    n+=1
+    ts=o.get(&#39;timestamp&#39;)
+    if ts: first=first or ts; last=ts
+    if o.get(&#39;type&#39;)==&#39;user&#39;: users+=1
+    if o.get(&#39;cwd&#39;): cwds.add(o[&#39;cwd&#39;])
+print(f&#34;  lines={n} user-turns={users}&#34;)
+print(f&#34;  first={first}\n  last ={last}&#34;)
+print(f&#34;  cwd  ={sorted(cwds)}&#34;)
+PY
+  echo &#34;  --- first user prompt ---&#34;
+  python3 - &#34;$f&#34; &lt;&lt;&#39;PY&#39;
+import json,sys
+for line in open(sys.argv[1]):
+    try: o=json.loads(line)
+    except: continue
+    if o.get(&#39;type&#39;)==&#39;user&#39;:
+        m=o.get(&#39;message&#39;,{}); c=m.get(&#39;content&#39;)
+        t=c if isinstance(c,str) else &#39; &#39;.join(x.get(&#39;text&#39;,&#39;&#39;) for x in c if isinstance(x,dict))
+        t=t.strip()
+        if t and not t.startswith(&#39;&lt;&#39;):
+            print(&#39;   &#39;, t[:180].replace(&#39;\n&#39;,&#39; &#39;)); break
+PY
+done</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-52-58-743Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-52-58-743Z" class="timestamp-link"><time datetime="2026-09-06T20:52:58.743Z" data-timestamp="2026-09-06T20:52:58.743Z">2026-09-06T20:52:58.743Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>=== 88729c20-4d22-420b-bc89-341988025652.jsonl ===
+  lines=39 user-turns=7
+  first=2026-09-05T20:53:25.647Z
+  last =2026-09-05T20:54:21.985Z
+  cwd  =[&#x27;/Users/shimantikas/Experiments/concept-lens&#x27;]
+  --- first user prompt ---
+    I&#x27;m building an app called Concept Lens which is a tool for undertsanding how concepts across independent systems relate. I need you to create a minimal app scaffold with 1. Java +
+=== ad7d85e1-200c-41d1-8ed9-3fd757737a81.jsonl ===
+  lines=1722 user-turns=292
+  first=2026-09-05T20:56:26.904Z
+  last =2026-09-06T20:52:48.079Z
+  cwd  =[&#x27;/Users/shimantikas/Experiments/concept-lens&#x27;, &#x27;/Users/shimantikas/Experiments/concept-lens/frontend&#x27;, &#x27;/Users/shimantikas/Experiments/concept-lens/ui-mock&#x27;]
+  --- first user prompt ---
+    I&#x27;m building an app called Concept Lens which is a tool for undertsanding how concepts across independent systems relate. I need you to create a minimal app scaffold with 1. Java +</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-53-04-727Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-53-04-727Z" class="timestamp-link"><time datetime="2026-09-06T20:53:04.727Z" data-timestamp="2026-09-06T20:53:04.727Z">2026-09-06T20:53:04.727Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-53-08-226Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-53-08-226Z" class="timestamp-link"><time datetime="2026-09-06T20:53:08.226Z" data-timestamp="2026-09-06T20:53:08.226Z">2026-09-06T20:53:08.226Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_015zQn8j7VK8ukA4jWGPNRbG">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Inspect ui-mock and transcript tooling availability</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd /Users/shimantikas/Experiments/concept-lens
+echo &#34;=== ui-mock contents ===&#34;; ls -la ui-mock/ | tail -n +2 | sed &#39;s/^/  /&#39;
+echo &#34;  tracked:&#34;; git ls-files ui-mock | sed &#39;s/^/    /&#39;
+echo
+echo &#34;=== references to ui-mock across the repo ===&#34;
+grep -rn &#39;ui-mock&#39; --include=&#39;*.md&#39; --include=&#39;*.java&#39; --include=&#39;*.ts&#39; --include=&#39;*.tsx&#39; --include=&#39;*.json&#39; --include=&#39;*.xml&#39; . 2&gt;/dev/null | grep -v node_modules | grep -v &#39;^./target&#39; | sed &#39;s/^/  /&#39;
+echo
+echo &#34;=== tooling availability (not installing) ===&#34;
+for t in uv uvx claude-code-transcripts; do printf &#39;  %-24s %s\n&#39; &#34;$t&#34; &#34;$(command -v $t || echo &#39;not installed&#39;)&#34;; done
+python3 -c &#34;print(&#39;  python:&#39;, __import__(&#39;sys&#39;).version.split()[0])&#34;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-53-10-433Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-53-10-433Z" class="timestamp-link"><time datetime="2026-09-06T20:53:10.433Z" data-timestamp="2026-09-06T20:53:10.433Z">2026-09-06T20:53:10.433Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>=== ui-mock contents ===
+  drwxr-xr-x   4 shimantikas  staff    128 Sep  6 11:55 .
+  drwxr-xr-x  17 shimantikas  staff    544 Sep  6 13:51 ..
+  -rw-r--r--@  1 shimantikas  staff  39150 Sep  6 11:53 concept_lens_mock_ui_updated.html
+  -rw-r--r--@  1 shimantikas  staff  36710 Sep  5 13:25 concept_lens_mock_ui.html
+  tracked:
+    ui-mock/concept_lens_mock_ui.html
+    ui-mock/concept_lens_mock_ui_updated.html
+
+=== references to ui-mock across the repo ===
+  README.md:64:ui-mock/                    UX mock — the source of truth for the UI. Do not edit.
+  README.md:90:The UI from `ui-mock/concept_lens_mock_ui.html` has been migrated to React and behaves as the
+
+=== tooling availability (not installing) ===
+  uv                       /opt/homebrew/bin/uv
+  uvx                      /opt/homebrew/bin/uvx
+  claude-code-transcripts  /Users/shimantikas/.local/bin/claude-code-transcripts
+  python: 3.9.6</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-53-40-678Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-53-40-678Z" class="timestamp-link"><time datetime="2026-09-06T20:53:40.678Z" data-timestamp="2026-09-06T20:53:40.678Z">2026-09-06T20:53:40.678Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Everything inspected, nothing changed. Here's what I found.</p>
+<h2>1. Related Concepts — looks good, with one real problem next to it</h2>
+<p><strong>The bridge is a better choice than the one I proposed.</strong> You mapped <code>returns.returnable.item_delivered</code> ↔ <code>delivery.delivered.reached_destination</code>. Both propositions are about the <em>item reaching its destination</em>, so there's none of the order-vs-package granularity mismatch that the <code>order_shipped</code> ↔ <code>left_fulfillment_center</code> bridge would have had. The rationale explains each system's use of the state. Semantically clean.</p>
+<p><strong>All three demo states are preserved</strong>, verified live:</p>
+<pre><code>Returnable   vs Refundable      NOT_ESTABLISHED      matched=1 unmatched=3/2  chips=[Returnable ↔ Delivered]
+Shipped      vs Delivered       RIGHT_INCLUDES_LEFT  matched=1 unmatched=0/1  chips=[Delivered ↔ Returnable]
+BuyerCountry vs BillingCountry  SAME_MEANING         matched=3 unmatched=0/0  chips=NONE
+Returnable   vs Delivered       NOT_ESTABLISHED      matched=1 unmatched=3/1  chips=[Returnable ↔ Refundable, Delivered ↔ Shipped]
+</code></pre>
+<p>Build green: <strong>92 backend + 44 frontend tests</strong>. <code>relatedPairs</code> is correct — CONFIRMED-only, self-mappings skipped, undirected dedupe, current pair excluded, direct neighbours only. Chips are explicit pairs with an unambiguous anchor. Crucially, the <strong>landing pair now shows a chip</strong>, so the feature is visible without hunting.</p>
+<p><strong>The one thing I'd change — heading collision.</strong> Compare now reads:</p>
+<ul>
+<li><code>How are these concepts related?</code> (Venn section)</li>
+<li><code>How they relate</code> (evidence section)</li>
+<li><code>Related concepts</code> (chips)</li>
+</ul>
+<p>The first two are the same sentence twice, ~200px apart. I'd rename the Venn heading to something about the shape of the relationship — e.g. <strong>"Confirmed semantic overlap"</strong> or <strong>"Relationship shape"</strong> — and leave "How they relate" on the evidence section as you asked. One string in <code>ComparePage.tsx</code>.</p>
+<p>Two smaller notes, neither blocking:
+- <code>RelatedComparisons</code> imports <code>ConceptPicker.module.css</code> for <code>.suggested</code>. It works, but the chips are now coupled to another component's stylesheet — a change to the picker silently restyles these. ~8 duplicated lines or a shared class would decouple it.
+- It returns <code>null</code> when empty, so the section vanishes on BuyerCountry ↔ BillingCountry rather than showing an empty state. I think that's the right call — just confirming it's deliberate.</p>
+<h2>2. <code>ui-mock/</code> — recommend deleting the folder</h2>
+<p>Both files are tracked. <code>concept_lens_mock_ui.html</code> is fully superseded; <code>concept_lens_mock_ui_updated.html</code> describes a redesign we deliberately did <strong>not</strong> implement, so shipping it invites a reviewer to diff the app against a mock it was never meant to match.</p>
+<p>The stronger reason: <code>README.md:64</code> currently says <em>"ui-mock/ — UX mock — the source of truth for the UI. Do not edit."</em> That's precisely the impression you said you want to avoid, and it's no longer true — the domain model is the source of truth now.</p>
+<p><strong>Recommendation: delete both files and the folder</strong>, and drop the README references. The design history lives in the transcript, which is a submission artifact anyway. If you'd rather keep provenance, keep only <code>concept_lens_mock_ui.html</code> under a README line calling it "original design exploration, not current" — but I'd delete.</p>
+<h2>3. README outline (product-first)</h2>
+<ol>
+<li><strong>Concept Lens</strong> — one-line description + deployed URL</li>
+<li><strong>The problem</strong> — independently owned systems use the same words differently; naive tools guess from names</li>
+<li><strong>The idea</strong> — authored fact-level <code>SAME_MEANING</code> mappings; concept-level relationships <em>derived</em>, never stored; unmapped means unknown, not different</li>
+<li><strong>Try it</strong> — the three scenarios and what each demonstrates, plus the round trip: remove <code>rel_024</code> → Shipped/Delivered flips to <code>NOT_ESTABLISHED</code> → Reset demo data</li>
+<li><strong>What's authored vs derived</strong> — the table that carries the core idea</li>
+<li><strong>Architecture</strong> — model → repository → service → comparison → api, React front end, single deployable jar; why concepts are read-only and mappings are not</li>
+<li><strong>Running locally</strong> — <code>./mvnw clean package</code>, <code>java -jar</code>, dev mode</li>
+<li><strong>Tests</strong> — counts, what's covered, how seed integrity is guarded</li>
+<li><strong>Limitations &amp; future work</strong> — in-memory only, no auth, no transitive inference, dangling-mapping risk on republish, country cluster isolated</li>
+<li><strong>Time spent</strong> — honest figure from you</li>
+</ol>
+<h2>4. Transcript session</h2>
+<p><strong><code>~/.claude-personal/projects/-Users-shimantikas-Experiments-concept-lens/ad7d85e1-200c-41d1-8ed9-3fd757737a81.jsonl</code></strong> (3.1 MB, 1722 lines, 292 user turns, Sep 5 20:56 → Sep 6 20:52).</p>
+<p>Chosen on evidence, not recency: its <code>cwd</code> values are all under <code>Experiments/concept-lens</code>, it spans the full build, and its id matches this session. The sibling <code>88729c20-…jsonl</code> has the same opening prompt but only 39 lines across <strong>56 seconds</strong> — an abandoned false start. I'd exclude it, though I can convert both if you want completeness.</p>
+<p><code>uv</code>, <code>uvx</code>, and <code>claude-code-transcripts</code> are all already installed. Planned command, output outside the repo, no gist:</p>
+<pre><code>claude-code-transcripts json \
+  ~/.claude-personal/projects/-Users-shimantikas-Experiments-concept-lens/ad7d85e1-200c-41d1-8ed9-3fd757737a81.jsonl \
+  -o ~/Experiments/concept-lens-transcript --json
+</code></pre>
+<p>One caution: at 3.1 MB the transcript will include every tool call and file dump, so your secrets review is worth doing carefully — I'd grep the output for paths under <code>/Users/shimantikas</code>, which appear throughout.</p>
+<p>Waiting on your go.</p></div></div></div>
+<div class="message user" id="msg-2026-09-06T20-56-41-220Z"><div class="message-header"><span class="role-label">User</span><a href="#msg-2026-09-06T20-56-41-220Z" class="timestamp-link"><time datetime="2026-09-06T20:56:41.220Z" data-timestamp="2026-09-06T20:56:41.220Z">2026-09-06T20:56:41.220Z</time></a></div><div class="message-content">
+<div class="user-content"><p>one more small change for Related concepts:</p>
+<p>I want the section to always render, even when there are no related comparisons.</p>
+<p>heading:
+Related concepts</p>
+<p>description:
+Other comparisons connected by confirmed semantic mappings.</p>
+<p>when there are related comparisons, show the pair chips as it does now.</p>
+<p>when there are none, show:
+No other related comparisons in this demo data.</p>
+<p>with the current seed data I expect:</p>
+<p>Returnable ↔ Refundable → Returnable ↔ Delivered
+Shipped ↔ Delivered → Delivered ↔ Returnable
+BuyerCountry ↔ BillingCountry → empty-state text above</p>
+<p>don't change the discovery logic, seed data, or styling beyond what's needed to render the empty state consistently. rest looks good go ahead</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-56-59-431Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-56-59-431Z" class="timestamp-link"><time datetime="2026-09-06T20:56:59.431Z" data-timestamp="2026-09-06T20:56:59.431Z">2026-09-06T20:56:59.431Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-57-00-131Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-57-00-131Z" class="timestamp-link"><time datetime="2026-09-06T20:57:00.131Z" data-timestamp="2026-09-06T20:57:00.131Z">2026-09-06T20:57:00.131Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01TXA8jRkpKvjwauTzeU9Rk4">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check existing tests touching Related concepts</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd frontend &amp;&amp; grep -rn -i &#39;related&#39; src/compare/ComparePage.test.tsx src/compare/relatedComparisons.test.ts | head -20 | sed &#39;s/^/  /&#39;</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-57-00-232Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-57-00-232Z" class="timestamp-link"><time datetime="2026-09-06T20:57:00.232Z" data-timestamp="2026-09-06T20:57:00.232Z">2026-09-06T20:57:00.232Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  src/compare/ComparePage.test.tsx:309:    expect(await screen.findByText(&#x27;Related concepts&#x27;)).toBeInTheDocument()
+  src/compare/ComparePage.test.tsx:339:  it(&#x27;omits Related concepts when the country pair has no other neighbors&#x27;, async () =&gt; {
+  src/compare/ComparePage.test.tsx:382:    expect(screen.queryByText(&#x27;Related concepts&#x27;)).not.toBeInTheDocument()
+  src/compare/ComparePage.test.tsx:385:  it(&#x27;selects the related pair without leaving Compare&#x27;, async () =&gt; {
+  src/compare/ComparePage.test.tsx:406:  it(&#x27;shows one related chip when several mappings join the same two concepts&#x27;, async () =&gt; {
+  src/compare/relatedComparisons.test.ts:5:import { relatedPairs } from &#x27;./relatedComparisons.ts&#x27;
+  src/compare/relatedComparisons.test.ts:79:describe(&#x27;relatedPairs&#x27;, () =&gt; {
+  src/compare/relatedComparisons.test.ts:81:    expect(relatedPairs(CATALOG, SEEDED, RETURNABLE.id, REFUNDABLE.id)).toEqual([
+  src/compare/relatedComparisons.test.ts:91:    expect(relatedPairs(CATALOG, SEEDED, SHIPPED.id, DELIVERED.id)).toEqual([
+  src/compare/relatedComparisons.test.ts:101:    const pairs = relatedPairs(CATALOG, SEEDED, REFUNDABLE.id, RETURNABLE.id)
+  src/compare/relatedComparisons.test.ts:110:    expect(relatedPairs([RETURNABLE, REFUNDABLE], [MAPPING], RETURNABLE.id, REFUNDABLE.id)).toEqual(
+  src/compare/relatedComparisons.test.ts:124:      relatedPairs(CATALOG, [...SEEDED, second], RETURNABLE.id, REFUNDABLE.id),
+  src/compare/relatedComparisons.test.ts:135:    expect(relatedPairs(CATALOG, [MAPPING, reversed], RETURNABLE.id, REFUNDABLE.id)).toEqual([</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-57-10-140Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-57-10-140Z" class="timestamp-link"><time datetime="2026-09-06T20:57:10.140Z" data-timestamp="2026-09-06T20:57:10.140Z">2026-09-06T20:57:10.140Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01ESGgvZ4cd6NU4bGXgFG8Ar">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Always render Related concepts with an empty state</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cat &gt; src/compare/RelatedComparisons.module.css &lt;&lt;&#39;EOF&#39;
+.empty {
+  font-size: 12px;
+  color: var(--muted);
+  line-height: 1.45;
+}
+EOF
+python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/compare/RelatedComparisons.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;import picker from &#39;./ConceptPicker.module.css&#39;
+import type { RelatedPair } from &#39;./relatedComparisons.ts&#39;&#34;&#34;&#34;,
+&#34;&#34;&#34;import picker from &#39;./ConceptPicker.module.css&#39;
+import styles from &#39;./RelatedComparisons.module.css&#39;
+import type { RelatedPair } from &#39;./relatedComparisons.ts&#39;&#34;&#34;&#34;)
+s = s.replace(&#34;&#34;&#34;export default function RelatedComparisons({ pairs, onSelect }: RelatedComparisonsProps) {
+  if (pairs.length === 0) {
+    return null
+  }
+
+  return (
+    &lt;&gt;
+      &lt;div className=&#34;section-title&#34;&gt;Related concepts&lt;/div&gt;
+      &lt;div className=&#34;section-sub&#34;&gt;
+        Explore other concept comparisons connected by confirmed mappings.
+      &lt;/div&gt;
+      &lt;div className={picker.suggested}&gt;
+        {pairs.map((pair) =&gt; (
+          &lt;button key={`${pair.left}|${pair.right}`} onClick={() =&gt; onSelect(pair.left, pair.right)}&gt;
+            {pair.label}
+          &lt;/button&gt;
+        ))}
+      &lt;/div&gt;
+    &lt;/&gt;
+  )
+}&#34;&#34;&#34;,
+&#34;&#34;&#34;/**
+ * The section always renders. Having no related comparisons is a fact about the confirmed
+ * mappings, so it is stated rather than hidden.
+ */
+export default function RelatedComparisons({ pairs, onSelect }: RelatedComparisonsProps) {
+  return (
+    &lt;&gt;
+      &lt;div className=&#34;section-title&#34;&gt;Related concepts&lt;/div&gt;
+      &lt;div className=&#34;section-sub&#34;&gt;
+        Other comparisons connected by confirmed semantic mappings.
+      &lt;/div&gt;
+      {pairs.length === 0 ? (
+        &lt;div className={styles.empty}&gt;No other related comparisons in this demo data.&lt;/div&gt;
+      ) : (
+        &lt;div className={picker.suggested}&gt;
+          {pairs.map((pair) =&gt; (
+            &lt;button
+              key={`${pair.left}|${pair.right}`}
+              onClick={() =&gt; onSelect(pair.left, pair.right)}
+            &gt;
+              {pair.label}
+            &lt;/button&gt;
+          ))}
+        &lt;/div&gt;
+      )}
+    &lt;/&gt;
+  )
+}&#34;&#34;&#34;)
+open(p,&#39;w&#39;).write(s)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx tsc -b 2&gt;&amp;1 | head -3; npx vitest run 2&gt;&amp;1 | grep -aE &#39;Tests |Files |FAIL|×&#39; | head -6</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-57-15-638Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-57-15-638Z" class="timestamp-link"><time datetime="2026-09-06T20:57:15.638Z" data-timestamp="2026-09-06T20:57:15.638Z">2026-09-06T20:57:15.638Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>     × omits Related concepts when the country pair has no other neighbors 12ms
+⎯⎯⎯⎯⎯⎯⎯ Failed Tests 1 ⎯⎯⎯⎯⎯⎯⎯
+ FAIL  src/compare/ComparePage.test.tsx &gt; ComparePage &gt; omits Related concepts when the country pair has no other neighbors
+ Test Files  1 failed | 4 passed (5)
+      Tests  1 failed | 43 passed (44)</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-57-18-254Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-57-18-254Z" class="timestamp-link"><time datetime="2026-09-06T20:57:18.254Z" data-timestamp="2026-09-06T20:57:18.254Z">2026-09-06T20:57:18.254Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-57-19-051Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-57-19-051Z" class="timestamp-link"><time datetime="2026-09-06T20:57:19.051Z" data-timestamp="2026-09-06T20:57:19.051Z">2026-09-06T20:57:19.051Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>That test asserted the old hide-when-empty behaviour. Updating it to the new contract.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-57-19-311Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-57-19-311Z" class="timestamp-link"><time datetime="2026-09-06T20:57:19.311Z" data-timestamp="2026-09-06T20:57:19.311Z">2026-09-06T20:57:19.311Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01EJNWn8gttqeAuPVShmxQuG">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Read the test that needs updating</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">sed -n &#39;339,384p&#39; src/compare/ComparePage.test.tsx</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-57-19-371Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-57-19-371Z" class="timestamp-link"><time datetime="2026-09-06T20:57:19.371Z" data-timestamp="2026-09-06T20:57:19.371Z">2026-09-06T20:57:19.371Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>  it(&#x27;omits Related concepts when the country pair has no other neighbors&#x27;, async () =&gt; {
+    const stub = installApiStub({
+      concepts: [BUYER_COUNTRY, BILLING_COUNTRY],
+      mappings: [
+        {
+          id: &#x27;rel_031&#x27;,
+          leftFactId: BUYER_COUNTRY.facts[0].id,
+          rightFactId: BILLING_COUNTRY.facts[0].id,
+          type: &#x27;SAME_MEANING&#x27;,
+          status: &#x27;CONFIRMED&#x27;,
+          rationale: &#x27;Same country value.&#x27;,
+          reviewedBy: &#x27;Domain reviewer&#x27;,
+        },
+      ],
+      comparison: {
+        leftConcept: BUYER_COUNTRY,
+        rightConcept: BILLING_COUNTRY,
+        relationship: &#x27;SAME_MEANING&#x27;,
+        matchedFacts: [
+          {
+            leftFact: BUYER_COUNTRY.facts[0],
+            rightFact: BILLING_COUNTRY.facts[0],
+            mapping: {
+              id: &#x27;rel_031&#x27;,
+              leftFactId: BUYER_COUNTRY.facts[0].id,
+              rightFactId: BILLING_COUNTRY.facts[0].id,
+              type: &#x27;SAME_MEANING&#x27;,
+              status: &#x27;CONFIRMED&#x27;,
+              rationale: &#x27;Same country value.&#x27;,
+              reviewedBy: &#x27;Domain reviewer&#x27;,
+            },
+          },
+        ],
+        unmatchedLeftFacts: [],
+        unmatchedRightFacts: [],
+      },
+    })
+    renderPage()
+
+    await screen.findByText(&#x27;BuyerCountry vs BillingCountry&#x27;)
+    await waitFor(() =&gt;
+      expect(stub.calls.some((call) =&gt; call.url.startsWith(&#x27;/api/mappings&#x27;))).toBe(true),
+    )
+    expect(screen.queryByText(&#x27;Related concepts&#x27;)).not.toBeInTheDocument()
+  })</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-57-27-571Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-57-27-571Z" class="timestamp-link"><time datetime="2026-09-06T20:57:27.571Z" data-timestamp="2026-09-06T20:57:27.571Z">2026-09-06T20:57:27.571Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01FfhFYqkkpszGbbdsZv9gT5">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Update the test and rerun with lint</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">python3 - &lt;&lt;&#39;PY&#39;
+p=&#39;src/compare/ComparePage.test.tsx&#39;
+s=open(p).read()
+s = s.replace(&#34;&#34;&#34;  it(&#39;omits Related concepts when the country pair has no other neighbors&#39;, async () =&gt; {&#34;&#34;&#34;,
+              &#34;&#34;&#34;  it(&#39;states that there are no related comparisons when the pair has no other neighbors&#39;, async () =&gt; {&#34;&#34;&#34;)
+s = s.replace(&#34;&#34;&#34;    await screen.findByText(&#39;BuyerCountry vs BillingCountry&#39;)
+    await waitFor(() =&gt;
+      expect(stub.calls.some((call) =&gt; call.url.startsWith(&#39;/api/mappings&#39;))).toBe(true),
+    )
+    expect(screen.queryByText(&#39;Related concepts&#39;)).not.toBeInTheDocument()
+  })&#34;&#34;&#34;,
+&#34;&#34;&#34;    await screen.findByText(&#39;BuyerCountry vs BillingCountry&#39;)
+    await waitFor(() =&gt;
+      expect(stub.calls.some((call) =&gt; call.url.startsWith(&#39;/api/mappings&#39;))).toBe(true),
+    )
+
+    // The section still renders: having no related comparisons is a fact worth stating.
+    expect(await screen.findByText(&#39;Related concepts&#39;)).toBeInTheDocument()
+    expect(
+      screen.getByText(&#39;No other related comparisons in this demo data.&#39;),
+    ).toBeInTheDocument()
+  })&#34;&#34;&#34;)
+s = s.replace(&#34;    expect(await screen.findByText(&#39;Related concepts&#39;)).toBeInTheDocument()\n  })&#34;,
+              &#34;    expect(await screen.findByText(&#39;Related concepts&#39;)).toBeInTheDocument()\n    expect(\n      screen.getByText(&#39;Other comparisons connected by confirmed semantic mappings.&#39;),\n    ).toBeInTheDocument()\n  })&#34;, 1)
+open(p,&#39;w&#39;).write(s)
+PY
+export PATH=&#34;$PWD/node:$PATH&#34; &amp;&amp; npx vitest run 2&gt;&amp;1 | grep -aE &#39;Tests |Files |FAIL|×&#39; | head -5
+echo &#34;--- lint ---&#34;; npm run lint 2&gt;&amp;1 | tail -3</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-57-34-325Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-57-34-325Z" class="timestamp-link"><time datetime="2026-09-06T20:57:34.325Z" data-timestamp="2026-09-06T20:57:34.325Z">2026-09-06T20:57:34.325Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre> Test Files  5 passed (5)
+      Tests  44 passed (44)
+--- lint ---
+&gt; concept-lens-frontend@0.0.1 lint
+&gt; eslint .</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-57-46-187Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-57-46-187Z" class="timestamp-link"><time datetime="2026-09-06T20:57:46.187Z" data-timestamp="2026-09-06T20:57:46.187Z">2026-09-06T20:57:46.187Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01GaUeZ8hFaYC5QPwaWgZTQL">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Full build and verify the three expected outcomes</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">cd /Users/shimantikas/Experiments/concept-lens &amp;&amp; export JAVA_HOME=$(/usr/libexec/java_home -v 21) &amp;&amp; ./mvnw -B clean package 2&gt;&amp;1 | grep -aE &#39;Tests run: [0-9]+, Fail.*Skipped: [0-9]+$|Results:|BUILD|Tests  &#39; | tail -5
+echo
+pkill -f &#39;concept-lens-0.0.1-SNAPSHOT.jar&#39; 2&gt;/dev/null; lsof -ti:8080 2&gt;/dev/null | xargs -r kill -9 2&gt;/dev/null; sleep 1
+&#34;$JAVA_HOME/bin/java&#34; -jar target/concept-lens-0.0.1-SNAPSHOT.jar &gt; /tmp/app.log 2&gt;&amp;1 &amp;
+for i in $(seq 1 40); do curl -s -o /dev/null http://localhost:8080/api/mappings 2&gt;/dev/null &amp;&amp; break; perl -e &#39;select(undef,undef,undef,0.5)&#39;; done
+echo &#34;=== what each pair will show under Related concepts ===&#34;
+python3 - &lt;&lt;&#39;PY&#39;
+import json,urllib.request
+B=&#39;http://localhost:8080&#39;
+g=lambda u: json.load(urllib.request.urlopen(B+u))
+concepts=g(&#39;/api/concepts&#39;); mappings=g(&#39;/api/mappings&#39;)
+owner={f[&#39;id&#39;]:c[&#39;id&#39;] for c in concepts for f in c[&#39;facts&#39;]}
+name={c[&#39;id&#39;]:c[&#39;name&#39;] for c in concepts}
+nb={}
+for m in mappings:
+    if m[&#39;status&#39;]!=&#39;CONFIRMED&#39;: continue
+    a,b=owner[m[&#39;leftFactId&#39;]],owner[m[&#39;rightFactId&#39;]]
+    if a!=b: nb.setdefault(a,set()).add(b); nb.setdefault(b,set()).add(a)
+for l,r in [(&#39;returns.returnable&#39;,&#39;payments.refundable&#39;),(&#39;fulfillment.shipped&#39;,&#39;delivery.delivered&#39;),
+            (&#39;orders.buyercountry&#39;,&#39;payments.billingcountry&#39;)]:
+    cur={l,r}; seen=set(); chips=[]
+    for anchor in (l,r):
+        for o in sorted(nb.get(anchor,())):
+            if o in cur: continue
+            k=tuple(sorted((anchor,o)))
+            if k in seen: continue
+            seen.add(k); chips.append(f&#39;{name[anchor]} ↔ {name[o]}&#39;)
+    shown=&#39;, &#39;.join(chips) if chips else &#39;No other related comparisons in this demo data.&#39;
+    print(f&#34;  {name[l]} ↔ {name[r]:16} → {shown}&#34;)
+PY
+pkill -f &#39;concept-lens-0.0.1-SNAPSHOT.jar&#39;; rm -f /tmp/app.log</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-58-16-120Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-58-16-120Z" class="timestamp-link"><time datetime="2026-09-06T20:58:16.120Z" data-timestamp="2026-09-06T20:58:16.120Z">2026-09-06T20:58:16.120Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>[INFO] Results:
+[INFO] Tests run: 92, Failures: 0, Errors: 0, Skipped: 0
+[INFO]       Tests  44 passed (44)
+[INFO] BUILD SUCCESS
+
+=== what each pair will show under Related concepts ===
+  Returnable ↔ Refundable       → Returnable ↔ Delivered
+  Shipped ↔ Delivered        → Delivered ↔ Returnable
+  BuyerCountry ↔ BillingCountry   → No other related comparisons in this demo data.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-58-34-178Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-58-34-178Z" class="timestamp-link"><time datetime="2026-09-06T20:58:34.178Z" data-timestamp="2026-09-06T20:58:34.178Z">2026-09-06T20:58:34.178Z</time></a></div><div class="message-content">
+<div class="thinking"><div class="thinking-label">Thinking</div></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-58-35-572Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-58-35-572Z" class="timestamp-link"><time datetime="2026-09-06T20:58:35.572Z" data-timestamp="2026-09-06T20:58:35.572Z">2026-09-06T20:58:35.572Z</time></a></div><div class="message-content">
+<div class="assistant-text"><p>Related concepts is done and matches your expectations exactly:</p>
+<pre><code>Returnable ↔ Refundable       → Returnable ↔ Delivered
+Shipped ↔ Delivered           → Delivered ↔ Returnable
+BuyerCountry ↔ BillingCountry → No other related comparisons in this demo data.
+</code></pre>
+<p>92 backend + 44 frontend tests, build green, lint clean. Now the transcript into <code>ai-transcripts/</code>.</p></div></div></div>
+<div class="message assistant" id="msg-2026-09-06T20-58-36-126Z"><div class="message-header"><span class="role-label">Assistant</span><a href="#msg-2026-09-06T20-58-36-126Z" class="timestamp-link"><time datetime="2026-09-06T20:58:36.126Z" data-timestamp="2026-09-06T20:58:36.126Z">2026-09-06T20:58:36.126Z</time></a></div><div class="message-content">
+<div class="tool-use bash-tool" data-tool-id="toolu_01DP9oh7pxaMugDsMCDMhZA4">
+<div class="tool-header"><span class="tool-icon">$</span> Bash</div>
+<div class="tool-description">Check the transcript tool&#39;s flags</div><div class="truncatable"><div class="truncatable-content"><pre class="bash-command">claude-code-transcripts --help 2&gt;&amp;1 | head -25; echo &#34;--- json subcommand ---&#34;; claude-code-transcripts json --help 2&gt;&amp;1 | head -25</pre></div><button class="expand-btn">Show more</button></div>
+</div></div></div>
+<div class="message tool-reply" id="msg-2026-09-06T20-58-40-207Z"><div class="message-header"><span class="role-label">Tool reply</span><a href="#msg-2026-09-06T20-58-40-207Z" class="timestamp-link"><time datetime="2026-09-06T20:58:40.207Z" data-timestamp="2026-09-06T20:58:40.207Z">2026-09-06T20:58:40.207Z</time></a></div><div class="message-content"><div class="tool-result"><div class="truncatable"><div class="truncatable-content"><pre>Usage: claude-code-transcripts [OPTIONS] COMMAND [ARGS]...
+
+  Convert Claude Code session JSON to mobile-friendly HTML pages.
+
+Options:
+  -v, --version  Show the version and exit.
+  --help         Show this message and exit.
+
+Commands:
+  local*  Select and convert a local Claude Code session to HTML.
+  all     Convert all local Claude Code sessions to a browsable HTML archive.
+  json    Convert a Claude Code session JSON/JSONL file or URL to HTML.
+  web     Select and convert a web session from the Claude API to HTML.
+--- json subcommand ---
+Usage: claude-code-transcripts json [OPTIONS] JSON_FILE
+
+  Convert a Claude Code session JSON/JSONL file or URL to HTML.
+
+Options:
+  -o, --output PATH  Output directory. If not specified, writes to temp dir
+                     and opens in browser.
+  -a, --output-auto  Auto-name output subdirectory based on filename (uses -o
+                     as parent, or current dir).
+  --repo TEXT        GitHub repo (owner/name) for commit links. Auto-detected
+                     from git push output if not specified.
+  --gist             Upload to GitHub Gist and output a gisthost.github.io
+                     URL.
+  --json             Include the original JSON session file in the output
+                     directory.
+  --open             Open the generated index.html in your default browser
+                     (default if no -o specified).
+  --help             Show this message and exit.</pre></div><button class="expand-btn">Show more</button></div></div></div></div>
+        
+
+<div class="pagination">
+<a href="index.html" class="index-link">Index</a>
+<a href="page-006.html">&larr; Prev</a>
+<a href="page-001.html">1</a>
+<a href="page-002.html">2</a>
+<a href="page-003.html">3</a>
+<a href="page-004.html">4</a>
+<a href="page-005.html">5</a>
+<a href="page-006.html">6</a>
+<span class="current">7</span>
+<span class="disabled">Next &rarr;</span>
+</div>
+
+    </div>
+    <script>
+document.querySelectorAll('time[data-timestamp]').forEach(function(el) {
+    const timestamp = el.getAttribute('data-timestamp');
+    const date = new Date(timestamp);
+    const now = new Date();
+    const isToday = date.toDateString() === now.toDateString();
+    const timeStr = date.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+    if (isToday) { el.textContent = timeStr; }
+    else { el.textContent = date.toLocaleDateString(undefined, { month: 'short', day: 'numeric' }) + ' ' + timeStr; }
+});
+document.querySelectorAll('pre.json').forEach(function(el) {
+    let text = el.textContent;
+    text = text.replace(/"([^"]+)":/g, '<span style="color: #ce93d8">"$1"</span>:');
+    text = text.replace(/: "([^"]*)"/g, ': <span style="color: #81d4fa">"$1"</span>');
+    text = text.replace(/: (\d+)/g, ': <span style="color: #ffcc80">$1</span>');
+    text = text.replace(/: (true|false|null)/g, ': <span style="color: #f48fb1">$1</span>');
+    el.innerHTML = text;
+});
+document.querySelectorAll('.truncatable').forEach(function(wrapper) {
+    const content = wrapper.querySelector('.truncatable-content');
+    const btn = wrapper.querySelector('.expand-btn');
+    if (content.scrollHeight > 250) {
+        wrapper.classList.add('truncated');
+        btn.addEventListener('click', function() {
+            if (wrapper.classList.contains('truncated')) { wrapper.classList.remove('truncated'); wrapper.classList.add('expanded'); btn.textContent = 'Show less'; }
+            else { wrapper.classList.remove('expanded'); wrapper.classList.add('truncated'); btn.textContent = 'Show more'; }
+        });
+    }
+});
+</script>
+</body>
+</html>

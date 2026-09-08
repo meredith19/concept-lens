@@ -10,7 +10,7 @@ export default function Takeaway({ takeaway }: TakeawayProps) {
     <div className={styles.takeaway}>
       <div className={styles.label}>INTERPRETATION</div>
       <div className={styles.title}>{takeaway.title}</div>
-      <div className={styles.copy}>{takeaway.copy}</div>
+      {takeaway.copy && <div className={styles.copy}>{takeaway.copy}</div>}
     </div>
   )
 }

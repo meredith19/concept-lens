@@ -10,6 +10,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.resource.NoResourceFoundException;
 
+import com.conceptlens.comparison.InvalidComparisonException;
 import com.conceptlens.service.ConceptNotFoundException;
 import com.conceptlens.service.InvalidMappingException;
 import com.conceptlens.service.MappingNotFoundException;
@@ -46,6 +47,13 @@ class RestExceptionHandler {
     ErrorResponse handleInvalidMapping(InvalidMappingException e) {
         log.debug("Invalid mapping: {}", e.getMessage());
         return new ErrorResponse("INVALID_MAPPING", e.getMessage());
+    }
+
+    @ExceptionHandler(InvalidComparisonException.class)
+    @ResponseStatus(HttpStatus.BAD_REQUEST)
+    ErrorResponse handleInvalidComparison(InvalidComparisonException e) {
+        log.debug("Invalid comparison: {}", e.getMessage());
+        return new ErrorResponse("INVALID_COMPARISON", e.getMessage());
     }
 
     /** A body that could not be parsed into the expected shape. */

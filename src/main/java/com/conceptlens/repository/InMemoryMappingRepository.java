@@ -51,4 +51,14 @@ public class InMemoryMappingRepository implements MappingRepository {
     public boolean deleteById(String id) {
         return mappingsById.remove(id) != null;
     }
+
+    @Override
+    public void replaceAll(List<SemanticMapping> mappings) {
+        synchronized (mappingsById) {
+            mappingsById.clear();
+            for (var mapping : mappings) {
+                mappingsById.put(mapping.id(), mapping);
+            }
+        }
+    }
 }

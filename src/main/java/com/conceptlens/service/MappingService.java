@@ -1,7 +1,6 @@
 package com.conceptlens.service;
 
 import java.util.List;
-import java.util.Optional;
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -22,6 +21,10 @@ import com.conceptlens.repository.MappingRepository;
  * mapping actually refers to facts that exist and that it relates two different source systems'
  * concepts rather than restating one concept's own vocabulary.
  *
+ * <p>Creates, deletes and resets share one lock so a validate-then-insert cannot interleave with
+ * another write. That is in-process serialization for a single-user prototype, not a load-tested
+ * concurrent store.
+ *
  * <p>Changes apply to runtime state only; nothing is written back to the seed file.
  */
 @Service
@@ -32,6 +35,7 @@ public class MappingService {
     private final MappingRepository mappingRepository;
     private final ConceptRepository conceptRepository;
     private final MappingIdGenerator mappingIdGenerator;
+    private final Object writes = new Object();
 
     public MappingService(
             MappingRepository mappingRepository,
@@ -68,14 +72,16 @@ public class MappingService {
      * @throws InvalidMappingException if any validation rule is broken
      */
     public SemanticMapping addMapping(MappingDraft draft) {
-        return addMapping(new SemanticMapping(
-                mappingIdGenerator.next(),
-                draft.leftFactId(),
-                draft.rightFactId(),
-                draft.type(),
-                draft.status(),
-                draft.rationale(),
-                draft.reviewedBy()));
+        synchronized (writes) {
+            return addMapping(new SemanticMapping(
+                    mappingIdGenerator.next(),
+                    draft.leftFactId(),
+                    draft.rightFactId(),
+                    draft.type(),
+                    draft.status(),
+                    draft.rationale(),
+                    draft.reviewedBy()));
+        }
     }
 
     /**
@@ -85,15 +91,20 @@ public class MappingService {
      * service supply a {@link MappingDraft} and never choose an id themselves.
      */
     SemanticMapping addMapping(SemanticMapping mapping) {
-        validate(mapping);
-
-        SemanticMapping created = mappingRepository.create(mapping);
-        log.info(
-                "Added mapping {} relating {} and {}",
-                created.id(),
-                created.leftFactId(),
-                created.rightFactId());
-        return created;
+        synchronized (writes) {
+            validate(mapping);
+            try {
+                SemanticMapping created = mappingRepository.create(mapping);
+                log.info(
+                        "Added mapping {} relating {} and {}",
+                        created.id(),
+                        created.leftFactId(),
+                        created.rightFactId());
+                return created;
+            } catch (IllegalArgumentException e) {
+                throw invalid(e.getMessage());
+            }
+        }
     }
 
     /**
@@ -102,11 +113,25 @@ public class MappingService {
      * @throws MappingNotFoundException if no mapping has that id
      */
     public void removeMapping(String mappingId) {
-        if (!mappingRepository.deleteById(mappingId)) {
-            log.debug("Mapping removal missed for id {}", mappingId);
-            throw new MappingNotFoundException(mappingId);
+        synchronized (writes) {
+            if (!mappingRepository.deleteById(mappingId)) {
+                log.debug("Mapping removal missed for id {}", mappingId);
+                throw new MappingNotFoundException(mappingId);
+            }
+            log.info("Removed mapping {}", mappingId);
         }
-        log.info("Removed mapping {}", mappingId);
+    }
+
+    /**
+     * Replaces every held mapping with this set, as one store update.
+     *
+     * <p>Used to restore the seeded catalog. The mappings are trusted already — they are not
+     * re-validated as drafts.
+     */
+    public void replaceAll(List<SemanticMapping> mappings) {
+        synchronized (writes) {
+            mappingRepository.replaceAll(mappings);
+        }
     }
 
     private void validate(SemanticMapping mapping) {
@@ -117,6 +142,9 @@ public class MappingService {
         if (mapping.status() != MappingStatus.CONFIRMED) {
             reject("Mapping status must be %s but was %s"
                     .formatted(MappingStatus.CONFIRMED, mapping.status()));
+        }
+        if (mapping.rationale() == null || mapping.rationale().isBlank()) {
+            reject("Rationale must not be blank");
         }
         if (mappingRepository.findById(mapping.id()).isPresent()) {
             reject("A mapping already exists with id " + mapping.id());
@@ -135,16 +163,20 @@ public class MappingService {
         }
     }
 
+    private void reject(String reason) {
+        throw invalid(reason);
+    }
+
     /**
-     * Refuses a proposed mapping.
+     * Builds the exception for a refused mapping.
      *
      * <p>Logged at debug because a rejection is the service working correctly: the caller supplied
      * something invalid, the exception tells them so, and nothing here needs an operator's
      * attention.
      */
-    private void reject(String reason) {
+    private InvalidMappingException invalid(String reason) {
         log.debug("Rejected mapping: {}", reason);
-        throw new InvalidMappingException(reason);
+        return new InvalidMappingException(reason);
     }
 
     /**
@@ -155,24 +187,16 @@ public class MappingService {
      * formed.
      */
     private Concept conceptOwning(String factId) {
-        Optional<Concept> owner = conceptRepository.findAll().stream()
+        return conceptRepository.findAll().stream()
                 .filter(concept -> concept.facts().stream()
                         .anyMatch(fact -> fact.id().equals(factId)))
-                .findFirst();
-
-        if (owner.isEmpty()) {
-            reject("No published fact with id " + factId);
-        }
-        return owner.get();
+                .findFirst()
+                .orElseThrow(() -> invalid("No published fact with id " + factId));
     }
 
     /** True if these two facts are already mapped, in either direction. */
     private boolean equivalentMappingExists(String leftFactId, String rightFactId) {
         return mappingRepository.findAll().stream()
-                .anyMatch(existing ->
-                        (existing.leftFactId().equals(leftFactId)
-                                        && existing.rightFactId().equals(rightFactId))
-                                || (existing.leftFactId().equals(rightFactId)
-                                        && existing.rightFactId().equals(leftFactId)));
+                .anyMatch(existing -> existing.relates(leftFactId, rightFactId));
     }
 }
